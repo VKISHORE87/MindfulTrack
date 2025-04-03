@@ -37,7 +37,7 @@ export default function Login() {
       await apiRequest("POST", "/api/auth/login", values);
       toast({
         title: "Login successful",
-        description: "Welcome back to SkillPath!",
+        description: "Welcome back to Upcraft!",
       });
       setLocation("/dashboard");
     } catch (error) {
@@ -59,7 +59,7 @@ export default function Login() {
             <div className="bg-primary text-white p-2 rounded-lg">
               <LightbulbIcon className="h-6 w-6" />
             </div>
-            <h1 className="ml-2 text-xl font-bold">SkillPath</h1>
+            <h1 className="ml-2 text-xl font-bold">Upcraft</h1>
           </div>
           <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
           <CardDescription className="text-center">

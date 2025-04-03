@@ -44,7 +44,7 @@ export default function Register() {
       await apiRequest("POST", "/api/auth/register", values);
       toast({
         title: "Registration successful",
-        description: "Your account has been created. Welcome to SkillPath!",
+        description: "Your account has been created. Welcome to Upcraft!",
       });
       setLocation("/dashboard");
     } catch (error) {
@@ -66,7 +66,7 @@ export default function Register() {
             <div className="bg-primary text-white p-2 rounded-lg">
               <LightbulbIcon className="h-6 w-6" />
             </div>
-            <h1 className="ml-2 text-xl font-bold">SkillPath</h1>
+            <h1 className="ml-2 text-xl font-bold">Upcraft</h1>
           </div>
           <CardTitle className="text-2xl text-center">Create an account</CardTitle>
           <CardDescription className="text-center">

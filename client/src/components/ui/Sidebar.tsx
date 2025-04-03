@@ -34,7 +34,7 @@ export default function Sidebar({ user, currentRoute }: SidebarProps) {
           <div className="bg-primary text-white p-2 rounded-lg">
             <LightbulbIcon className="h-6 w-6" />
           </div>
-          <h1 className="ml-2 text-xl font-bold">SkillPath</h1>
+          <h1 className="ml-2 text-xl font-bold">Upcraft</h1>
         </div>
       </div>
       

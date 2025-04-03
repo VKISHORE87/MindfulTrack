@@ -702,9 +702,6 @@ export class MemStorage implements IStorage {
   }
 }
 
-import { db } from "./db";
-import { eq, and, sql, desc } from "drizzle-orm";
-
 // Database implementation of the storage interface
 export class DatabaseStorage implements IStorage {
   // User methods
