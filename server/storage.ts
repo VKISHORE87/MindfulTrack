@@ -9,6 +9,8 @@ import {
   userActivities, UserActivity, InsertUserActivity,
   skillValidations, SkillValidation, InsertSkillValidation
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, sql, desc } from "drizzle-orm";
 
 // Comprehensive storage interface for all CRUD operations
 export interface IStorage {
@@ -700,4 +702,324 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { db } from "./db";
+import { eq, and, sql, desc } from "drizzle-orm";
+
+// Database implementation of the storage interface
+export class DatabaseStorage implements IStorage {
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined> {
+    const [updatedUser] = await db.update(users)
+      .set(userData)
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser || undefined;
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    const result = await db.delete(users).where(eq(users.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Career goal methods
+  async getCareerGoal(id: number): Promise<CareerGoal | undefined> {
+    const [careerGoal] = await db.select().from(careerGoals).where(eq(careerGoals.id, id));
+    return careerGoal || undefined;
+  }
+
+  async getCareerGoalsByUserId(userId: number): Promise<CareerGoal[]> {
+    return db.select().from(careerGoals).where(eq(careerGoals.userId, userId));
+  }
+
+  async createCareerGoal(goal: InsertCareerGoal): Promise<CareerGoal> {
+    const [careerGoal] = await db.insert(careerGoals).values(goal).returning();
+    return careerGoal;
+  }
+
+  async updateCareerGoal(id: number, goalData: Partial<InsertCareerGoal>): Promise<CareerGoal | undefined> {
+    const [updatedGoal] = await db.update(careerGoals)
+      .set(goalData)
+      .where(eq(careerGoals.id, id))
+      .returning();
+    return updatedGoal || undefined;
+  }
+
+  async deleteCareerGoal(id: number): Promise<boolean> {
+    const result = await db.delete(careerGoals).where(eq(careerGoals.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Skill methods
+  async getSkill(id: number): Promise<Skill | undefined> {
+    const [skill] = await db.select().from(skills).where(eq(skills.id, id));
+    return skill || undefined;
+  }
+
+  async getAllSkills(): Promise<Skill[]> {
+    return db.select().from(skills);
+  }
+
+  async getSkillsByCategory(category: string): Promise<Skill[]> {
+    return db.select().from(skills).where(eq(skills.category, category));
+  }
+
+  async createSkill(skill: InsertSkill): Promise<Skill> {
+    const [newSkill] = await db.insert(skills).values(skill).returning();
+    return newSkill;
+  }
+
+  async updateSkill(id: number, skillData: Partial<InsertSkill>): Promise<Skill | undefined> {
+    const [updatedSkill] = await db.update(skills)
+      .set(skillData)
+      .where(eq(skills.id, id))
+      .returning();
+    return updatedSkill || undefined;
+  }
+
+  async deleteSkill(id: number): Promise<boolean> {
+    const result = await db.delete(skills).where(eq(skills.id, id));
+    return result.rowCount > 0;
+  }
+
+  // User skill methods
+  async getUserSkill(id: number): Promise<UserSkill | undefined> {
+    const [userSkill] = await db.select().from(userSkills).where(eq(userSkills.id, id));
+    return userSkill || undefined;
+  }
+
+  async getUserSkillsByUserId(userId: number): Promise<UserSkill[]> {
+    return db.select().from(userSkills).where(eq(userSkills.userId, userId));
+  }
+
+  async getUserSkillsWithDetails(userId: number): Promise<(UserSkill & { skillName: string, category: string })[]> {
+    const result = await db.select({
+      ...userSkills,
+      skillName: skills.name,
+      category: skills.category
+    })
+    .from(userSkills)
+    .innerJoin(skills, eq(userSkills.skillId, skills.id))
+    .where(eq(userSkills.userId, userId));
+    
+    return result.map(item => ({
+      ...item,
+      id: item.id,
+      userId: item.userId,
+      skillId: item.skillId,
+      currentLevel: item.currentLevel,
+      targetLevel: item.targetLevel,
+      notes: item.notes,
+      lastAssessed: item.lastAssessed,
+      skillName: item.skillName,
+      category: item.category
+    }));
+  }
+
+  async createUserSkill(userSkill: InsertUserSkill): Promise<UserSkill> {
+    const [newUserSkill] = await db.insert(userSkills).values(userSkill).returning();
+    return newUserSkill;
+  }
+
+  async updateUserSkill(id: number, userSkillData: Partial<InsertUserSkill>): Promise<UserSkill | undefined> {
+    const [updatedUserSkill] = await db.update(userSkills)
+      .set(userSkillData)
+      .where(eq(userSkills.id, id))
+      .returning();
+    return updatedUserSkill || undefined;
+  }
+
+  async deleteUserSkill(id: number): Promise<boolean> {
+    const result = await db.delete(userSkills).where(eq(userSkills.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Learning resource methods
+  async getLearningResource(id: number): Promise<LearningResource | undefined> {
+    const [resource] = await db.select().from(learningResources).where(eq(learningResources.id, id));
+    return resource || undefined;
+  }
+
+  async getAllLearningResources(): Promise<LearningResource[]> {
+    return db.select().from(learningResources);
+  }
+
+  async getLearningResourcesByType(type: string): Promise<LearningResource[]> {
+    return db.select().from(learningResources).where(eq(learningResources.resourceType, type));
+  }
+
+  async getLearningResourcesBySkill(skillId: number): Promise<LearningResource[]> {
+    // This is a bit more complex since we have an array column
+    // We need to check if the skillId exists in the skillIds array
+    const skillIdStr = skillId.toString();
+    const resources = await db.select().from(learningResources);
+    return resources.filter(resource => 
+      resource.skillIds && resource.skillIds.includes(skillIdStr)
+    );
+  }
+
+  async createLearningResource(resource: InsertLearningResource): Promise<LearningResource> {
+    const [newResource] = await db.insert(learningResources).values(resource).returning();
+    return newResource;
+  }
+
+  async updateLearningResource(id: number, resourceData: Partial<InsertLearningResource>): Promise<LearningResource | undefined> {
+    const [updatedResource] = await db.update(learningResources)
+      .set(resourceData)
+      .where(eq(learningResources.id, id))
+      .returning();
+    return updatedResource || undefined;
+  }
+
+  async deleteLearningResource(id: number): Promise<boolean> {
+    const result = await db.delete(learningResources).where(eq(learningResources.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Learning path methods
+  async getLearningPath(id: number): Promise<LearningPath | undefined> {
+    const [path] = await db.select().from(learningPaths).where(eq(learningPaths.id, id));
+    return path || undefined;
+  }
+
+  async getLearningPathsByUserId(userId: number): Promise<LearningPath[]> {
+    return db.select().from(learningPaths).where(eq(learningPaths.userId, userId));
+  }
+
+  async createLearningPath(path: InsertLearningPath): Promise<LearningPath> {
+    const [newPath] = await db.insert(learningPaths).values(path).returning();
+    return newPath;
+  }
+
+  async updateLearningPath(id: number, pathData: Partial<InsertLearningPath>): Promise<LearningPath | undefined> {
+    const [updatedPath] = await db.update(learningPaths)
+      .set(pathData)
+      .where(eq(learningPaths.id, id))
+      .returning();
+    return updatedPath || undefined;
+  }
+
+  async deleteLearningPath(id: number): Promise<boolean> {
+    const result = await db.delete(learningPaths).where(eq(learningPaths.id, id));
+    return result.rowCount > 0;
+  }
+
+  // User progress methods
+  async getUserProgress(id: number): Promise<UserProgress | undefined> {
+    const [progress] = await db.select().from(userProgress).where(eq(userProgress.id, id));
+    return progress || undefined;
+  }
+
+  async getUserProgressByUserId(userId: number): Promise<UserProgress[]> {
+    return db.select().from(userProgress).where(eq(userProgress.userId, userId));
+  }
+
+  async getUserProgressByResource(userId: number, resourceId: number): Promise<UserProgress | undefined> {
+    const [progress] = await db.select().from(userProgress)
+      .where(and(
+        eq(userProgress.userId, userId),
+        eq(userProgress.resourceId, resourceId)
+      ));
+    return progress || undefined;
+  }
+
+  async createUserProgress(progress: InsertUserProgress): Promise<UserProgress> {
+    const [newProgress] = await db.insert(userProgress).values(progress).returning();
+    return newProgress;
+  }
+
+  async updateUserProgress(id: number, progressData: Partial<InsertUserProgress>): Promise<UserProgress | undefined> {
+    const [updatedProgress] = await db.update(userProgress)
+      .set(progressData)
+      .where(eq(userProgress.id, id))
+      .returning();
+    return updatedProgress || undefined;
+  }
+
+  async deleteUserProgress(id: number): Promise<boolean> {
+    const result = await db.delete(userProgress).where(eq(userProgress.id, id));
+    return result.rowCount > 0;
+  }
+
+  // User activity methods
+  async getUserActivity(id: number): Promise<UserActivity | undefined> {
+    const [activity] = await db.select().from(userActivities).where(eq(userActivities.id, id));
+    return activity || undefined;
+  }
+
+  async getUserActivitiesByUserId(userId: number, limit?: number): Promise<UserActivity[]> {
+    let query = db.select().from(userActivities)
+      .where(eq(userActivities.userId, userId))
+      .orderBy(desc(userActivities.createdAt));
+    
+    if (limit) {
+      query = query.limit(limit);
+    }
+    
+    return query;
+  }
+
+  async createUserActivity(activity: InsertUserActivity): Promise<UserActivity> {
+    const [newActivity] = await db.insert(userActivities).values(activity).returning();
+    return newActivity;
+  }
+
+  async deleteUserActivity(id: number): Promise<boolean> {
+    const result = await db.delete(userActivities).where(eq(userActivities.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Skill validation methods
+  async getSkillValidation(id: number): Promise<SkillValidation | undefined> {
+    const [validation] = await db.select().from(skillValidations).where(eq(skillValidations.id, id));
+    return validation || undefined;
+  }
+
+  async getSkillValidationsByUserId(userId: number): Promise<SkillValidation[]> {
+    return db.select().from(skillValidations).where(eq(skillValidations.userId, userId));
+  }
+
+  async getSkillValidationsBySkill(skillId: number): Promise<SkillValidation[]> {
+    return db.select().from(skillValidations).where(eq(skillValidations.skillId, skillId));
+  }
+
+  async createSkillValidation(validation: InsertSkillValidation): Promise<SkillValidation> {
+    const [newValidation] = await db.insert(skillValidations).values(validation).returning();
+    return newValidation;
+  }
+
+  async updateSkillValidation(id: number, validationData: Partial<InsertSkillValidation>): Promise<SkillValidation | undefined> {
+    const [updatedValidation] = await db.update(skillValidations)
+      .set(validationData)
+      .where(eq(skillValidations.id, id))
+      .returning();
+    return updatedValidation || undefined;
+  }
+
+  async deleteSkillValidation(id: number): Promise<boolean> {
+    const result = await db.delete(skillValidations).where(eq(skillValidations.id, id));
+    return result.rowCount > 0;
+  }
+}
+
+// Switch from in-memory storage to database storage
+export const storage = new DatabaseStorage();
