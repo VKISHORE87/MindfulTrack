@@ -1,18 +1,8 @@
 import OpenAI from "openai";
+import { safeJsonParse } from "./utils";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-// Helper function to safely parse OpenAI response
-function safeJsonParse(content: string | null): any {
-  if (!content) return {};
-  try {
-    return JSON.parse(content);
-  } catch (error) {
-    console.error("Error parsing OpenAI response:", error);
-    return {};
-  }
-}
 
 export interface UserData {
   skills: Array<{
@@ -223,9 +213,15 @@ export async function generateLearningPath(userData: UserData): Promise<Learning
       response_format: { type: "json_object" }
     });
 
-    return safeJsonParse(response.choices[0].message.content);
+    return safeJsonParse(response.choices[0].message.content, {} as LearningPath);
   } catch (error) {
     console.error("Error generating learning path with OpenAI:", error);
+    if (error instanceof Error && error.message.includes("insufficient_quota")) {
+      throw new Error("OpenAI API quota exceeded. Please try again later or contact support to update your API limits.");
+    }
+    if (error instanceof Error && error.message.includes("rate_limit")) {
+      throw new Error("OpenAI API rate limit reached. Please try again after a few moments.");
+    }
     throw new Error("Failed to generate learning path recommendation");
   }
 }
@@ -247,9 +243,15 @@ export async function analyzeSkillGaps(userData: UserData): Promise<SkillGapAnal
       response_format: { type: "json_object" }
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    return safeJsonParse(response.choices[0].message.content, {} as SkillGapAnalysis);
   } catch (error) {
     console.error("Error analyzing skill gaps with OpenAI:", error);
+    if (error instanceof Error && error.message.includes("insufficient_quota")) {
+      throw new Error("OpenAI API quota exceeded. Please try again later or contact support to update your API limits.");
+    }
+    if (error instanceof Error && error.message.includes("rate_limit")) {
+      throw new Error("OpenAI API rate limit reached. Please try again after a few moments.");
+    }
     throw new Error("Failed to analyze skill gaps");
   }
 }
@@ -271,9 +273,15 @@ export async function recommendResources(userData: UserData): Promise<ResourceRe
       response_format: { type: "json_object" }
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    return safeJsonParse(response.choices[0].message.content, {} as ResourceRecommendation);
   } catch (error) {
     console.error("Error recommending resources with OpenAI:", error);
+    if (error instanceof Error && error.message.includes("insufficient_quota")) {
+      throw new Error("OpenAI API quota exceeded. Please try again later or contact support to update your API limits.");
+    }
+    if (error instanceof Error && error.message.includes("rate_limit")) {
+      throw new Error("OpenAI API rate limit reached. Please try again after a few moments.");
+    }
     throw new Error("Failed to generate resource recommendations");
   }
 }
@@ -295,9 +303,15 @@ export async function generateSkillGraph(userData: UserData): Promise<SkillGraph
       response_format: { type: "json_object" }
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    return safeJsonParse(response.choices[0].message.content, {} as SkillGraphData);
   } catch (error) {
     console.error("Error generating skill graph with OpenAI:", error);
+    if (error instanceof Error && error.message.includes("insufficient_quota")) {
+      throw new Error("OpenAI API quota exceeded. Please try again later or contact support to update your API limits.");
+    }
+    if (error instanceof Error && error.message.includes("rate_limit")) {
+      throw new Error("OpenAI API rate limit reached. Please try again after a few moments.");
+    }
     throw new Error("Failed to generate skill graph visualization data");
   }
 }
@@ -319,9 +333,15 @@ export async function predictCareerPath(userData: UserData): Promise<PredictiveC
       response_format: { type: "json_object" }
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    return safeJsonParse(response.choices[0].message.content, {} as PredictiveCareerPath);
   } catch (error) {
     console.error("Error predicting career path with OpenAI:", error);
+    if (error instanceof Error && error.message.includes("insufficient_quota")) {
+      throw new Error("OpenAI API quota exceeded. Please try again later or contact support to update your API limits.");
+    }
+    if (error instanceof Error && error.message.includes("rate_limit")) {
+      throw new Error("OpenAI API rate limit reached. Please try again after a few moments.");
+    }
     throw new Error("Failed to generate career predictions");
   }
 }
@@ -347,9 +367,15 @@ export async function getAiCoachGuidance(
       response_format: { type: "json_object" }
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    return safeJsonParse(response.choices[0].message.content, {} as AiCoachResponse);
   } catch (error) {
     console.error("Error getting AI coach guidance with OpenAI:", error);
+    if (error instanceof Error && error.message.includes("insufficient_quota")) {
+      throw new Error("OpenAI API quota exceeded. Please try again later or contact support to update your API limits.");
+    }
+    if (error instanceof Error && error.message.includes("rate_limit")) {
+      throw new Error("OpenAI API rate limit reached. Please try again after a few moments.");
+    }
     throw new Error("Failed to generate coaching guidance");
   }
 }
@@ -382,9 +408,15 @@ export async function analyzeLearningPatterns(
       response_format: { type: "json_object" }
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    return safeJsonParse(response.choices[0].message.content, {} as LearningPatternAnalysis);
   } catch (error) {
     console.error("Error analyzing learning patterns with OpenAI:", error);
+    if (error instanceof Error && error.message.includes("insufficient_quota")) {
+      throw new Error("OpenAI API quota exceeded. Please try again later or contact support to update your API limits.");
+    }
+    if (error instanceof Error && error.message.includes("rate_limit")) {
+      throw new Error("OpenAI API rate limit reached. Please try again after a few moments.");
+    }
     throw new Error("Failed to analyze learning patterns");
   }
 }
@@ -431,9 +463,29 @@ export async function detectLearningStyle(
       response_format: { type: "json_object" }
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    return safeJsonParse(response.choices[0].message.content, {} as {
+      primaryStyle: 'visual' | 'auditory' | 'reading' | 'kinesthetic';
+      secondaryStyle: 'visual' | 'auditory' | 'reading' | 'kinesthetic';
+      styleProfile: {
+        visual: number;
+        auditory: number;
+        reading: number;
+        kinesthetic: number;
+      };
+      recommendations: Array<{
+        style: string;
+        resourceTypes: string[];
+        learningStrategies: string[];
+      }>;
+    });
   } catch (error) {
     console.error("Error detecting learning style with OpenAI:", error);
+    if (error instanceof Error && error.message.includes("insufficient_quota")) {
+      throw new Error("OpenAI API quota exceeded. Please try again later or contact support to update your API limits.");
+    }
+    if (error instanceof Error && error.message.includes("rate_limit")) {
+      throw new Error("OpenAI API rate limit reached. Please try again after a few moments.");
+    }
     throw new Error("Failed to detect learning style");
   }
 }

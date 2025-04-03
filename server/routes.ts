@@ -24,8 +24,29 @@ import {
 
 // Initialize OpenAI
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || "sk-dummy-key-for-dev"
+  apiKey: process.env.OPENAI_API_KEY
 });
+
+// Utility function to convert user data for OpenAI
+function formatUserDataForAI(user: any, userSkills: any[], careerGoals: any[], learningHistory: any[] = [], learningPreferences: any = {}) {
+  return {
+    skills: userSkills.map(skill => ({
+      id: skill.id,
+      name: skill.skillName || skill.name,
+      category: skill.category,
+      currentLevel: skill.currentLevel,
+      targetLevel: skill.targetLevel
+    })),
+    careerGoals: careerGoals.map(goal => ({
+      id: goal.id,
+      title: goal.title,
+      description: goal.description,
+      timelineMonths: goal.timelineMonths
+    })),
+    learningHistory,
+    learningPreferences
+  };
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup session middleware
@@ -960,6 +981,323 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.json(dashboardData);
       } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // =====================
+  // AI-powered Features
+  // =====================
+
+  // AI Coach - Get personalized coaching advice
+  app.post(
+    "/api/users/:userId/ai-coach",
+    isAuthenticated,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const userId = parseInt(req.params.userId);
+        
+        // Check if user is accessing their own data
+        if (req.user && (req.user as any).id !== userId) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
+
+        // Get user data
+        const user = await storage.getUser(userId);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        // Get user skills and career goals
+        const userSkills = await storage.getUserSkillsWithDetails(userId);
+        const careerGoals = await storage.getCareerGoalsByUserId(userId);
+        
+        // Get user question from request body
+        const { question } = req.body;
+        if (!question) {
+          return res.status(400).json({ message: "Question is required" });
+        }
+
+        // Format user data for AI
+        const userData = formatUserDataForAI(user, userSkills, careerGoals);
+
+        // Prepare system prompt for AI coach
+        const systemPrompt = `You are an AI career and skills coach named "Upcraft Coach". 
+Your role is to provide personalized advice to help users develop their skills and advance in their careers.
+Use the provided user data to make your advice specific and relevant.
+
+User data:
+${JSON.stringify(userData, null, 2)}
+
+Reply in a friendly, supportive tone. Provide specific, actionable advice based on the user's skill levels,
+career goals, and learning history. Limit your response to 3-4 paragraphs at most.`;
+
+        // Call OpenAI API
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: question }
+          ],
+          temperature: 0.7,
+          max_tokens: 1000
+        });
+
+        // Return the AI response
+        res.json({ 
+          message: completion.choices[0].message.content
+        });
+      } catch (error) {
+        console.error("AI Coach error:", error);
+        // Check for OpenAI specific errors
+        if (error instanceof Error) {
+          // Handle quota exceeded errors
+          if (error.message.includes("insufficient_quota")) {
+            return res.status(429).json({ 
+              message: "OpenAI API quota exceeded. Please try again later or contact support to update API limits."
+            });
+          }
+          // Handle rate limit errors
+          if (error.message.includes("rate_limit")) {
+            return res.status(429).json({ 
+              message: "OpenAI API rate limit reached. Please try again after a few moments."
+            });
+          }
+          // Handle authentication errors
+          if (error.message.includes("authentication")) {
+            return res.status(500).json({
+              message: "Authentication error with AI service. Please check API configuration."
+            });
+          }
+        }
+        next(error);
+      }
+    }
+  );
+
+  // Smart Skill Graph - Get skill relationships and insights
+  app.get(
+    "/api/users/:userId/smart-skill-graph",
+    isAuthenticated,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const userId = parseInt(req.params.userId);
+        
+        // Check if user is accessing their own data
+        if (req.user && (req.user as any).id !== userId) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
+
+        // Get user data
+        const user = await storage.getUser(userId);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        // Get user skills and career goals
+        const userSkills = await storage.getUserSkillsWithDetails(userId);
+        const careerGoals = await storage.getCareerGoalsByUserId(userId);
+        
+        // Format user data for AI
+        const userData = formatUserDataForAI(user, userSkills, careerGoals);
+
+        // Prepare system prompt for skill graph analysis
+        const systemPrompt = `You are an AI skill analyzer. Your job is to analyze the relationship between different skills and provide a graph structure that shows how skills are connected.
+Based on the user's current skills and levels, identify clusters of related skills, dependencies between skills, and provide a graph structure.
+
+User data:
+${JSON.stringify(userData, null, 2)}
+
+Return a JSON response with the following structure:
+{
+  "nodes": [
+    { "id": "skill1", "name": "Skill Name", "category": "Technical/Soft/Business", "level": 3, "targetLevel": 5, "cluster": "Frontend" },
+    ...
+  ],
+  "links": [
+    { "source": "skill1", "target": "skill2", "strength": 0.8, "type": "prerequisite/complementary/alternative" },
+    ...
+  ],
+  "clusters": [
+    { "id": "cluster1", "name": "Frontend Development", "description": "Skills related to frontend web development" },
+    ...
+  ],
+  "recommendations": [
+    { "skillId": "skill3", "reason": "This skill complements your existing JavaScript knowledge" },
+    ...
+  ]
+}
+
+Include all the user's current skills as nodes and add 3-5 recommended skills. For links, create connections between skills that are related.`;
+
+        // Call OpenAI API
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: "Generate a smart skill graph based on my current skills and goals." }
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0.7,
+          max_tokens: 2000
+        });
+
+        // Parse and return the AI response
+        try {
+          const content = completion.choices[0].message.content || '{}';
+          const graphData = JSON.parse(content);
+          res.json(graphData);
+        } catch (error) {
+          console.error("Error parsing OpenAI JSON response:", error);
+          res.status(500).json({ 
+            message: "Failed to generate skill graph",
+            error: "Invalid response format from AI service" 
+          });
+        }
+      } catch (error) {
+        console.error("Smart Skill Graph error:", error);
+        // Check for OpenAI specific errors
+        if (error instanceof Error) {
+          // Handle quota exceeded errors
+          if (error.message.includes("insufficient_quota")) {
+            return res.status(429).json({ 
+              message: "OpenAI API quota exceeded. Please try again later or contact support to update API limits."
+            });
+          }
+          // Handle rate limit errors
+          if (error.message.includes("rate_limit")) {
+            return res.status(429).json({ 
+              message: "OpenAI API rate limit reached. Please try again after a few moments."
+            });
+          }
+          // Handle authentication errors
+          if (error.message.includes("authentication")) {
+            return res.status(500).json({
+              message: "Authentication error with AI service. Please check API configuration."
+            });
+          }
+        }
+        next(error);
+      }
+    }
+  );
+
+  // Learning Pattern Analysis - Get personalized learning recommendations
+  app.get(
+    "/api/users/:userId/learning-pattern-analysis",
+    isAuthenticated,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const userId = parseInt(req.params.userId);
+        
+        // Check if user is accessing their own data
+        if (req.user && (req.user as any).id !== userId) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
+
+        // Get user data
+        const user = await storage.getUser(userId);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        // Get user skills, progress, and activities
+        const userSkills = await storage.getUserSkillsWithDetails(userId);
+        const careerGoals = await storage.getCareerGoalsByUserId(userId);
+        const userProgress = await storage.getUserProgressByUserId(userId);
+        const userActivities = await storage.getUserActivitiesByUserId(userId);
+        
+        // Format user data for AI
+        const userData = formatUserDataForAI(user, userSkills, careerGoals);
+
+        // Add learning history from progress and activities
+        const learningHistory = {
+          progress: userProgress,
+          activities: userActivities
+        };
+
+        // Prepare system prompt for learning pattern analysis
+        const systemPrompt = `You are an AI learning pattern analyzer. Your task is to analyze the user's learning history, progress, and activities to identify patterns in their learning behavior.
+Based on this analysis, provide personalized recommendations for learning resources, methods, and approaches that would be most effective for this user.
+
+User data:
+${JSON.stringify(userData, null, 2)}
+
+Learning history:
+${JSON.stringify(learningHistory, null, 2)}
+
+Return a JSON response with the following structure:
+{
+  "learning_patterns": [
+    { "pattern": "Pattern Name", "description": "Description of the pattern", "evidence": "Evidence from user data" },
+    ...
+  ],
+  "recommendations": {
+    "resource_types": [
+      { "type": "video", "suitability": 85, "reason": "User engages well with video content" },
+      ...
+    ],
+    "learning_pace": { "recommended": "steady/intensive/intermittent", "reason": "Based on activity patterns" },
+    "focus_areas": [
+      { "skill": "Skill Name", "priority": "high/medium/low", "reason": "Reason for priority" },
+      ...
+    ],
+    "suggested_resources": [
+      { "title": "Resource Title", "type": "video/article/course", "link": "URL if available", "reason": "Why this is recommended" },
+      ...
+    ]
+  },
+  "summary": "Brief summary of key insights and recommendations"
+}`;
+
+        // Call OpenAI API
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: "Analyze my learning patterns and provide personalized recommendations." }
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0.7,
+          max_tokens: 2000
+        });
+
+        // Parse and return the AI response
+        try {
+          const content = completion.choices[0].message.content || '{}';
+          const analysisData = JSON.parse(content);
+          res.json(analysisData);
+        } catch (error) {
+          console.error("Error parsing OpenAI JSON response:", error);
+          res.status(500).json({ 
+            message: "Failed to generate learning pattern analysis",
+            error: "Invalid response format from AI service" 
+          });
+        }
+      } catch (error) {
+        console.error("Learning Pattern Analysis error:", error);
+        // Check for OpenAI specific errors
+        if (error instanceof Error) {
+          // Handle quota exceeded errors
+          if (error.message.includes("insufficient_quota")) {
+            return res.status(429).json({ 
+              message: "OpenAI API quota exceeded. Please try again later or contact support to update API limits."
+            });
+          }
+          // Handle rate limit errors
+          if (error.message.includes("rate_limit")) {
+            return res.status(429).json({ 
+              message: "OpenAI API rate limit reached. Please try again after a few moments."
+            });
+          }
+          // Handle authentication errors
+          if (error.message.includes("authentication")) {
+            return res.status(500).json({
+              message: "Authentication error with AI service. Please check API configuration."
+            });
+          }
+        }
         next(error);
       }
     }
