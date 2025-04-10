@@ -354,6 +354,14 @@ export class MemStorage implements IStorage {
     return Array.from(this.usersMap.values()).find(user => user.email === email);
   }
 
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    return Array.from(this.usersMap.values()).find(user => user.googleId === googleId);
+  }
+
+  async getUserByResetToken(token: string): Promise<User | undefined> {
+    return Array.from(this.usersMap.values()).find(user => user.resetPasswordToken === token);
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserID++;
     const user: User = {
@@ -719,6 +727,16 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.googleId, googleId));
+    return user || undefined;
+  }
+
+  async getUserByResetToken(token: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.resetPasswordToken, token));
     return user || undefined;
   }
 
