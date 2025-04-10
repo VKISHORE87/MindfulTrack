@@ -20,8 +20,19 @@ import {
   insertLearningPathSchema,
   insertUserProgressSchema,
   insertUserActivitySchema,
-  insertSkillValidationSchema
+  insertSkillValidationSchema,
+  User
 } from "@shared/schema";
+
+// Helper function to safely remove password from user object
+const removePassword = (user: any): Omit<typeof user, 'password'> => {
+  if (!user) return user;
+  const userCopy = { ...user };
+  if ('password' in userCopy) {
+    delete userCopy.password;
+  }
+  return userCopy;
+};
 
 // Initialize OpenAI
 const openai = new OpenAI({
@@ -83,7 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Remove password before serializing
-        const { password: _, ...userWithoutPassword } = user;
+        const userWithoutPassword = removePassword(user);
         return done(null, userWithoutPassword);
       } catch (err) {
         return done(err);
@@ -102,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user) {
         return done(new Error("User not found"));
       }
-      const { password: _, ...userWithoutPassword } = user;
+      const userWithoutPassword = removePassword(user);
       done(null, userWithoutPassword);
     } catch (err) {
       done(err);
@@ -145,7 +156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         const newUser = await storage.createUser(userDataResult.data);
-        const { password: _, ...userWithoutPassword } = newUser;
+        const userWithoutPassword = removePassword(newUser);
 
         // Auto-login after registration
         req.login(userWithoutPassword, (err) => {
@@ -219,7 +230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Remove password before serializing
-        const { password: _, ...userWithoutPassword } = user;
+        const userWithoutPassword = removePassword(user);
         
         // Log the user in
         req.login(userWithoutPassword, (err) => {
@@ -369,7 +380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(404).json({ message: "User not found" });
         }
 
-        const { password: _, ...userWithoutPassword } = user;
+        const userWithoutPassword = removePassword(user);
         res.json(userWithoutPassword);
       } catch (error) {
         next(error);
