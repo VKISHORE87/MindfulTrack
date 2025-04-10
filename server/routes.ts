@@ -9,6 +9,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import crypto from "crypto";
 import OpenAI from "openai";
+import nodemailer from "nodemailer";
 
 import {
   insertUserSchema,
@@ -182,6 +183,167 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/auth/me", isAuthenticated, (req: Request, res: Response) => {
     res.json(req.user);
   });
+
+  // Google Login
+  app.post(
+    "/api/auth/google",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { email, name, googleId, profilePicture } = req.body;
+        
+        if (!email || !googleId) {
+          return res.status(400).json({ message: "Email and Google ID are required" });
+        }
+
+        // Check if user exists with this email
+        let user = await storage.getUserByEmail(email);
+        
+        if (user) {
+          // Update Google ID if it's not already set
+          if (!user.googleId) {
+            user = await storage.updateUser(user.id, { googleId, profilePicture });
+          }
+        } else {
+          // Create new user with Google info
+          // Generate a username from email
+          const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
+          
+          user = await storage.createUser({
+            username,
+            email,
+            name: name || username,
+            googleId,
+            profilePicture,
+            role: "user"
+          });
+        }
+
+        // Remove password before serializing
+        const { password: _, ...userWithoutPassword } = user;
+        
+        // Log the user in
+        req.login(userWithoutPassword, (err) => {
+          if (err) {
+            return next(err);
+          }
+          return res.status(200).json(userWithoutPassword);
+        });
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Forgot password - request reset
+  app.post(
+    "/api/auth/forgot-password",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { email } = req.body;
+        
+        if (!email) {
+          return res.status(400).json({ message: "Email is required" });
+        }
+
+        const user = await storage.getUserByEmail(email);
+        
+        if (!user) {
+          // Don't reveal that the user doesn't exist
+          return res.status(200).json({ 
+            message: "If the email exists in our system, a password reset link will be sent" 
+          });
+        }
+
+        // Generate reset token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetExpires = new Date(Date.now() + 3600000); // 1 hour from now
+        
+        // Update user with reset token
+        await storage.updateUser(user.id, {
+          resetPasswordToken: resetToken,
+          resetPasswordExpires: resetExpires
+        });
+
+        // Create reset URL
+        const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
+        
+        // Setup nodemailer transport
+        const transporter = nodemailer.createTransport({
+          host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+          port: process.env.EMAIL_PORT ? parseInt(process.env.EMAIL_PORT) : 587,
+          secure: process.env.EMAIL_SECURE === 'true',
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+          }
+        });
+
+        // Email options
+        const mailOptions = {
+          from: process.env.EMAIL_FROM || 'no-reply@upcraft.com',
+          to: user.email,
+          subject: 'Upcraft - Password Reset',
+          text: `You requested a password reset. Please use the following link to reset your password:\n\n${resetUrl}\n\nThis link is valid for 1 hour.`,
+          html: `
+            <p>You requested a password reset.</p>
+            <p>Please click the following link to reset your password:</p>
+            <a href="${resetUrl}">${resetUrl}</a>
+            <p>This link is valid for 1 hour.</p>
+          `
+        };
+
+        // Send email
+        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+          await transporter.sendMail(mailOptions);
+        } else {
+          console.log("Email credentials not configured. Reset URL:", resetUrl);
+        }
+
+        res.status(200).json({ 
+          message: "If the email exists in our system, a password reset link will be sent" 
+        });
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Reset password
+  app.post(
+    "/api/auth/reset-password",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { token, password } = req.body;
+        
+        if (!token || !password) {
+          return res.status(400).json({ message: "Token and password are required" });
+        }
+
+        // Find user with the provided token
+        const user = await storage.getUserByResetToken(token);
+        
+        if (!user) {
+          return res.status(400).json({ message: "Invalid or expired token" });
+        }
+
+        // Check if token is expired
+        if (!user.resetPasswordExpires || new Date() > new Date(user.resetPasswordExpires)) {
+          return res.status(400).json({ message: "Token has expired" });
+        }
+
+        // Update user with new password and clear reset token
+        await storage.updateUser(user.id, {
+          password,
+          resetPasswordToken: null,
+          resetPasswordExpires: null
+        });
+
+        res.status(200).json({ message: "Password has been reset successfully" });
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
 
   // =====================
   // User Routes
