@@ -6,10 +6,14 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  password: text("password"),  // Can be null for Google sign-in
   name: text("name").notNull(),
   role: text("role"),
   email: text("email").notNull().unique(),
+  googleId: text("google_id").unique(),
+  profilePicture: text("profile_picture"),
+  resetPasswordToken: text("reset_password_token").unique(),
+  resetPasswordExpires: timestamp("reset_password_expires"),
   createdAt: timestamp("created_at").defaultNow()
 });
 
@@ -105,7 +109,11 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
   name: true,
   role: true,
-  email: true
+  email: true,
+  googleId: true,
+  profilePicture: true,
+  resetPasswordToken: true,
+  resetPasswordExpires: true
 });
 
 export const insertCareerGoalSchema = createInsertSchema(careerGoals).pick({
