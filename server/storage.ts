@@ -721,13 +721,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
+    console.log("DatabaseStorage.getUserByUsername called with:", username);
+    try {
+      const [user] = await db.select().from(users).where(eq(users.username, username));
+      console.log("getUserByUsername result:", user || "No user found");
+      return user || undefined;
+    } catch (error) {
+      console.error("Error in getUserByUsername:", error);
+      throw error;
+    }
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user || undefined;
+    console.log("DatabaseStorage.getUserByEmail called with:", email);
+    try {
+      const [user] = await db.select().from(users).where(eq(users.email, email));
+      console.log("getUserByEmail result:", user || "No user found");
+      return user || undefined;
+    } catch (error) {
+      console.error("Error in getUserByEmail:", error);
+      throw error;
+    }
   }
 
   async getUserByGoogleId(googleId: string): Promise<User | undefined> {
