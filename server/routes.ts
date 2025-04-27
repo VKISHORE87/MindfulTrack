@@ -1528,6 +1528,386 @@ Return a JSON response with the following structure:
     }
   );
 
+  // =====================
+  // Interview Routes
+  // =====================
+
+  // Get all interview roles
+  app.get(
+    "/api/interview/roles",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const roles = await storage.getAllInterviewRoles();
+        res.json(roles);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Get role by ID
+  app.get(
+    "/api/interview/roles/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const roleId = parseInt(req.params.id);
+        const role = await storage.getInterviewRole(roleId);
+        
+        if (!role) {
+          return res.status(404).json({ message: "Interview role not found" });
+        }
+        
+        res.json(role);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Get questions by role ID
+  app.get(
+    "/api/interview/roles/:roleId/questions",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const roleId = parseInt(req.params.roleId);
+        const questions = await storage.getInterviewQuestionsByRoleId(roleId);
+        res.json(questions);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Create a new interview role
+  app.post(
+    "/api/interview/roles",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const roleDataResult = insertInterviewRoleSchema.safeParse(req.body);
+        if (!roleDataResult.success) {
+          return res.status(400).json({
+            message: "Invalid interview role data",
+            errors: roleDataResult.error.errors,
+          });
+        }
+
+        const newRole = await storage.createInterviewRole(roleDataResult.data);
+        res.status(201).json(newRole);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Create a new interview question
+  app.post(
+    "/api/interview/questions",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const questionDataResult = insertInterviewQuestionSchema.safeParse(req.body);
+        if (!questionDataResult.success) {
+          return res.status(400).json({
+            message: "Invalid interview question data",
+            errors: questionDataResult.error.errors,
+          });
+        }
+
+        const newQuestion = await storage.createInterviewQuestion(questionDataResult.data);
+        res.status(201).json(newQuestion);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Get user's interview sessions
+  app.get(
+    "/api/users/:userId/interview-sessions",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const userId = parseInt(req.params.userId);
+        
+        const sessions = await storage.getInterviewSessionsByUserId(userId);
+        res.json(sessions);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Get a specific interview session
+  app.get(
+    "/api/interview/sessions/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const sessionId = parseInt(req.params.id);
+        const session = await storage.getInterviewSession(sessionId);
+        
+        if (!session) {
+          return res.status(404).json({ message: "Interview session not found" });
+        }
+        
+        res.json(session);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Create a new interview session
+  app.post(
+    "/api/interview/sessions",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const sessionDataResult = insertInterviewSessionSchema.safeParse(req.body);
+        if (!sessionDataResult.success) {
+          return res.status(400).json({
+            message: "Invalid interview session data",
+            errors: sessionDataResult.error.errors,
+          });
+        }
+
+        const newSession = await storage.createInterviewSession(sessionDataResult.data);
+        
+        // Create activity entry for completing an interview session
+        await storage.createUserActivity({
+          userId: sessionDataResult.data.userId,
+          activityType: "interview_session",
+          description: `Completed interview session for role ID: ${sessionDataResult.data.roleId}`,
+          metadata: { sessionId: newSession.id }
+        });
+
+        res.status(201).json(newSession);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Get questions for a mock interview
+  app.get(
+    "/api/interview/mock-questions",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { roleId, difficulty, count = "5" } = req.query;
+        
+        if (!roleId) {
+          return res.status(400).json({ message: "Role ID is required" });
+        }
+        
+        const numQuestions = parseInt(count as string);
+        const parsedRoleId = parseInt(roleId as string);
+        
+        let questions;
+        
+        if (difficulty) {
+          questions = await storage.getInterviewQuestionsByRoleIdAndDifficulty(
+            parsedRoleId, 
+            difficulty as string
+          );
+        } else {
+          questions = await storage.getInterviewQuestionsByRoleId(parsedRoleId);
+        }
+        
+        // If we have more questions than requested, select random ones
+        if (questions.length > numQuestions) {
+          // Shuffle array and take the first 'numQuestions' items
+          questions = questions
+            .sort(() => 0.5 - Math.random())
+            .slice(0, numQuestions);
+        }
+        
+        res.json(questions);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Create sample interview data
+  app.post(
+    "/api/interview/create-samples",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        // Create sample interview roles if none exist
+        const existingRoles = await storage.getAllInterviewRoles();
+        
+        if (existingRoles.length === 0) {
+          console.log("Creating sample interview roles...");
+          
+          const sampleRoles = [
+            {
+              title: "Frontend Developer",
+              industry: "Tech",
+              level: "Junior",
+              description: "Entry-level position focused on UI/UX implementation",
+              requiredSkills: ["JavaScript", "HTML", "CSS", "React"]
+            },
+            {
+              title: "Backend Developer",
+              industry: "Tech",
+              level: "Mid-level",
+              description: "Backend developer with focus on API design and implementation",
+              requiredSkills: ["Node.js", "Express", "SQL", "REST APIs"]
+            },
+            {
+              title: "Full Stack Developer",
+              industry: "Tech",
+              level: "Senior",
+              description: "Senior developer proficient in both frontend and backend technologies",
+              requiredSkills: ["JavaScript", "React", "Node.js", "SQL", "System Design"]
+            },
+            {
+              title: "Data Scientist",
+              industry: "Tech",
+              level: "Mid-level",
+              description: "Data scientist with focus on analysis and machine learning",
+              requiredSkills: ["Python", "SQL", "Machine Learning", "Data Visualization"]
+            }
+          ];
+          
+          const createdRoles = [];
+          for (const role of sampleRoles) {
+            const newRole = await storage.createInterviewRole(role);
+            createdRoles.push(newRole);
+          }
+          
+          // Create sample questions for each role
+          const sampleQuestions = [
+            // Frontend Developer Questions
+            {
+              roleId: 1,
+              category: "Technical",
+              difficulty: "Easy",
+              question: "Explain the difference between let, const, and var in JavaScript.",
+              expectedAnswerPoints: [
+                "var is function-scoped, while let and const are block-scoped",
+                "const prevents reassignment of the variable",
+                "var variables are hoisted and initialized with undefined",
+                "let and const are hoisted but not initialized (temporal dead zone)"
+              ],
+              sampleAnswer: "In JavaScript, var, let, and const are used for variable declarations but have different scoping and reassignment behaviors. var is function-scoped and gets hoisted with a value of undefined. let and const are block-scoped (available only within the block they're defined) and are hoisted but not initialized, creating a temporal dead zone. The key difference between let and const is that const prevents variable reassignment after initialization, though for objects and arrays, their properties can still be modified as the reference itself is constant, not the content.",
+              relatedSkillIds: ["JavaScript", "ES6"]
+            },
+            {
+              roleId: 1,
+              category: "Technical",
+              difficulty: "Medium",
+              question: "What is the virtual DOM in React and why is it important?",
+              expectedAnswerPoints: [
+                "The virtual DOM is a lightweight copy of the actual DOM",
+                "React uses it to minimize expensive DOM operations",
+                "React compares virtual DOM with previous versions to determine what needs to change",
+                "This approach improves performance by batching DOM updates"
+              ],
+              sampleAnswer: "The Virtual DOM in React is a lightweight, in-memory representation of the real DOM. When state changes in a React application, React first updates this virtual representation and then compares it with the previous version using a diffing algorithm. This process identifies the minimal set of changes needed to update the actual DOM. This approach is important because direct DOM manipulation is slow and inefficient. By batching changes and updating only what's necessary, React significantly improves performance, especially in complex applications with frequent updates. Additionally, the Virtual DOM abstraction allows React to work across different rendering environments, not just browsers.",
+              relatedSkillIds: ["React", "JavaScript", "Frontend Optimization"]
+            },
+            {
+              roleId: 1,
+              category: "Problem Solving",
+              difficulty: "Hard",
+              question: "How would you implement a responsive image gallery with lazy loading?",
+              expectedAnswerPoints: [
+                "Use CSS Grid or Flexbox for responsive layout",
+                "Implement Intersection Observer API for lazy loading",
+                "Consider fallbacks for older browsers",
+                "Discuss image optimization techniques",
+                "Handle loading states and errors"
+              ],
+              sampleAnswer: "To implement a responsive image gallery with lazy loading, I'd start with a responsive grid layout using CSS Grid or Flexbox with percentage-based dimensions and media queries to adjust columns based on viewport width. For lazy loading, I'd use the Intersection Observer API to detect when images enter the viewport. Each image would initially have a lightweight placeholder or blur-up preview, with the src attribute loaded only when the image approaches the viewport. I'd implement loading indicators and error states for better UX. For older browsers, I'd provide a fallback using scroll event listeners with debouncing. Image optimization would include serving properly sized images using srcset and sizes attributes, modern formats like WebP with fallbacks, and potentially a CDN for delivery. Finally, I'd ensure accessibility with proper alt text, keyboard navigation, and maintaining focus states.",
+              relatedSkillIds: ["HTML", "CSS", "JavaScript", "Performance Optimization"]
+            },
+            // Backend Developer Questions
+            {
+              roleId: 2,
+              category: "Technical",
+              difficulty: "Medium",
+              question: "Explain RESTful API design principles and best practices.",
+              expectedAnswerPoints: [
+                "Use standard HTTP methods (GET, POST, PUT, DELETE)",
+                "Use nouns for resources, not verbs",
+                "Implement proper status codes",
+                "Version your APIs",
+                "Use pagination for large resources",
+                "Implement proper error handling"
+              ],
+              sampleAnswer: "RESTful API design centers around resources, identified by URLs, that can be manipulated using standard HTTP methods. GET retrieves resources, POST creates them, PUT updates them, and DELETE removes them. Best practices include: using plural nouns for resource endpoints (e.g., /users, not /user); implementing proper HTTP status codes (200 for success, 400 for client errors, 500 for server errors); using query parameters for filtering and pagination; versioning APIs to maintain backward compatibility (e.g., /v1/resources); implementing consistent error responses with meaningful messages; using nested routes sparingly for related resources; and documenting thoroughly with tools like Swagger. Security considerations include using HTTPS, implementing authentication/authorization, rate limiting, and validating inputs. A well-designed REST API should be intuitive, consistent, and follow the HATEOAS principle to make API navigation discoverable.",
+              relatedSkillIds: ["API Design", "REST", "Backend Development"]
+            },
+            {
+              roleId: 2,
+              category: "Technical",
+              difficulty: "Hard",
+              question: "How would you handle database transactions in a distributed system?",
+              expectedAnswerPoints: [
+                "Discuss ACID properties",
+                "Explain distributed transaction patterns (2PC, saga)",
+                "Cover eventual consistency",
+                "Mention challenges like network partitions",
+                "Discuss compensation/rollback strategies"
+              ],
+              sampleAnswer: "Managing transactions in distributed systems requires balancing consistency with availability and partition tolerance. While traditional systems rely on ACID properties, distributed systems often use the Two-Phase Commit (2PC) protocol where a coordinator ensures all participants can commit before finalizing, though this can create performance bottlenecks and availability issues. Modern systems frequently employ the Saga pattern, breaking transactions into smaller local transactions with compensating actions for failures. Event-driven architectures with eventual consistency are also common, prioritizing availability over immediate consistency. For implementation, I'd consider factors like business requirements for consistency vs. availability, expected transaction volumes, and failure scenarios. Challenges include handling network partitions, partial failures, and duplicate messages. Monitoring is crucial for detecting anomalies, with strategies like distributed tracing helping track transactions across services. The right approach ultimately depends on specific system requirements and constraints.",
+              relatedSkillIds: ["Database Design", "Distributed Systems", "System Architecture"]
+            },
+            // Full Stack Developer Questions
+            {
+              roleId: 3,
+              category: "System Design",
+              difficulty: "Hard",
+              question: "Design a real-time collaborative document editing system like Google Docs.",
+              expectedAnswerPoints: [
+                "Discuss operational transformation or CRDT for conflict resolution",
+                "Cover WebSockets for real-time communication",
+                "Explain persistence strategy",
+                "Address user presence and cursors",
+                "Cover authentication and permissions",
+                "Discuss scalability challenges"
+              ],
+              sampleAnswer: "For a real-time collaborative document editor like Google Docs, I'd design a system with client and server components communicating via WebSockets for low-latency updates. At its core would be either Operational Transformation (OT) or Conflict-free Replicated Data Types (CRDTs) to handle concurrent edits and ensure eventual consistency. The architecture would include a web client using a rich text editor framework, an authentication service, a document service for storage and retrieval, and a collaboration service handling real-time synchronization and conflict resolution. For scalability, I'd implement horizontal scaling of WebSocket servers with Redis or Kafka for pub/sub messaging, database sharding, and caching. Features would include user presence indicators, cursor positions, version history, permissions management, and offline editing with conflict resolution upon reconnection. For large documents, I'd implement pagination or chunking, and use a NoSQL database for flexible schema evolution. The system would need comprehensive logging, monitoring, and analytics to track performance metrics and user behavior patterns.",
+              relatedSkillIds: ["System Design", "WebSockets", "Database Design", "Frontend Development"]
+            },
+            // Data Scientist Questions
+            {
+              roleId: 4,
+              category: "Technical",
+              difficulty: "Medium",
+              question: "Explain the difference between supervised and unsupervised learning with examples.",
+              expectedAnswerPoints: [
+                "Supervised learning uses labeled data",
+                "Unsupervised learning works with unlabeled data",
+                "Examples of supervised: classification, regression",
+                "Examples of unsupervised: clustering, dimensionality reduction",
+                "Discuss when to use each approach"
+              ],
+              sampleAnswer: "Supervised learning uses labeled data where we have both input features and target outputs. The algorithm learns to map inputs to correct outputs, essentially learning from a 'teacher' (the labels). Common examples include classification (predicting categories like spam detection) and regression (predicting continuous values like house prices). Models like Decision Trees, Random Forests, and Neural Networks are often used. In contrast, unsupervised learning works with unlabeled data, identifying patterns or structures without guidance. Examples include clustering (grouping similar data points, like customer segmentation), dimensionality reduction (like PCA to reduce features while preserving information), and association rule learning (finding relationships between variables). Semi-supervised learning bridges these approaches by using both labeled and unlabeled data, especially useful when labeling is expensive. The choice between methods depends on data availability, problem type, and business goals - supervised for prediction tasks with sufficient labeled data, unsupervised for exploration or when labels aren't available.",
+              relatedSkillIds: ["Machine Learning", "Data Science", "Statistics"]
+            }
+          ];
+          
+          const createdQuestions = [];
+          for (const question of sampleQuestions) {
+            const newQuestion = await storage.createInterviewQuestion(question);
+            createdQuestions.push(newQuestion);
+          }
+          
+          res.status(201).json({
+            message: "Sample interview data created successfully",
+            roles: createdRoles,
+            questions: createdQuestions
+          });
+        } else {
+          res.json({
+            message: "Sample data already exists",
+            rolesCount: existingRoles.length
+          });
+        }
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
   const httpServer = createServer(app);
   return httpServer;
 }
