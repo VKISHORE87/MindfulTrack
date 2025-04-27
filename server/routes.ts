@@ -1701,10 +1701,10 @@ Return a JSON response with the following structure:
         let questions;
         
         if (difficulty) {
-          questions = await storage.getInterviewQuestionsByRoleIdAndDifficulty(
-            parsedRoleId, 
-            difficulty as string
-          );
+          // Get questions by role
+          const roleQuestions = await storage.getInterviewQuestionsByRole(parsedRoleId);
+          // Filter by difficulty
+          questions = roleQuestions.filter(q => q.difficulty === difficulty);
         } else {
           questions = await storage.getInterviewQuestionsByRole(parsedRoleId);
         }
