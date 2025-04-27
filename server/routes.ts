@@ -21,6 +21,9 @@ import {
   insertUserProgressSchema,
   insertUserActivitySchema,
   insertSkillValidationSchema,
+  insertInterviewRoleSchema,
+  insertInterviewQuestionSchema,
+  insertInterviewSessionSchema,
   User
 } from "@shared/schema";
 
