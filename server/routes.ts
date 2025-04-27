@@ -1570,7 +1570,7 @@ Return a JSON response with the following structure:
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const roleId = parseInt(req.params.roleId);
-        const questions = await storage.getInterviewQuestionsByRoleId(roleId);
+        const questions = await storage.getInterviewQuestionsByRole(roleId);
         res.json(questions);
       } catch (error) {
         next(error);
@@ -1706,7 +1706,7 @@ Return a JSON response with the following structure:
             difficulty as string
           );
         } else {
-          questions = await storage.getInterviewQuestionsByRoleId(parsedRoleId);
+          questions = await storage.getInterviewQuestionsByRole(parsedRoleId);
         }
         
         // If we have more questions than requested, select random ones
