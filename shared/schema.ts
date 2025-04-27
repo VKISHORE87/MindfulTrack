@@ -244,7 +244,108 @@ export const validationTypeSchema = z.enum([
   "self_assessment"
 ]);
 
+// Interview Preparation
+export const interviewRoles = pgTable("interview_roles", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull().unique(),
+  description: text("description"),
+  requiredSkills: text("required_skills").array(),
+  industry: text("industry").notNull(),
+  level: text("level").notNull(), // junior, mid, senior
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+export const interviewQuestions = pgTable("interview_questions", {
+  id: serial("id").primaryKey(),
+  roleId: integer("role_id").notNull().references(() => interviewRoles.id),
+  question: text("question").notNull(),
+  category: text("category").notNull(), // technical, behavioral, scenario-based
+  difficulty: text("difficulty").notNull(), // easy, medium, hard
+  expectedAnswerPoints: text("expected_answer_points").array(),
+  sampleAnswer: text("sample_answer"),
+  relatedSkillIds: text("related_skill_ids").array()
+});
+
+export const interviewSessions = pgTable("interview_sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  roleId: integer("role_id").notNull().references(() => interviewRoles.id),
+  sessionDate: timestamp("session_date").defaultNow(),
+  feedback: text("feedback"),
+  performance: integer("performance").notNull(), // 0-100
+  notes: text("notes"),
+  questionIds: text("question_ids").array(),
+  answers: json("answers") // {questionId: string, answer: string, score: number}[]
+});
+
+// Insert schemas
+export const insertInterviewRoleSchema = createInsertSchema(interviewRoles).pick({
+  title: true,
+  description: true,
+  requiredSkills: true,
+  industry: true,
+  level: true
+});
+
+export const insertInterviewQuestionSchema = createInsertSchema(interviewQuestions).pick({
+  roleId: true,
+  question: true,
+  category: true,
+  difficulty: true,
+  expectedAnswerPoints: true,
+  sampleAnswer: true,
+  relatedSkillIds: true
+});
+
+export const insertInterviewSessionSchema = createInsertSchema(interviewSessions).pick({
+  userId: true,
+  roleId: true,
+  sessionDate: true,
+  feedback: true,
+  performance: true,
+  notes: true,
+  questionIds: true,
+  answers: true
+});
+
+// Types
+export type InsertInterviewRole = z.infer<typeof insertInterviewRoleSchema>;
+export type InterviewRole = typeof interviewRoles.$inferSelect;
+
+export type InsertInterviewQuestion = z.infer<typeof insertInterviewQuestionSchema>;
+export type InterviewQuestion = typeof interviewQuestions.$inferSelect;
+
+export type InsertInterviewSession = z.infer<typeof insertInterviewSessionSchema>;
+export type InterviewSession = typeof interviewSessions.$inferSelect;
+
+export const interviewQuestionCategorySchema = z.enum([
+  "technical",
+  "behavioral",
+  "scenario",
+  "system_design",
+  "coding",
+  "domain_knowledge"
+]);
+
+export const interviewDifficultySchema = z.enum([
+  "easy",
+  "medium",
+  "hard"
+]);
+
+export const careerLevelSchema = z.enum([
+  "entry",
+  "junior",
+  "mid",
+  "senior",
+  "lead",
+  "manager"
+]);
+
 export type SkillCategory = z.infer<typeof skillCategorySchema>;
 export type ResourceType = z.infer<typeof resourceTypeSchema>;
 export type ActivityType = z.infer<typeof activityTypeSchema>;
 export type ValidationType = z.infer<typeof validationTypeSchema>;
+export type InterviewQuestionCategory = z.infer<typeof interviewQuestionCategorySchema>;
+export type InterviewDifficulty = z.infer<typeof interviewDifficultySchema>;
+export type CareerLevel = z.infer<typeof careerLevelSchema>;
