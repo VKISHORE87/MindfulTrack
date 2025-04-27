@@ -63,9 +63,18 @@ function formatUserDataForAI(user: any, userSkills: any[], careerGoals: any[], l
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup session middleware
   const MemoryStoreSession = MemoryStore(session);
+  
+  // Make it work in development environment
+  const isDevEnvironment = process.env.NODE_ENV !== "production";
+  
   app.use(
     session({
-      cookie: { maxAge: 86400000 }, // 24 hours
+      cookie: { 
+        maxAge: 86400000, // 24 hours
+        secure: !isDevEnvironment, // Only use secure cookies in production
+        httpOnly: true,
+        sameSite: 'lax'
+      },
       store: new MemoryStoreSession({
         checkPeriod: 86400000, // prune expired entries every 24h
       }),
@@ -75,9 +84,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })
   );
 
-  // Setup passport for authentication
+  // Setup passport for authentication - MUST be after session setup
   app.use(passport.initialize());
   app.use(passport.session());
+  
+  // For development environment debugging - MUST be after passport setup
+  if (isDevEnvironment) {
+    app.use((req, _res, next) => {
+      console.log("Session ID:", req.sessionID);
+      console.log("Is Authenticated:", req.isAuthenticated ? req.isAuthenticated() : "Function not available");
+      next();
+    });
+  }
 
   // Configure passport to use a LocalStrategy
   passport.use(
@@ -181,9 +199,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Login route
   app.post(
     "/api/auth/login",
-    passport.authenticate("local"),
-    (req: Request, res: Response) => {
-      res.json(req.user);
+    (req: Request, res: Response, next: NextFunction) => {
+      passport.authenticate("local", (err, user, info) => {
+        if (err) {
+          return next(err);
+        }
+        
+        if (!user) {
+          return res.status(401).json({ message: info?.message || "Authentication failed" });
+        }
+        
+        // Manual login with req.login
+        req.login(user, (loginErr) => {
+          if (loginErr) {
+            return next(loginErr);
+          }
+          
+          // Log session information after successful login
+          console.log("Login successful - Session ID:", req.sessionID);
+          console.log("Is authenticated after login:", req.isAuthenticated());
+          
+          // Return the user object
+          return res.json(user);
+        });
+      })(req, res, next);
     }
   );
 

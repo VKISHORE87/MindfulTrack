@@ -41,13 +41,50 @@ export default function Register() {
   const onSubmit = async (values: RegisterValues) => {
     setIsSubmitting(true);
     try {
-      await apiRequest("POST", "/api/auth/register", values);
+      console.log("Submitting registration data:", { ...values, password: "****" });
+      
+      // Register the user and get the response
+      const response = await apiRequest("POST", "/api/auth/register", values);
+      console.log("Registration response status:", response.status);
+      
+      // Parse the user data from the response
+      const userData = await response.json();
+      console.log("Registration successful, user data:", userData);
+      
+      // Show success message
       toast({
         title: "Registration successful",
         description: "Your account has been created. Welcome to Upcraft!",
       });
+      
+      // Verify session after registration
+      try {
+        const meResponse = await fetch('/api/auth/me', { credentials: 'include' });
+        console.log('Session check after registration:', meResponse.status);
+        if (meResponse.ok) {
+          console.log('Session valid after registration');
+        } else {
+          console.log('Session invalid after registration');
+          
+          // Try to login manually if session is invalid
+          try {
+            await apiRequest("POST", "/api/auth/login", {
+              username: values.username,
+              password: values.password
+            });
+            console.log("Manual login after registration successful");
+          } catch (loginError) {
+            console.error("Manual login after registration failed:", loginError);
+          }
+        }
+      } catch (err) {
+        console.error('Error checking session after registration:', err);
+      }
+      
+      // Redirect to dashboard
       setLocation("/dashboard");
     } catch (error) {
+      console.error("Registration error:", error);
       toast({
         title: "Registration failed",
         description: "This username or email may already be in use",
