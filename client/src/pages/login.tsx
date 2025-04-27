@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,16 +34,51 @@ export default function Login() {
   const onSubmit = async (values: LoginValues) => {
     setIsSubmitting(true);
     try {
-      await apiRequest("POST", "/api/auth/login", values);
-      toast({
-        title: "Login successful",
-        description: "Welcome back to Upcraft!",
-      });
-      setLocation("/dashboard");
+      console.log("Attempting login with:", { username: values.username, password: "****" });
+      
+      // Use the apiRequest function to make a POST request to the login endpoint
+      const response = await apiRequest("POST", "/api/auth/login", values);
+      
+      // Log the response for debugging
+      console.log("Login response status:", response.status);
+      
+      // Parse the response JSON
+      const user = await response.json();
+      console.log("Logged in user:", user);
+      
+      // Check if we have a valid user object
+      if (user && user.id) {
+        // Show success toast
+        toast({
+          title: "Login successful",
+          description: "Welcome back to Upcraft!",
+        });
+        
+        // Fetch current user to verify session
+        try {
+          const meResponse = await fetch('/api/auth/me', { credentials: 'include' });
+          console.log('Session check response:', meResponse.status);
+          if (meResponse.ok) {
+            console.log('Session valid');
+          } else {
+            console.log('Session invalid');
+          }
+        } catch (err) {
+          console.error('Error checking session:', err);
+        }
+        
+        // Redirect to dashboard
+        queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+        setLocation("/dashboard");
+      } else {
+        // Something went wrong
+        throw new Error("Invalid response from server");
+      }
     } catch (error) {
+      console.error("Login error:", error);
       toast({
         title: "Login failed",
-        description: "Invalid username or password",
+        description: "Invalid username or password. Please try again.",
         variant: "destructive",
       });
     } finally {

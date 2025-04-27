@@ -19,22 +19,30 @@ import Sidebar from "@/components/ui/Sidebar";
 import MobileNavigation from "@/components/ui/MobileNavigation";
 import Header from "@/components/ui/Header";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { useLocation } from "wouter";
 
-function ProtectedRoute({ component: Component, ...rest }: any) {
-  const { data: user, isLoading, error } = useQuery({
+interface ProtectedRouteProps {
+  component: React.ComponentType<any>;
+  [key: string]: any;
+}
+
+function ProtectedRoute({ component: Component, ...rest }: ProtectedRouteProps) {
+  const { data: user, isLoading, error, isError } = useQuery({
     queryKey: ['/api/auth/me'],
     retry: false,
+    staleTime: 0, // Always refetch
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
   
   const [location, setLocation] = useLocation();
   
   useEffect(() => {
-    if (!isLoading && !user && error) {
+    if (!isLoading && (isError || !user)) {
+      console.log("Protected route - Auth failed:", { isError, error });
       setLocation("/login");
     }
-  }, [user, isLoading, error, setLocation]);
+  }, [user, isLoading, isError, error, setLocation]);
   
   if (isLoading) {
     return (
@@ -49,13 +57,28 @@ function ProtectedRoute({ component: Component, ...rest }: any) {
   return <Component {...rest} user={user} />;
 }
 
-function AppLayout({ children, hideNavigation = false }) {
+interface AppLayoutProps {
+  children: ReactNode;
+  hideNavigation?: boolean;
+}
+
+function AppLayout({ children, hideNavigation = false }: AppLayoutProps) {
   const { data: user } = useQuery({
     queryKey: ['/api/auth/me'],
     retry: false,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
   
   const [location] = useLocation();
+  
+  // Log authentication status for debugging
+  useEffect(() => {
+    if (location !== '/login' && location !== '/register' && 
+        location !== '/forgot-password' && location !== '/reset-password') {
+      console.log("AppLayout authentication status:", user ? "Authenticated" : "Not authenticated");
+    }
+  }, [user, location]);
   
   // Don't show navigation on login/register pages
   if (hideNavigation) {
