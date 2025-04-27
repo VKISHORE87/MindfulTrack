@@ -13,6 +13,8 @@ import Profile from "@/pages/profile";
 import Practice from "@/pages/practice";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
+import ForgotPassword from "@/pages/forgot-password";
+import ResetPassword from "@/pages/reset-password";
 import Sidebar from "@/components/ui/Sidebar";
 import MobileNavigation from "@/components/ui/MobileNavigation";
 import Header from "@/components/ui/Header";
@@ -99,6 +101,16 @@ function Router() {
       <Route path="/register">
         <AppLayout hideNavigation={true}>
           <Register />
+        </AppLayout>
+      </Route>
+      <Route path="/forgot-password">
+        <AppLayout hideNavigation={true}>
+          <ForgotPassword />
+        </AppLayout>
+      </Route>
+      <Route path="/reset-password">
+        <AppLayout hideNavigation={true}>
+          <ResetPassword />
         </AppLayout>
       </Route>
       <Route path="/">
