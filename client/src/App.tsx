@@ -22,38 +22,41 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect, ReactNode } from "react";
 import { useLocation } from "wouter";
 
+// Create a simple Redirect component using wouter and React hooks
+function Redirect({ to }: { to: string }) {
+  const [, setLocation] = useLocation();
+  
+  useEffect(() => {
+    setLocation(to);
+  }, [to, setLocation]);
+  
+  return null;
+}
+
 interface ProtectedRouteProps {
   component: React.ComponentType<any>;
   [key: string]: any;
 }
 
+// Mock user for development
+const mockUser = {
+  id: 1,
+  username: "demo_user",
+  name: "Demo User",
+  email: "demo@example.com",
+  role: "user",
+  createdAt: new Date(),
+  googleId: null,
+  profilePicture: null,
+  resetPasswordToken: null,
+  resetPasswordExpires: null
+};
+
 function ProtectedRoute({ component: Component, ...rest }: ProtectedRouteProps) {
-  const { data: user, isLoading, error, isError } = useQuery({
-    queryKey: ['/api/auth/me'],
-    retry: false,
-    staleTime: 0, // Always refetch
-    refetchOnWindowFocus: true, // Refetch when window gains focus
-  });
+  // Using mockUser instead of making API calls
+  const user = mockUser;
   
-  const [location, setLocation] = useLocation();
-  
-  useEffect(() => {
-    if (!isLoading && (isError || !user)) {
-      console.log("Protected route - Auth failed:", { isError, error });
-      setLocation("/login");
-    }
-  }, [user, isLoading, isError, error, setLocation]);
-  
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-  
-  if (!user) return null;
-  
+  // No loading state needed
   return <Component {...rest} user={user} />;
 }
 
@@ -63,22 +66,10 @@ interface AppLayoutProps {
 }
 
 function AppLayout({ children, hideNavigation = false }: AppLayoutProps) {
-  const { data: user } = useQuery({
-    queryKey: ['/api/auth/me'],
-    retry: false,
-    staleTime: 0,
-    refetchOnWindowFocus: true,
-  });
+  // Using mockUser instead of fetching
+  const user = mockUser;
   
   const [location] = useLocation();
-  
-  // Log authentication status for debugging
-  useEffect(() => {
-    if (location !== '/login' && location !== '/register' && 
-        location !== '/forgot-password' && location !== '/reset-password') {
-      console.log("AppLayout authentication status:", user ? "Authenticated" : "Not authenticated");
-    }
-  }, [user, location]);
   
   // Don't show navigation on login/register pages
   if (hideNavigation) {
@@ -87,12 +78,12 @@ function AppLayout({ children, hideNavigation = false }: AppLayoutProps) {
   
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
-      {user && <Sidebar user={user} currentRoute={location} />}
+      <Sidebar user={user} currentRoute={location} />
       <main className="flex-1 overflow-auto">
-        {user && <Header title={getPageTitle(location)} />}
+        <Header title={getPageTitle(location)} />
         {children}
       </main>
-      {user && <MobileNavigation currentRoute={location} />}
+      <MobileNavigation currentRoute={location} />
     </div>
   );
 }
@@ -116,26 +107,21 @@ function getPageTitle(path: string): string {
 function Router() {
   return (
     <Switch>
+      {/* Direct routes to dashboard - no login needed */}
       <Route path="/login">
-        <AppLayout hideNavigation={true}>
-          <Login />
-        </AppLayout>
+        <Redirect to="/dashboard" />
       </Route>
       <Route path="/register">
-        <AppLayout hideNavigation={true}>
-          <Register />
-        </AppLayout>
+        <Redirect to="/dashboard" />
       </Route>
       <Route path="/forgot-password">
-        <AppLayout hideNavigation={true}>
-          <ForgotPassword />
-        </AppLayout>
+        <Redirect to="/dashboard" />
       </Route>
       <Route path="/reset-password">
-        <AppLayout hideNavigation={true}>
-          <ResetPassword />
-        </AppLayout>
+        <Redirect to="/dashboard" />
       </Route>
+      
+      {/* Main application routes */}
       <Route path="/">
         <AppLayout>
           <ProtectedRoute component={Dashboard} />
