@@ -19,16 +19,17 @@ import Sidebar from "@/components/ui/Sidebar";
 import MobileNavigation from "@/components/ui/MobileNavigation";
 import Header from "@/components/ui/Header";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect, ReactNode } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import { useLocation } from "wouter";
 
-// Create a simple Redirect component using wouter and React hooks
+// Create a simple Redirect component for redirecting routes
 function Redirect({ to }: { to: string }) {
-  const [, setLocation] = useLocation();
+  const [, navigate] = useLocation();
   
+  // Perform navigation immediately
   useEffect(() => {
-    setLocation(to);
-  }, [to, setLocation]);
+    navigate(to);
+  }, [navigate, to]);
   
   return null;
 }
