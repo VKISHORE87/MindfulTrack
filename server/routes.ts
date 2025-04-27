@@ -317,8 +317,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log("Email credentials not configured. Reset URL:", resetUrl);
         }
 
+        // In development environment, also include the resetUrl in the response
+        const isDevEnvironment = process.env.NODE_ENV !== 'production';
         res.status(200).json({ 
-          message: "If the email exists in our system, a password reset link will be sent" 
+          message: "If the email exists in our system, a password reset link will be sent",
+          ...(isDevEnvironment && { debugResetUrl: resetUrl })
         });
       } catch (error) {
         next(error);

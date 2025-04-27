@@ -23,6 +23,7 @@ export default function ForgotPassword() {
   const [, setLocation] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [resetLink, setResetLink] = useState<string | null>(null);
 
   const form = useForm<ForgotPasswordValues>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -34,12 +35,21 @@ export default function ForgotPassword() {
   const onSubmit = async (values: ForgotPasswordValues) => {
     setIsSubmitting(true);
     try {
-      await apiRequest("POST", "/api/auth/forgot-password", values);
+      const response = await apiRequest("POST", "/api/auth/forgot-password", values);
       setSuccess(true);
+      
       toast({
         title: "Password reset email sent",
         description: "If this email exists in our system, you'll receive instructions to reset your password.",
       });
+      
+      // For development mode, extract resetUrl from response
+      if (response && typeof response === 'object' && 'debugResetUrl' in response) {
+        setResetLink(response.debugResetUrl as string);
+        console.log("Reset URL found in response:", response.debugResetUrl);
+      } else {
+        console.log("Check server logs for the password reset link");
+      }
     } catch (error) {
       toast({
         title: "Something went wrong",
@@ -74,6 +84,40 @@ export default function ForgotPassword() {
                   We've sent password reset instructions to your email address. Please check your inbox.
                 </AlertDescription>
               </Alert>
+              
+              {/* For development environment only */}
+              <div className="mt-4 p-4 bg-gray-100 rounded-md">
+                <h3 className="text-sm font-semibold text-gray-700 mb-1">Development Mode</h3>
+                {resetLink ? (
+                  <>
+                    <p className="text-xs text-gray-600 mb-2">
+                      Here is your password reset link:
+                    </p>
+                    <div className="text-xs break-all border border-gray-300 p-2 rounded bg-white mb-2">
+                      {resetLink}
+                    </div>
+                    <div className="flex justify-end">
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(resetLink, "_blank")}
+                      >
+                        Open Link
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xs text-gray-600 mb-2">
+                      In development mode, the actual reset link is logged to the server console.
+                    </p>
+                    <div className="text-xs text-gray-500 break-all border border-gray-300 p-2 rounded bg-white">
+                      Check the server logs for a line containing: "Reset URL: http://..."
+                    </div>
+                  </>
+                )}
+              </div>
+              
               <Button 
                 className="w-full"
                 variant="outline" 
