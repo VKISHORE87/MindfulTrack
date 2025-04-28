@@ -1390,6 +1390,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
             targetLevel: skill.targetLevel,
             percentage: Math.round(skill.currentLevel / skill.targetLevel * 100)
           })),
+          // The key skills the user should focus on based on their target role
+          keySkills: await (async () => {
+            // If the user has a career goal with a target role, fetch those skills instead
+            if (primaryCareerGoal && primaryCareerGoal.targetRoleId) {
+              try {
+                // Get the target role
+                const targetRole = await storage.getInterviewRole(parseInt(primaryCareerGoal.targetRoleId));
+                if (targetRole && Array.isArray(targetRole.requiredSkills)) {
+                  // Map the current user skills to a lookup object
+                  const userSkillsMap = new Map(
+                    userSkills.map(skill => [skill.skillName.toLowerCase(), skill])
+                  );
+                  
+                  // For each target skill, check if user has it
+                  return targetRole.requiredSkills
+                    .filter(skill => skill && typeof skill === 'string')
+                    .map(skillName => {
+                      const userSkill = userSkillsMap.get(skillName.toLowerCase());
+                      let status: 'missing' | 'improvement' | 'proficient' = 'missing';
+                      let currentLevel = 30; // Default baseline for missing skills
+                      
+                      if (userSkill) {
+                        currentLevel = userSkill.currentLevel;
+                        if (currentLevel >= 80) {
+                          status = 'proficient';
+                        } else {
+                          status = 'improvement';
+                        }
+                      }
+                      
+                      // For target role skills, we want a high proficiency level
+                      const targetLevel = 90;
+                      
+                      return {
+                        name: skillName,
+                        status,
+                        currentLevel,
+                        targetLevel,
+                        percentage: Math.round((currentLevel / targetLevel) * 100)
+                      };
+                    })
+                    .sort((a, b) => {
+                      // Sort: missing first, then need improvement, then proficient
+                      if (a.status === 'missing' && b.status !== 'missing') return -1;
+                      if (a.status !== 'missing' && b.status === 'missing') return 1;
+                      if (a.status === 'improvement' && b.status === 'proficient') return -1;
+                      if (a.status === 'proficient' && b.status === 'improvement') return 1;
+                      // Then sort by percentage
+                      return a.percentage - b.percentage;
+                    })
+                    .slice(0, 5); // Top 5 skills to focus on
+                }
+              } catch (error) {
+                console.error("Error fetching target role skills:", error);
+              }
+            }
+            
+            // Fallback to user's current skills with lowest percentages
+            return userSkills
+              .map(skill => ({
+                name: skill.skillName,
+                status: skill.currentLevel < 60 ? 'improvement' : 'proficient',
+                currentLevel: skill.currentLevel,
+                targetLevel: skill.targetLevel,
+                percentage: Math.round((skill.currentLevel / skill.targetLevel) * 100)
+              }))
+              .sort((a, b) => a.percentage - b.percentage)
+              .slice(0, 5);
+          })(),
           careerGoal: primaryCareerGoal ? {
             id: primaryCareerGoal.id,
             title: primaryCareerGoal.title,
