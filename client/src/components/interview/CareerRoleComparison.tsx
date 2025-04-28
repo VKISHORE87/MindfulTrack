@@ -63,7 +63,7 @@ export default function CareerRoleComparison() {
   // Fetch all roles
   const { data: roles, isLoading } = useQuery<InterviewRole[]>({
     queryKey: ["/api/interview/roles"],
-    keepPreviousData: true,
+    placeholderData: [],
   });
 
   // Fetch specific roles when comparing
@@ -79,13 +79,13 @@ export default function CareerRoleComparison() {
 
   // Create a list of unique industries from roles
   const industries = roles 
-    ? [...new Set(roles.map(role => role.industry))]
+    ? [...new Set(roles.map((role: InterviewRole) => role.industry))]
     : [];
 
   // Filter roles by industry if set
   const filteredRoles = roles 
     ? (industryFilter && industryFilter !== "all_industries")
-      ? roles.filter(role => role.industry === industryFilter) 
+      ? roles.filter((role: InterviewRole) => role.industry === industryFilter) 
       : roles
     : [];
 
@@ -199,7 +199,7 @@ export default function CareerRoleComparison() {
                       <SelectValue placeholder="Select your current role" />
                     </SelectTrigger>
                     <SelectContent>
-                      {filteredRoles.map((role) => (
+                      {filteredRoles.map((role: InterviewRole) => (
                         <SelectItem key={role.id} value={role.id.toString()}>
                           {role.title}
                         </SelectItem>
@@ -215,7 +215,7 @@ export default function CareerRoleComparison() {
                       <SelectValue placeholder="Select your target role" />
                     </SelectTrigger>
                     <SelectContent>
-                      {filteredRoles.map((role) => (
+                      {filteredRoles.map((role: InterviewRole) => (
                         <SelectItem key={role.id} value={role.id.toString()}>
                           {role.title}
                         </SelectItem>
