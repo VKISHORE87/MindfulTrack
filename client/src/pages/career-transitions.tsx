@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Helmet } from "react-helmet";
 import CareerRoleComparison from "@/components/interview/CareerRoleComparison";
 import CareerPathComponent from "@/components/career/CareerPathComponent";
+import { AdminPanel } from "@/components/admin/AdminPanel";
 import { 
   Card, 
   CardContent, 
@@ -20,7 +21,8 @@ import {
   GraduationCap, 
   BarChart4, 
   TrendingUp, 
-  Layers 
+  Layers,
+  Settings 
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { InterviewRole } from "../../../shared/schema";
@@ -55,7 +57,7 @@ export default function CareerTransitionsPage() {
         </header>
 
         <Tabs defaultValue="role-comparison" className="space-y-4">
-          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-4">
+          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-5">
             <TabsTrigger value="role-comparison">
               <BriefcaseIcon className="h-4 w-4 mr-2" />
               Role Comparison
@@ -71,6 +73,10 @@ export default function CareerTransitionsPage() {
             <TabsTrigger value="market-trends">
               <TrendingUp className="h-4 w-4 mr-2" />
               Market Trends
+            </TabsTrigger>
+            <TabsTrigger value="admin">
+              <Settings className="h-4 w-4 mr-2" />
+              Admin
             </TabsTrigger>
           </TabsList>
           
@@ -173,6 +179,10 @@ export default function CareerTransitionsPage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="admin" className="space-y-4">
+            <AdminPanel />
           </TabsContent>
         </Tabs>
         
