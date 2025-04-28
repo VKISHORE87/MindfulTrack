@@ -11,6 +11,7 @@ import Progress from "@/pages/progress";
 import Validation from "@/pages/validation";
 import Profile from "@/pages/profile";
 import Practice from "@/pages/practice";
+import CareerTransitions from "@/pages/career-transitions";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import ForgotPassword from "@/pages/forgot-password";
@@ -99,6 +100,7 @@ function getPageTitle(path: string): string {
     'progress': 'Progress',
     'validation': 'Skill Validation',
     'practice': 'Practice Skills',
+    'career-transitions': 'Career Transitions',
     'profile': 'My Profile'
   };
   
@@ -166,6 +168,11 @@ function Router() {
       <Route path="/practice">
         <AppLayout>
           <ProtectedRoute component={Practice} />
+        </AppLayout>
+      </Route>
+      <Route path="/career-transitions">
+        <AppLayout>
+          <ProtectedRoute component={CareerTransitions} />
         </AppLayout>
       </Route>
       <Route>

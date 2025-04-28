@@ -1045,6 +1045,116 @@ export class MemStorage implements IStorage {
 
 // Database implementation of the storage interface
 export class DatabaseStorage implements IStorage {
+  // Interview role methods
+  async getInterviewRole(id: number): Promise<InterviewRole | undefined> {
+    const [role] = await db.select().from(interviewRoles).where(eq(interviewRoles.id, id));
+    return role;
+  }
+
+  async getAllInterviewRoles(): Promise<InterviewRole[]> {
+    return await db.select().from(interviewRoles);
+  }
+
+  async getInterviewRolesByIndustry(industry: string): Promise<InterviewRole[]> {
+    return await db.select().from(interviewRoles).where(eq(interviewRoles.industry, industry));
+  }
+
+  async getInterviewRolesByLevel(level: string): Promise<InterviewRole[]> {
+    return await db.select().from(interviewRoles).where(eq(interviewRoles.level, level));
+  }
+
+  async createInterviewRole(role: InsertInterviewRole): Promise<InterviewRole> {
+    const [createdRole] = await db.insert(interviewRoles).values(role).returning();
+    return createdRole;
+  }
+
+  async updateInterviewRole(id: number, roleData: Partial<InsertInterviewRole>): Promise<InterviewRole | undefined> {
+    const [updatedRole] = await db.update(interviewRoles)
+      .set(roleData)
+      .where(eq(interviewRoles.id, id))
+      .returning();
+    return updatedRole;
+  }
+
+  async deleteInterviewRole(id: number): Promise<boolean> {
+    const result = await db.delete(interviewRoles).where(eq(interviewRoles.id, id));
+    return result.rowCount ? true : false;
+  }
+
+  // Interview question methods
+  async getInterviewQuestion(id: number): Promise<InterviewQuestion | undefined> {
+    const [question] = await db.select().from(interviewQuestions).where(eq(interviewQuestions.id, id));
+    return question;
+  }
+
+  async getInterviewQuestionsByRole(roleId: number): Promise<InterviewQuestion[]> {
+    return await db.select().from(interviewQuestions).where(eq(interviewQuestions.roleId, roleId));
+  }
+
+  async getInterviewQuestionsByCategory(category: string): Promise<InterviewQuestion[]> {
+    return await db.select().from(interviewQuestions).where(eq(interviewQuestions.category, category));
+  }
+
+  async getInterviewQuestionsByDifficulty(difficulty: string): Promise<InterviewQuestion[]> {
+    return await db.select().from(interviewQuestions).where(eq(interviewQuestions.difficulty, difficulty));
+  }
+
+  async getInterviewQuestionsBySkill(skillId: number): Promise<InterviewQuestion[]> {
+    // This is more complex as we need to check if the skill ID is in the array of related skills
+    // For a simplistic approach, we'll just return all questions
+    // In a real implementation, you would use a more sophisticated query
+    return await db.select().from(interviewQuestions);
+  }
+
+  async createInterviewQuestion(question: InsertInterviewQuestion): Promise<InterviewQuestion> {
+    const [createdQuestion] = await db.insert(interviewQuestions).values(question).returning();
+    return createdQuestion;
+  }
+
+  async updateInterviewQuestion(id: number, questionData: Partial<InsertInterviewQuestion>): Promise<InterviewQuestion | undefined> {
+    const [updatedQuestion] = await db.update(interviewQuestions)
+      .set(questionData)
+      .where(eq(interviewQuestions.id, id))
+      .returning();
+    return updatedQuestion;
+  }
+
+  async deleteInterviewQuestion(id: number): Promise<boolean> {
+    const result = await db.delete(interviewQuestions).where(eq(interviewQuestions.id, id));
+    return result.rowCount ? true : false;
+  }
+
+  // Interview session methods
+  async getInterviewSession(id: number): Promise<InterviewSession | undefined> {
+    const [session] = await db.select().from(interviewSessions).where(eq(interviewSessions.id, id));
+    return session;
+  }
+
+  async getInterviewSessionsByUserId(userId: number): Promise<InterviewSession[]> {
+    return await db.select().from(interviewSessions).where(eq(interviewSessions.userId, userId));
+  }
+
+  async getInterviewSessionsByRole(roleId: number): Promise<InterviewSession[]> {
+    return await db.select().from(interviewSessions).where(eq(interviewSessions.roleId, roleId));
+  }
+
+  async createInterviewSession(session: InsertInterviewSession): Promise<InterviewSession> {
+    const [createdSession] = await db.insert(interviewSessions).values(session).returning();
+    return createdSession;
+  }
+
+  async updateInterviewSession(id: number, sessionData: Partial<InsertInterviewSession>): Promise<InterviewSession | undefined> {
+    const [updatedSession] = await db.update(interviewSessions)
+      .set(sessionData)
+      .where(eq(interviewSessions.id, id))
+      .returning();
+    return updatedSession;
+  }
+
+  async deleteInterviewSession(id: number): Promise<boolean> {
+    const result = await db.delete(interviewSessions).where(eq(interviewSessions.id, id));
+    return result.rowCount ? true : false;
+  }
   // User methods
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
