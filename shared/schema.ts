@@ -274,6 +274,18 @@ export const interviewRoles = pgTable("interview_roles", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
+// Career paths to show progression options
+export const careerPaths = pgTable("career_paths", {
+  id: serial("id").primaryKey(),
+  roleId: integer("role_id").notNull().references(() => interviewRoles.id, { onDelete: 'cascade' }),
+  previousRole: text("previous_role"),
+  nextRole: text("next_role"),
+  yearsToProgress: integer("years_to_progress"),
+  skillsToAcquire: text("skills_to_acquire").array(),
+  typicalTransitionPath: text("typical_transition_path"),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
 export const interviewQuestions = pgTable("interview_questions", {
   id: serial("id").primaryKey(),
   roleId: integer("role_id").notNull().references(() => interviewRoles.id),
@@ -303,6 +315,15 @@ export const insertInterviewRoleSchema = createInsertSchema(interviewRoles).omit
   createdAt: true
 });
 
+export const insertCareerPathSchema = createInsertSchema(careerPaths).pick({
+  roleId: true,
+  previousRole: true,
+  nextRole: true,
+  yearsToProgress: true,
+  skillsToAcquire: true,
+  typicalTransitionPath: true
+});
+
 export const insertInterviewQuestionSchema = createInsertSchema(interviewQuestions).pick({
   roleId: true,
   question: true,
@@ -327,6 +348,9 @@ export const insertInterviewSessionSchema = createInsertSchema(interviewSessions
 // Types
 export type InsertInterviewRole = z.infer<typeof insertInterviewRoleSchema>;
 export type InterviewRole = typeof interviewRoles.$inferSelect;
+
+export type InsertCareerPath = z.infer<typeof insertCareerPathSchema>;
+export type CareerPath = typeof careerPaths.$inferSelect;
 
 export type InsertInterviewQuestion = z.infer<typeof insertInterviewQuestionSchema>;
 export type InterviewQuestion = typeof interviewQuestions.$inferSelect;
