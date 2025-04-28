@@ -384,6 +384,10 @@ export default function CareerRoleComparison() {
                         {filteredCurrentRoles.map((role: InterviewRole) => (
                           <SelectItem key={role.id} value={role.id.toString()}>
                             {role.title}
+                            {Array.isArray(role.requiredSkills) && role.requiredSkills.length ? 
+                              ' ✓' : 
+                              ' ⚠️'
+                            }
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -430,6 +434,10 @@ export default function CareerRoleComparison() {
                         {filteredTargetRoles.map((role: InterviewRole) => (
                           <SelectItem key={role.id} value={role.id.toString()}>
                             {role.title}
+                            {Array.isArray(role.requiredSkills) && role.requiredSkills.length ? 
+                              ' ✓' : 
+                              ' ⚠️'
+                            }
                           </SelectItem>
                         ))}
                       </SelectContent>
