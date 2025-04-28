@@ -31,7 +31,7 @@ export default function CareerGoals({ id, title, timeline, readiness }: CareerGo
           </div>
           
           <div className="mt-4 md:mt-0 flex gap-3">
-            <Link href="/assessment">
+            <Link href="/career-transitions">
               <Button variant="outline" size="sm">
                 Update Goal
               </Button>
@@ -193,7 +193,7 @@ export default function CareerGoals({ id, title, timeline, readiness }: CareerGo
                   <h4 className="font-medium">Skill Gap Analysis</h4>
                 </div>
                 <div className="pl-10">
-                  <Link href="/assessment">
+                  <Link href="/career-transitions">
                     <a className="text-sm font-medium text-primary hover:text-primary-800 flex items-center">
                       View detailed skill gap analysis
                       <ChevronRight className="h-4 w-4 ml-1" />
