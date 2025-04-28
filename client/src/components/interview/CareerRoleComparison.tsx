@@ -420,31 +420,7 @@ export default function CareerRoleComparison() {
                       <CardContent className="pt-6">
                         <p className="text-sm text-gray-600 mb-4">{currentRole?.description}</p>
                         
-                        <div className="space-y-4">
-                          <div className="flex items-center">
-                            <DollarSign className="h-5 w-5 text-green-500 mr-2" />
-                            <div>
-                              <div className="text-sm font-medium">Average Salary</div>
-                              <div className="text-lg font-bold">${currentRole?.averageSalary || "N/A"}</div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center">
-                            <TrendingUp className="h-5 w-5 text-blue-500 mr-2" />
-                            <div>
-                              <div className="text-sm font-medium">Growth Rate</div>
-                              <div className="text-lg font-bold">{currentRole?.growthRate || "0"}%</div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center">
-                            <BarChart4 className="h-5 w-5 text-purple-500 mr-2" />
-                            <div>
-                              <div className="text-sm font-medium">Demand Score</div>
-                              <div className="text-lg font-bold">{currentRole?.demandScore || "N/A"}/10</div>
-                            </div>
-                          </div>
-                        </div>
+                        {/* Market metrics removed to focus on skill gaps */}
                         
                         <div className="mt-6">
                           <h4 className="text-base font-semibold mb-3">Required Skills</h4>
@@ -479,31 +455,7 @@ export default function CareerRoleComparison() {
                       <CardContent className="pt-6">
                         <p className="text-sm text-gray-600 mb-4">{targetRole?.description}</p>
                         
-                        <div className="space-y-4">
-                          <div className="flex items-center">
-                            <DollarSign className="h-5 w-5 text-green-500 mr-2" />
-                            <div>
-                              <div className="text-sm font-medium">Average Salary</div>
-                              <div className="text-lg font-bold">${targetRole?.averageSalary || "N/A"}</div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center">
-                            <TrendingUp className="h-5 w-5 text-blue-500 mr-2" />
-                            <div>
-                              <div className="text-sm font-medium">Growth Rate</div>
-                              <div className="text-lg font-bold">{targetRole?.growthRate || "0"}%</div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center">
-                            <BarChart4 className="h-5 w-5 text-purple-500 mr-2" />
-                            <div>
-                              <div className="text-sm font-medium">Demand Score</div>
-                              <div className="text-lg font-bold">{targetRole?.demandScore || "N/A"}/10</div>
-                            </div>
-                          </div>
-                        </div>
+                        {/* Market metrics removed to focus on skill gaps */}
                         
                         <div className="mt-6">
                           <h4 className="text-base font-semibold mb-3">Required Skills</h4>

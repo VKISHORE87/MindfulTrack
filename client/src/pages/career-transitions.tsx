@@ -19,9 +19,7 @@ import {
   ChevronRight, 
   Compass, 
   GraduationCap, 
-  BarChart4, 
   TrendingUp, 
-  Layers,
   Settings 
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -57,7 +55,7 @@ export default function CareerTransitionsPage() {
         </header>
 
         <Tabs defaultValue="role-comparison" className="space-y-4">
-          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-5">
+          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-4">
             <TabsTrigger value="role-comparison">
               <BriefcaseIcon className="h-4 w-4 mr-2" />
               Role Comparison
@@ -69,10 +67,6 @@ export default function CareerTransitionsPage() {
             <TabsTrigger value="learning-roadmap">
               <GraduationCap className="h-4 w-4 mr-2" />
               Learning Roadmap
-            </TabsTrigger>
-            <TabsTrigger value="market-trends">
-              <TrendingUp className="h-4 w-4 mr-2" />
-              Market Trends
             </TabsTrigger>
             <TabsTrigger value="admin">
               <Settings className="h-4 w-4 mr-2" />
@@ -161,25 +155,7 @@ export default function CareerTransitionsPage() {
             </Card>
           </TabsContent>
           
-          <TabsContent value="market-trends" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Industry & Market Trends</CardTitle>
-                <CardDescription>
-                  Stay informed about job market trends, growing industries, and in-demand skills.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <BarChart4 className="h-12 w-12 text-primary mx-auto mb-4 opacity-60" />
-                  <h3 className="text-lg font-medium mb-2">Coming Soon</h3>
-                  <p className="text-muted-foreground max-w-md mx-auto">
-                    We're building a comprehensive market trends dashboard with real-time data on industry growth, salary trends, and emerging skill demands.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          {/* Market Trends tab removed to focus on skill-based transitions */}
           
           <TabsContent value="admin" className="space-y-4">
             <AdminPanel />
