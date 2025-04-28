@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { apiRequest } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Server, Globe } from 'lucide-react';
+import { Loader2, Server, Globe, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 
 export function AdminPanel() {
   const { toast } = useToast();
@@ -172,10 +172,95 @@ export function AdminPanel() {
             </div>
           )}
         </div>
+        
+        {/* Debug section */}
+        <div className="border rounded-md p-4 border-yellow-200 bg-yellow-50">
+          <h3 className="font-medium mb-2 flex items-center gap-2">
+            <Search className="h-4 w-4 text-amber-600" />
+            Role Debugging
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Check for specific roles in the database
+          </p>
+          
+          <RoleDebugger />
+        </div>
       </CardContent>
       <CardFooter className="text-xs text-muted-foreground">
         These tools are intended for administrative use only
       </CardFooter>
     </Card>
+  );
+}
+
+// Role debugger component
+function RoleDebugger() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  
+  // Fetch all roles
+  const { data: roles, isLoading } = useQuery<any[]>({
+    queryKey: ["/api/interview/roles"],
+    placeholderData: [],
+  });
+  
+  // Update search results when searchTerm changes
+  useEffect(() => {
+    if (!roles) return;
+    
+    const results = roles.filter(role => 
+      role.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      role.industry.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setSearchResults(results);
+  }, [searchTerm, roles]);
+  
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <input 
+          type="text" 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search for a role..."
+          className="px-3 py-2 border rounded-md flex-1"
+        />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            // Just focus the input since search is automatic
+            document.querySelector('input[placeholder="Search for a role..."]')?.focus();
+          }}
+        >
+          <Search className="h-4 w-4 mr-2" />
+          Search
+        </Button>
+      </div>
+      
+      {searchResults.length > 0 && (
+        <div className="border rounded-md p-2 max-h-80 overflow-y-auto">
+          <p className="text-sm mb-2">Found {searchResults.length} roles:</p>
+          <div className="space-y-2">
+            {searchResults.map(role => (
+              <div key={role.id} className="border-b pb-2">
+                <div className="font-medium">{role.title}</div>
+                <div className="text-xs text-muted-foreground">
+                  <span className="font-medium">ID:</span> {role.id} | 
+                  <span className="font-medium"> Industry:</span> {role.industry} |
+                  <span className="font-medium"> Type:</span> {role.roleType}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {searchTerm && searchResults.length === 0 && (
+        <div className="text-orange-600 text-sm">
+          No roles found matching "{searchTerm}"
+        </div>
+      )}
+    </div>
   );
 }
