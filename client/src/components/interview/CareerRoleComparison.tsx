@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Loader2, ArrowRight, TrendingUp, DollarSign, BarChart4 } from "lucide-react";
+import { Loader2, ArrowRight, TrendingUp, DollarSign, BarChart4, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
@@ -283,10 +283,13 @@ export default function CareerRoleComparison() {
                         </div>
                         
                         <div className="mt-6">
-                          <h4 className="text-sm font-medium mb-2">Required Skills</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {currentRole?.requiredSkills?.map((skill, index) => (
-                              <Badge key={index} variant="outline">{skill}</Badge>
+                          <h4 className="text-base font-semibold mb-3">Required Skills</h4>
+                          <div className="border rounded-md p-3 bg-blue-50/50">
+                            {currentRole?.requiredSkills?.map((skill, index: number) => (
+                              <div key={index} className="flex items-center mb-2 last:mb-0">
+                                <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                                <span className="text-sm font-medium">{skill}</span>
+                              </div>
                             ))}
                             {!currentRole?.requiredSkills?.length && (
                               <span className="text-sm text-gray-500">No skills listed</span>
@@ -339,10 +342,13 @@ export default function CareerRoleComparison() {
                         </div>
                         
                         <div className="mt-6">
-                          <h4 className="text-sm font-medium mb-2">Required Skills</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {targetRole?.requiredSkills?.map((skill, index) => (
-                              <Badge key={index} variant="outline">{skill}</Badge>
+                          <h4 className="text-base font-semibold mb-3">Required Skills</h4>
+                          <div className="border rounded-md p-3 bg-purple-50/50">
+                            {targetRole?.requiredSkills?.map((skill, index: number) => (
+                              <div key={index} className="flex items-center mb-2 last:mb-0">
+                                <CheckCircle className="h-4 w-4 text-purple-600 mr-2" />
+                                <span className="text-sm font-medium">{skill}</span>
+                              </div>
                             ))}
                             {!targetRole?.requiredSkills?.length && (
                               <span className="text-sm text-gray-500">No skills listed</span>
