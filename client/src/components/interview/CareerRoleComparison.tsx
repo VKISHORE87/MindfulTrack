@@ -165,21 +165,48 @@ export default function CareerRoleComparison() {
     setSkillGaps([]);
   };
 
-  // Calculate skill gaps (in a real app, this would be done on the backend)
+  // Calculate skill gaps by comparing current role skills with target role skills
   const calculateSkillGaps = () => {
     if (!currentRole || !targetRole) return;
 
-    // This is a placeholder. In a real application, 
-    // you would get actual user skills and compare them with required skills
-    const mockSkills = [
-      { skillName: "JavaScript", currentLevel: 80, requiredLevel: 90, gap: 10 },
-      { skillName: "React", currentLevel: 70, requiredLevel: 85, gap: 15 },
-      { skillName: "Node.js", currentLevel: 60, requiredLevel: 80, gap: 20 },
-      { skillName: "Product Management", currentLevel: 50, requiredLevel: 90, gap: 40 },
-      { skillName: "Stakeholder Communication", currentLevel: 75, requiredLevel: 85, gap: 10 },
-    ];
+    // Get skills from both roles
+    const currentSkills = currentRole.requiredSkills || [];
+    const targetSkills = targetRole.requiredSkills || [];
     
-    setSkillGaps(mockSkills);
+    // Create a mapping of current skills with an assumed proficiency level
+    const currentSkillsMap = new Map();
+    currentSkills.forEach(skill => {
+      currentSkillsMap.set(skill.toLowerCase(), 80); // Assume 80% proficiency in current role skills
+    });
+    
+    const calculatedGaps: SkillGap[] = [];
+    
+    // For each target skill, check if it exists in current skills
+    targetSkills.forEach(skill => {
+      const skillName = skill;
+      const requiredLevel = 90; // Assume 90% proficiency needed for target role
+      
+      // If the skill exists in current skills, gap is smaller
+      const currentLevel = currentSkillsMap.has(skill.toLowerCase()) 
+        ? currentSkillsMap.get(skill.toLowerCase()) 
+        : 30; // If skill doesn't exist in current role, assume 30% baseline
+      
+      const gap = requiredLevel - currentLevel;
+      
+      if (gap > 0) {
+        calculatedGaps.push({
+          skillName,
+          currentLevel,
+          requiredLevel,
+          gap
+        });
+      }
+    });
+    
+    // Sort gaps by largest gap first
+    calculatedGaps.sort((a, b) => b.gap - a.gap);
+    
+    setSkillGaps(calculatedGaps);
   };
 
   // Handle current role search
