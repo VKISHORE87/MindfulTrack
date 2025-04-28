@@ -79,7 +79,7 @@ export default function CareerRoleComparison() {
 
   // Create a list of unique industries from roles
   const industries = roles 
-    ? [...new Set(roles.map((role: InterviewRole) => role.industry))]
+    ? Array.from(new Set(roles.map((role: InterviewRole) => role.industry)))
     : [];
 
   // Filter roles by industry if set
@@ -183,7 +183,7 @@ export default function CareerRoleComparison() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all_industries">All Industries</SelectItem>
-                      {industries.map((industry) => (
+                      {industries.map((industry: string) => (
                         <SelectItem key={industry} value={industry}>
                           {industry.charAt(0).toUpperCase() + industry.slice(1).replace(/_/g, ' ')}
                         </SelectItem>
@@ -246,10 +246,10 @@ export default function CareerRoleComparison() {
                         <div className="flex justify-between items-start">
                           <div>
                             <CardTitle>{currentRole?.title}</CardTitle>
-                            <CardDescription>{currentRole?.industry.charAt(0).toUpperCase() + currentRole?.industry.slice(1).replace(/_/g, ' ')}</CardDescription>
+                            <CardDescription>{currentRole?.industry ? currentRole.industry.charAt(0).toUpperCase() + currentRole.industry.slice(1).replace(/_/g, ' ') : 'Unknown industry'}</CardDescription>
                           </div>
                           <Badge className={getRoleTypeColor(currentRole?.roleType || "")}>
-                            {currentRole?.roleType.replace(/_/g, ' ')}
+                            {currentRole?.roleType ? currentRole.roleType.replace(/_/g, ' ') : 'Unknown role'}
                           </Badge>
                         </div>
                       </CardHeader>
@@ -302,10 +302,10 @@ export default function CareerRoleComparison() {
                         <div className="flex justify-between items-start">
                           <div>
                             <CardTitle>{targetRole?.title}</CardTitle>
-                            <CardDescription>{targetRole?.industry.charAt(0).toUpperCase() + targetRole?.industry.slice(1).replace(/_/g, ' ')}</CardDescription>
+                            <CardDescription>{targetRole?.industry ? targetRole.industry.charAt(0).toUpperCase() + targetRole.industry.slice(1).replace(/_/g, ' ') : 'Unknown industry'}</CardDescription>
                           </div>
                           <Badge className={getRoleTypeColor(targetRole?.roleType || "")}>
-                            {targetRole?.roleType.replace(/_/g, ' ')}
+                            {targetRole?.roleType ? targetRole.roleType.replace(/_/g, ' ') : 'Unknown role'}
                           </Badge>
                         </div>
                       </CardHeader>
@@ -359,7 +359,7 @@ export default function CareerRoleComparison() {
                   <div>
                     <h3 className="text-xl font-bold mb-4">Skills Gap Analysis</h3>
                     <div className="space-y-6">
-                      {skillGaps.map((skill, index) => (
+                      {skillGaps.map((skill: SkillGap, index: number) => (
                         <div key={index} className="space-y-2">
                           <div className="flex justify-between items-center">
                             <span className="font-medium">{skill.skillName}</span>
