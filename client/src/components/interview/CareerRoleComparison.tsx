@@ -102,6 +102,18 @@ export default function CareerRoleComparison() {
     queryKey: ["/api/interview/roles", targetRoleId],
     enabled: isComparing && !!targetRoleId,
   });
+  
+  // Debug log for role data
+  useEffect(() => {
+    if (currentRole) {
+      console.log("Current Role Data:", currentRole);
+      console.log("Current Role Skills:", currentRole.requiredSkills);
+    }
+    if (targetRole) {
+      console.log("Target Role Data:", targetRole);
+      console.log("Target Role Skills:", targetRole.requiredSkills);
+    }
+  }, [currentRole, targetRole]);
 
   // Create a list of unique industries from roles
   const industries = roles 
