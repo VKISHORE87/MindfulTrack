@@ -542,6 +542,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
+  
+  // Get current user's career goal
+  app.get(
+    "/api/users/career-goals/current",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        // For development, use a mock user ID
+        const userId = req.user ? (req.user as any).id : 1; // Use actual user ID if logged in
+        
+        // Get all goals for the user (usually just one)
+        const goals = await storage.getCareerGoalsByUserId(userId);
+        
+        // Return the most recently created goal if any exist
+        if (goals && goals.length > 0) {
+          // Sort by creation date, descending
+          const sortedGoals = [...goals].sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+          return res.json(sortedGoals[0]);
+        }
+        
+        // No goals found
+        return res.status(404).json({ message: "No career goal found" });
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+  
+  // Create or update user's career goal
+  app.post(
+    "/api/users/career-goals",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        // For development, use a mock user ID
+        const userId = req.user ? (req.user as any).id : 1; // Use actual user ID if logged in
+        
+        // Get existing goals
+        const existingGoals = await storage.getCareerGoalsByUserId(userId);
+        
+        // Prepare data with the user ID
+        const goalData = {
+          ...req.body,
+          userId,
+          readiness: req.body.readiness || 0 // Default readiness to 0 if not provided
+        };
+        
+        // Validate the goal data
+        const goalDataResult = insertCareerGoalSchema.safeParse(goalData);
+        if (!goalDataResult.success) {
+          return res.status(400).json({
+            message: "Invalid career goal data",
+            errors: goalDataResult.error.errors,
+          });
+        }
+        
+        let response;
+        
+        // If user already has a goal, update the most recent one
+        if (existingGoals && existingGoals.length > 0) {
+          // Sort by creation date, descending
+          const sortedGoals = [...existingGoals].sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+          
+          const mostRecentGoal = sortedGoals[0];
+          response = await storage.updateCareerGoal(mostRecentGoal.id, goalDataResult.data);
+          
+          // Create activity entry for updating a career goal
+          await storage.createUserActivity({
+            userId,
+            activityType: "update_career_goal",
+            description: `Updated career goal: ${response.title}`,
+            metadata: { goalId: response.id }
+          });
+          
+          return res.json(response);
+        }
+        
+        // Otherwise, create a new goal
+        response = await storage.createCareerGoal(goalDataResult.data);
+        
+        // Create activity entry for setting a career goal
+        await storage.createUserActivity({
+          userId,
+          activityType: "set_career_goal",
+          description: `Set career goal: ${response.title}`,
+          metadata: { goalId: response.id }
+        });
+        
+        res.status(201).json(response);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+  
+  // Update user's career goal by ID
+  app.patch(
+    "/api/users/career-goals/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const goalId = parseInt(req.params.id);
+        const userId = req.user ? (req.user as any).id : 1; // Use actual user ID if logged in
+        
+        const goal = await storage.getCareerGoal(goalId);
+        
+        if (!goal) {
+          return res.status(404).json({ message: "Career goal not found" });
+        }
+        
+        // Make sure the goal belongs to the user
+        if (goal.userId !== userId) {
+          return res.status(403).json({ message: "You don't have permission to update this goal" });
+        }
+        
+        // Update the goal
+        const updatedGoal = await storage.updateCareerGoal(goalId, req.body);
+        
+        // Create activity entry for updating a career goal
+        await storage.createUserActivity({
+          userId,
+          activityType: "update_career_goal",
+          description: `Updated career goal: ${updatedGoal.title}`,
+          metadata: { goalId: updatedGoal.id }
+        });
+        
+        res.json(updatedGoal);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
 
   // =====================
   // Skills Routes
