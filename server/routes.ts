@@ -2526,6 +2526,1240 @@ Return a JSON response with the following structure:
       }
     }
   );
+  
+  // Update other industry roles
+  app.post(
+    "/api/interview/update-other-industry-roles",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        // Get list of industries to update
+        const industries = [
+          "marketing", 
+          "finance", 
+          "healthcare", 
+          "education", 
+          "human_resources", 
+          "operations", 
+          "logistics", 
+          "business", 
+          "banking", 
+          "construction", 
+          "consulting", 
+          "pharmaceutical"
+        ];
+        
+        let totalDeleted = 0;
+        let totalCreated = 0;
+        
+        // For each industry, clear existing roles and add new ones
+        for (const industry of industries) {
+          // Clear existing industry roles
+          const existingRoles = await storage.getInterviewRolesByIndustry(industry);
+          if (existingRoles.length > 0) {
+            console.log(`Removing existing ${industry} industry roles...`);
+            for (const role of existingRoles) {
+              await storage.deleteInterviewRole(role.id);
+              totalDeleted++;
+            }
+          }
+        }
+        
+        console.log("Adding new roles for various industries...");
+        
+        // Marketing industry roles
+        const marketingRoles = [
+          {
+            title: "Digital Marketing Specialist",
+            industry: "marketing",
+            level: "mid",
+            roleType: "marketing",
+            description: "Plans and executes digital marketing campaigns across multiple channels",
+            requiredSkills: ["SEO/SEM", "Social Media Marketing", "Content Marketing", "Email Marketing", "Analytics", "PPC Advertising", "Digital Strategy", "Marketing Automation"],
+            averageSalary: "75000",
+            growthRate: "16.5",
+            demandScore: 8
+          },
+          {
+            title: "SEO/SEM Specialist",
+            industry: "marketing",
+            level: "mid",
+            roleType: "marketing",
+            description: "Optimizes websites and campaigns for search engines and manages search marketing",
+            requiredSkills: ["SEO", "SEM", "Google Analytics", "Keyword Research", "Content Optimization", "Google Ads", "Technical SEO", "Competitive Analysis"],
+            averageSalary: "72000",
+            growthRate: "15.8",
+            demandScore: 8
+          },
+          {
+            title: "Content Strategist",
+            industry: "marketing",
+            level: "mid",
+            roleType: "marketing",
+            description: "Develops and manages content plans to meet business and audience needs",
+            requiredSkills: ["Content Planning", "Editorial Calendar", "Audience Research", "Content Analytics", "Content Marketing", "Brand Voice", "SEO", "Storytelling"],
+            averageSalary: "80000",
+            growthRate: "14.2",
+            demandScore: 7
+          },
+          {
+            title: "Growth Marketer",
+            industry: "marketing",
+            level: "mid",
+            roleType: "marketing",
+            description: "Uses data-driven strategies to drive user acquisition, retention, and revenue growth",
+            requiredSkills: ["Acquisition Channels", "Conversion Optimization", "A/B Testing", "User Analytics", "Funnel Analysis", "Retention Strategies", "Marketing Automation", "Experimentation"],
+            averageSalary: "95000",
+            growthRate: "18.7",
+            demandScore: 9
+          },
+          {
+            title: "Marketing Automation Specialist",
+            industry: "marketing",
+            level: "mid",
+            roleType: "marketing",
+            description: "Implements and manages automated marketing campaigns and workflows",
+            requiredSkills: ["Marketing Automation Platforms", "Email Marketing", "Customer Journeys", "Segmentation", "Lead Scoring", "Campaign Analytics", "CRM Integration", "Workflow Design"],
+            averageSalary: "78000",
+            growthRate: "17.3",
+            demandScore: 8
+          },
+          {
+            title: "Social Media Manager",
+            industry: "marketing",
+            level: "mid",
+            roleType: "marketing",
+            description: "Develops and implements social media strategies across multiple platforms",
+            requiredSkills: ["Social Media Platforms", "Content Creation", "Community Management", "Social Analytics", "Paid Social", "Social Strategy", "Brand Voice", "Social Listening"],
+            averageSalary: "65000",
+            growthRate: "13.5",
+            demandScore: 7
+          },
+          {
+            title: "Brand Manager",
+            industry: "marketing",
+            level: "senior",
+            roleType: "marketing",
+            description: "Oversees and develops brand strategy, positioning, and identity",
+            requiredSkills: ["Brand Strategy", "Market Research", "Brand Guidelines", "Product Positioning", "Consumer Insights", "Brand Analytics", "Campaign Management", "Competitor Analysis"],
+            averageSalary: "105000",
+            growthRate: "12.8",
+            demandScore: 8
+          },
+          {
+            title: "Product Marketing Manager",
+            industry: "marketing",
+            level: "senior",
+            roleType: "marketing",
+            description: "Develops go-to-market strategies and positions products to target audiences",
+            requiredSkills: ["Product Positioning", "Competitive Analysis", "Market Research", "Sales Enablement", "Customer Personas", "Product Launches", "Messaging", "Value Proposition"],
+            averageSalary: "110000",
+            growthRate: "16.2",
+            demandScore: 8
+          },
+          {
+            title: "Performance Marketing Analyst",
+            industry: "marketing",
+            level: "mid",
+            roleType: "marketing",
+            description: "Analyzes and optimizes marketing campaigns for maximum ROI",
+            requiredSkills: ["Marketing Analytics", "Campaign Optimization", "PPC", "Paid Social", "Attribution Modeling", "A/B Testing", "Data Visualization", "ROI Analysis"],
+            averageSalary: "75000",
+            growthRate: "15.5",
+            demandScore: 8
+          },
+          {
+            title: "Influencer Marketing Manager",
+            industry: "marketing",
+            level: "mid",
+            roleType: "marketing",
+            description: "Develops and manages influencer relationships and campaigns",
+            requiredSkills: ["Influencer Relationships", "Campaign Management", "Social Media Platforms", "Content Creation", "ROI Measurement", "Influencer Selection", "Contract Negotiation", "Brand Alignment"],
+            averageSalary: "70000",
+            growthRate: "13.9",
+            demandScore: 7
+          }
+        ];
+        
+        // Finance industry roles
+        const financeRoles = [
+          {
+            title: "Financial Analyst",
+            industry: "finance",
+            level: "mid",
+            roleType: "finance",
+            description: "Analyzes financial data to provide insights for business decisions",
+            requiredSkills: ["Financial Modeling", "Excel", "Data Analysis", "Financial Reporting", "Budgeting", "Forecasting", "Variance Analysis", "Accounting Principles"],
+            averageSalary: "85000",
+            growthRate: "10.8",
+            demandScore: 8
+          },
+          {
+            title: "Investment Banker",
+            industry: "finance",
+            level: "senior",
+            roleType: "finance",
+            description: "Facilitates raising capital and provides financial advisory services",
+            requiredSkills: ["Financial Modeling", "Valuation", "M&A", "Capital Markets", "Deal Structuring", "Financial Analysis", "Client Management", "Presentation Skills"],
+            averageSalary: "150000",
+            growthRate: "9.4",
+            demandScore: 7
+          },
+          {
+            title: "Risk Analyst",
+            industry: "finance",
+            level: "mid",
+            roleType: "finance",
+            description: "Identifies and analyzes potential risks to organizational operations",
+            requiredSkills: ["Risk Assessment", "Regulatory Compliance", "Data Analysis", "Risk Modeling", "Financial Markets", "Statistical Analysis", "Risk Controls", "Stress Testing"],
+            averageSalary: "92000",
+            growthRate: "13.2",
+            demandScore: 8
+          },
+          {
+            title: "Credit Analyst",
+            industry: "finance",
+            level: "mid",
+            roleType: "finance",
+            description: "Evaluates creditworthiness of individuals or organizations",
+            requiredSkills: ["Credit Assessment", "Financial Statement Analysis", "Risk Evaluation", "Loan Documentation", "Regulatory Compliance", "Financial Modeling", "Industry Research", "Decision Making"],
+            averageSalary: "75000",
+            growthRate: "8.5",
+            demandScore: 7
+          },
+          {
+            title: "Financial Planner",
+            industry: "finance",
+            level: "mid",
+            roleType: "finance",
+            description: "Helps individuals and families develop financial strategies",
+            requiredSkills: ["Financial Planning", "Investment Management", "Retirement Planning", "Tax Planning", "Estate Planning", "Client Relationship Management", "Regulatory Compliance", "Risk Assessment"],
+            averageSalary: "88000",
+            growthRate: "11.3",
+            demandScore: 7
+          },
+          {
+            title: "Portfolio Manager",
+            industry: "finance",
+            level: "senior",
+            roleType: "finance",
+            description: "Manages investment portfolios to meet specific client objectives",
+            requiredSkills: ["Investment Management", "Asset Allocation", "Financial Analysis", "Market Research", "Performance Measurement", "Risk Management", "Client Relationship", "Strategic Planning"],
+            averageSalary: "130000",
+            growthRate: "10.2",
+            demandScore: 8
+          },
+          {
+            title: "Treasury Analyst",
+            industry: "finance",
+            level: "mid",
+            roleType: "finance",
+            description: "Manages an organization's cash flow and financial risk",
+            requiredSkills: ["Cash Management", "Foreign Exchange", "Cash Forecasting", "Liquidity Management", "Banking Relationships", "Risk Management", "Financial Analysis", "Treasury Systems"],
+            averageSalary: "82000",
+            growthRate: "9.8",
+            demandScore: 7
+          },
+          {
+            title: "Quantitative Analyst",
+            industry: "finance",
+            level: "senior",
+            roleType: "finance",
+            description: "Applies mathematical and statistical methods to financial problems",
+            requiredSkills: ["Quantitative Analysis", "Financial Modeling", "Programming (Python/R)", "Statistics", "Derivatives Pricing", "Risk Management", "Machine Learning", "Data Analysis"],
+            averageSalary: "125000",
+            growthRate: "14.8",
+            demandScore: 8
+          },
+          {
+            title: "Fintech Product Manager",
+            industry: "finance",
+            level: "senior",
+            roleType: "finance",
+            description: "Develops and manages financial technology products",
+            requiredSkills: ["Product Management", "Financial Services", "User Experience", "Agile Methodologies", "Financial Regulations", "API Integration", "Market Research", "Product Strategy"],
+            averageSalary: "115000",
+            growthRate: "15.2",
+            demandScore: 8
+          },
+          {
+            title: "Fraud Detection Specialist",
+            industry: "finance",
+            level: "mid",
+            roleType: "finance",
+            description: "Identifies and investigates fraudulent financial activities",
+            requiredSkills: ["Fraud Analytics", "Investigative Techniques", "Risk Assessment", "Data Analysis", "AML Knowledge", "Transaction Monitoring", "Regulatory Compliance", "Pattern Recognition"],
+            averageSalary: "85000",
+            growthRate: "16.5",
+            demandScore: 8
+          }
+        ];
+        
+        // Healthcare industry roles
+        const healthcareRoles = [
+          {
+            title: "Clinical Research Associate",
+            industry: "healthcare",
+            level: "mid",
+            roleType: "healthcare",
+            description: "Monitors clinical trials to ensure compliance with protocols and regulations",
+            requiredSkills: ["Clinical Trial Procedures", "ICH-GCP", "Regulatory Compliance", "Trial Documentation", "Site Monitoring", "Data Verification", "Medical Terminology", "Quality Assurance"],
+            averageSalary: "85000",
+            growthRate: "12.8",
+            demandScore: 7
+          },
+          {
+            title: "Health Informatics Specialist",
+            industry: "healthcare",
+            level: "mid",
+            roleType: "healthcare",
+            description: "Designs and manages health information systems and technology",
+            requiredSkills: ["Health Information Systems", "EHR/EMR Systems", "Data Analytics", "Healthcare IT", "HL7", "Healthcare Workflows", "System Integration", "Clinical Terminology"],
+            averageSalary: "92000",
+            growthRate: "17.5",
+            demandScore: 8
+          },
+          {
+            title: "Healthcare Data Analyst",
+            industry: "healthcare",
+            level: "mid",
+            roleType: "healthcare",
+            description: "Analyzes healthcare data to improve patient outcomes and operational efficiency",
+            requiredSkills: ["Healthcare Analytics", "Statistical Analysis", "Data Visualization", "SQL", "Medical Terminology", "Healthcare Systems", "Quality Metrics", "Population Health"],
+            averageSalary: "88000",
+            growthRate: "18.2",
+            demandScore: 8
+          },
+          {
+            title: "Public Health Analyst",
+            industry: "healthcare",
+            level: "mid",
+            roleType: "healthcare",
+            description: "Analyzes health trends and develops public health programs",
+            requiredSkills: ["Epidemiology", "Public Health Programs", "Data Analysis", "Research Methods", "Health Education", "Program Evaluation", "Community Assessment", "Health Policy"],
+            averageSalary: "82000",
+            growthRate: "14.5",
+            demandScore: 7
+          },
+          {
+            title: "Medical Coder",
+            industry: "healthcare",
+            level: "entry",
+            roleType: "healthcare",
+            description: "Assigns standardized codes to medical diagnoses and procedures",
+            requiredSkills: ["ICD-10 Coding", "CPT Coding", "Medical Terminology", "Anatomy & Physiology", "Healthcare Compliance", "Medical Documentation", "Attention to Detail", "Healthcare Regulations"],
+            averageSalary: "55000",
+            growthRate: "10.6",
+            demandScore: 7
+          },
+          {
+            title: "Biomedical Engineer",
+            industry: "healthcare",
+            level: "senior",
+            roleType: "healthcare",
+            description: "Develops medical devices and equipment to improve patient care",
+            requiredSkills: ["Medical Device Design", "Biomedical Instrumentation", "Clinical Evaluation", "Regulatory Compliance", "Quality Assurance", "Product Development", "CAD Software", "Biology & Physiology"],
+            averageSalary: "98000",
+            growthRate: "6.5",
+            demandScore: 7
+          },
+          {
+            title: "Patient Experience Manager",
+            industry: "healthcare",
+            level: "mid",
+            roleType: "healthcare",
+            description: "Develops strategies to improve patient satisfaction and engagement",
+            requiredSkills: ["Patient Experience", "Healthcare Administration", "Customer Service", "Program Development", "Quality Improvement", "Data Analysis", "Patient Advocacy", "Healthcare Regulations"],
+            averageSalary: "78000",
+            growthRate: "11.8",
+            demandScore: 7
+          },
+          {
+            title: "Medical Software Developer",
+            industry: "healthcare",
+            level: "mid",
+            roleType: "healthcare",
+            description: "Develops software applications for healthcare settings",
+            requiredSkills: ["Programming", "Healthcare IT", "Electronic Health Records", "HIPAA Compliance", "User Interface Design", "System Integration", "Medical Terminology", "Software Testing"],
+            averageSalary: "105000",
+            growthRate: "16.4",
+            demandScore: 8
+          },
+          {
+            title: "Health Data Privacy Officer",
+            industry: "healthcare",
+            level: "senior",
+            roleType: "healthcare",
+            description: "Ensures compliance with health data privacy regulations",
+            requiredSkills: ["HIPAA Compliance", "Healthcare Regulations", "Data Privacy", "Security Policies", "Risk Assessment", "Compliance Training", "Audit Procedures", "Healthcare IT"],
+            averageSalary: "110000",
+            growthRate: "15.7",
+            demandScore: 8
+          }
+        ];
+        
+        // Education industry roles
+        const educationRoles = [
+          {
+            title: "Instructional Designer",
+            industry: "education",
+            level: "mid",
+            roleType: "education",
+            description: "Develops effective educational content and learning experiences",
+            requiredSkills: ["Instructional Design Models", "E-Learning Development", "Learning Assessment", "Curriculum Design", "Educational Technology", "Multimedia Creation", "Adult Learning Theory", "Content Authoring Tools"],
+            averageSalary: "75000",
+            growthRate: "13.5",
+            demandScore: 7
+          },
+          {
+            title: "Educational Technologist",
+            industry: "education",
+            level: "mid",
+            roleType: "education",
+            description: "Implements and manages technology solutions for educational settings",
+            requiredSkills: ["Educational Technology", "Digital Learning Tools", "Technology Integration", "Learning Management Systems", "Training & Support", "Educational Assessment", "Project Management", "Instructional Design"],
+            averageSalary: "78000",
+            growthRate: "14.8",
+            demandScore: 7
+          },
+          {
+            title: "Curriculum Developer",
+            industry: "education",
+            level: "mid",
+            roleType: "education",
+            description: "Creates educational programs and instructional materials",
+            requiredSkills: ["Curriculum Design", "Learning Objectives", "Content Development", "Educational Standards", "Assessment Creation", "Instructional Strategies", "Subject Matter Expertise", "Curriculum Mapping"],
+            averageSalary: "72000",
+            growthRate: "11.2",
+            demandScore: 7
+          },
+          {
+            title: "Online Learning Specialist",
+            industry: "education",
+            level: "mid",
+            roleType: "education",
+            description: "Designs and manages virtual learning environments and courses",
+            requiredSkills: ["Online Course Design", "LMS Administration", "Virtual Classroom Tools", "Digital Assessment", "E-Learning Development", "Student Engagement", "Multimedia Creation", "Online Pedagogies"],
+            averageSalary: "70000",
+            growthRate: "15.5",
+            demandScore: 8
+          },
+          {
+            title: "EdTech Software Developer",
+            industry: "education",
+            level: "mid",
+            roleType: "education",
+            description: "Develops educational software applications and platforms",
+            requiredSkills: ["Software Development", "Educational Technology", "User Experience Design", "Learning Analytics", "API Integration", "Mobile Development", "Gamification", "Educational Standards"],
+            averageSalary: "95000",
+            growthRate: "16.8",
+            demandScore: 8
+          },
+          {
+            title: "Academic Advisor",
+            industry: "education",
+            level: "mid",
+            roleType: "education",
+            description: "Guides students in academic planning and educational decisions",
+            requiredSkills: ["Academic Counseling", "Education Policy", "Student Development", "Course Planning", "Career Guidance", "Student Assessment", "Communication Skills", "Educational Technologies"],
+            averageSalary: "55000",
+            growthRate: "10.2",
+            demandScore: 6
+          },
+          {
+            title: "LMS Administrator",
+            industry: "education",
+            level: "mid",
+            roleType: "education",
+            description: "Manages and supports learning management systems",
+            requiredSkills: ["LMS Configuration", "User Management", "Course Setup", "System Integration", "Technical Support", "Training Development", "Data Management", "Troubleshooting"],
+            averageSalary: "68000",
+            growthRate: "13.5",
+            demandScore: 7
+          },
+          {
+            title: "Education Data Analyst",
+            industry: "education",
+            level: "mid",
+            roleType: "education",
+            description: "Analyzes educational data to improve learning outcomes",
+            requiredSkills: ["Data Analysis", "Learning Analytics", "Educational Assessment", "Statistical Methods", "Data Visualization", "Student Performance Metrics", "Education Research", "Reporting"],
+            averageSalary: "72000",
+            growthRate: "15.2",
+            demandScore: 7
+          },
+          {
+            title: "Student Success Specialist",
+            industry: "education",
+            level: "mid",
+            roleType: "education",
+            description: "Develops and implements programs to support student achievement",
+            requiredSkills: ["Student Support Services", "Intervention Strategies", "Academic Coaching", "Retention Programs", "Data Analysis", "Student Engagement", "Educational Assessment", "Program Development"],
+            averageSalary: "58000",
+            growthRate: "12.5",
+            demandScore: 7
+          }
+        ];
+        
+        // Human Resources roles
+        const hrRoles = [
+          {
+            title: "HR Business Partner",
+            industry: "human_resources",
+            level: "senior",
+            roleType: "human_resources",
+            description: "Aligns HR strategies with business objectives and supports organizational leaders",
+            requiredSkills: ["Strategic Partnership", "Employee Relations", "Organization Development", "Change Management", "Talent Management", "HR Policies", "Performance Management", "Business Acumen"],
+            averageSalary: "95000",
+            growthRate: "10.8",
+            demandScore: 8
+          },
+          {
+            title: "Talent Acquisition Specialist",
+            industry: "human_resources",
+            level: "mid",
+            roleType: "human_resources",
+            description: "Sources, attracts, and hires qualified candidates for organizational roles",
+            requiredSkills: ["Recruitment Strategies", "Candidate Sourcing", "Interviewing", "ATS Systems", "Employer Branding", "Job Market Research", "Talent Pipeline", "Candidate Assessment"],
+            averageSalary: "70000",
+            growthRate: "13.5",
+            demandScore: 8
+          },
+          {
+            title: "HR Data Analyst",
+            industry: "human_resources",
+            level: "mid",
+            roleType: "human_resources",
+            description: "Analyzes HR metrics to provide insights for workforce decisions",
+            requiredSkills: ["People Analytics", "HR Metrics", "Statistical Analysis", "Data Visualization", "HRIS Systems", "Workforce Planning", "Reporting", "Survey Design"],
+            averageSalary: "82000",
+            growthRate: "16.8",
+            demandScore: 8
+          },
+          {
+            title: "Learning and Development Manager",
+            industry: "human_resources",
+            level: "senior",
+            roleType: "human_resources",
+            description: "Develops and manages employee training and development programs",
+            requiredSkills: ["Training Program Design", "Adult Learning Theory", "Needs Assessment", "Learning Management Systems", "Training Facilitation", "Program Evaluation", "Instructional Design", "Leadership Development"],
+            averageSalary: "88000",
+            growthRate: "11.5",
+            demandScore: 7
+          },
+          {
+            title: "Compensation and Benefits Analyst",
+            industry: "human_resources",
+            level: "mid",
+            roleType: "human_resources",
+            description: "Designs and administers employee compensation and benefits programs",
+            requiredSkills: ["Compensation Analysis", "Benefits Administration", "Market Research", "Salary Benchmarking", "Job Evaluation", "HRIS Systems", "Compliance", "Program Design"],
+            averageSalary: "75000",
+            growthRate: "9.8",
+            demandScore: 7
+          },
+          {
+            title: "DEI Specialist",
+            industry: "human_resources",
+            level: "mid",
+            roleType: "human_resources",
+            description: "Develops and implements diversity, equity, and inclusion initiatives",
+            requiredSkills: ["DEI Strategy", "Program Development", "Cultural Competence", "Training Design", "Inclusion Metrics", "Employee Resource Groups", "Workforce Analytics", "Change Management"],
+            averageSalary: "78000",
+            growthRate: "15.4",
+            demandScore: 8
+          },
+          {
+            title: "Employee Experience Manager",
+            industry: "human_resources",
+            level: "mid",
+            roleType: "human_resources",
+            description: "Creates and implements strategies to improve employee engagement and satisfaction",
+            requiredSkills: ["Employee Engagement", "Organizational Culture", "Program Development", "Onboarding Process", "Pulse Surveys", "Employee Lifecycle", "Change Management", "Employee Recognition"],
+            averageSalary: "82000",
+            growthRate: "12.7",
+            demandScore: 7
+          },
+          {
+            title: "HR Technology Specialist",
+            industry: "human_resources",
+            level: "mid",
+            roleType: "human_resources",
+            description: "Implements and manages HR information systems and technology",
+            requiredSkills: ["HRIS Systems", "System Implementation", "HR Process Automation", "User Training", "System Integration", "Data Management", "Project Management", "Technical Support"],
+            averageSalary: "85000",
+            growthRate: "14.2",
+            demandScore: 8
+          }
+        ];
+        
+        // Operations roles
+        const operationsRoles = [
+          {
+            title: "Operations Manager",
+            industry: "operations",
+            level: "senior",
+            roleType: "operations",
+            description: "Oversees daily operations to ensure efficiency and effectiveness",
+            requiredSkills: ["Operational Planning", "Process Management", "Team Leadership", "Performance Metrics", "Budget Management", "Resource Allocation", "Risk Management", "Quality Control"],
+            averageSalary: "95000",
+            growthRate: "11.2",
+            demandScore: 8
+          },
+          {
+            title: "Supply Chain Analyst",
+            industry: "operations",
+            level: "mid",
+            roleType: "operations",
+            description: "Analyzes and optimizes supply chain processes and performance",
+            requiredSkills: ["Supply Chain Management", "Data Analysis", "Inventory Management", "Demand Planning", "Logistics", "Cost Analysis", "Process Improvement", "ERP Systems"],
+            averageSalary: "78000",
+            growthRate: "13.6",
+            demandScore: 8
+          },
+          {
+            title: "Process Improvement Specialist",
+            industry: "operations",
+            level: "mid",
+            roleType: "operations",
+            description: "Identifies and implements process optimizations and efficiencies",
+            requiredSkills: ["Lean Six Sigma", "Process Mapping", "Data Analysis", "Continuous Improvement", "Change Management", "DMAIC Methodology", "Project Management", "Problem Solving"],
+            averageSalary: "85000",
+            growthRate: "12.8",
+            demandScore: 8
+          },
+          {
+            title: "Business Operations Analyst",
+            industry: "operations",
+            level: "mid",
+            roleType: "operations",
+            description: "Analyzes business operations to identify improvements and efficiencies",
+            requiredSkills: ["Operational Analysis", "Data Analysis", "Process Documentation", "KPI Development", "Business Requirements", "Project Management", "Cross-functional Collaboration", "Systems Thinking"],
+            averageSalary: "80000",
+            growthRate: "14.2",
+            demandScore: 8
+          },
+          {
+            title: "Operations Research Scientist",
+            industry: "operations",
+            level: "senior",
+            roleType: "operations",
+            description: "Applies analytical methods to solve complex operational problems",
+            requiredSkills: ["Mathematical Modeling", "Statistical Analysis", "Optimization", "Simulation", "Decision Analysis", "Programming", "Data Science", "Problem Solving"],
+            averageSalary: "105000",
+            growthRate: "16.5",
+            demandScore: 8
+          },
+          {
+            title: "Vendor Manager",
+            industry: "operations",
+            level: "mid",
+            roleType: "operations",
+            description: "Manages vendor relationships, contracts, and performance",
+            requiredSkills: ["Vendor Management", "Contract Negotiation", "Performance Metrics", "Relationship Management", "Cost Analysis", "Risk Assessment", "Procurement Processes", "Strategic Sourcing"],
+            averageSalary: "82000",
+            growthRate: "10.5",
+            demandScore: 7
+          },
+          {
+            title: "Plant Manager",
+            industry: "operations",
+            level: "senior",
+            roleType: "operations",
+            description: "Oversees manufacturing operations at a production facility",
+            requiredSkills: ["Manufacturing Operations", "Production Planning", "Lean Manufacturing", "Team Leadership", "Quality Control", "Regulatory Compliance", "Budget Management", "Continuous Improvement"],
+            averageSalary: "110000",
+            growthRate: "8.5",
+            demandScore: 7
+          }
+        ];
+        
+        // Logistics roles
+        const logisticsRoles = [
+          {
+            title: "Logistics Coordinator",
+            industry: "logistics",
+            level: "mid",
+            roleType: "operations",
+            description: "Coordinates the movement and storage of goods and materials",
+            requiredSkills: ["Logistics Management", "Transportation Planning", "Inventory Control", "Shipping Documentation", "Supply Chain Knowledge", "Carrier Management", "Problem Solving", "Communication"],
+            averageSalary: "65000",
+            growthRate: "12.8",
+            demandScore: 7
+          },
+          {
+            title: "Transportation Manager",
+            industry: "logistics",
+            level: "senior",
+            roleType: "operations",
+            description: "Manages transportation operations, carriers, and freight movements",
+            requiredSkills: ["Transportation Management", "Carrier Relations", "Route Optimization", "Freight Cost Analysis", "Regulatory Compliance", "Team Leadership", "Performance Metrics", "Contract Negotiation"],
+            averageSalary: "95000",
+            growthRate: "10.5",
+            demandScore: 7
+          },
+          {
+            title: "Fleet Manager",
+            industry: "logistics",
+            level: "mid",
+            roleType: "operations",
+            description: "Oversees the operation and maintenance of vehicle fleets",
+            requiredSkills: ["Fleet Management", "Vehicle Maintenance", "Driver Management", "Cost Control", "Compliance", "Safety Programs", "Vendor Management", "Route Planning"],
+            averageSalary: "78000",
+            growthRate: "9.8",
+            demandScore: 7
+          },
+          {
+            title: "Inventory Analyst",
+            industry: "logistics",
+            level: "mid",
+            roleType: "operations",
+            description: "Monitors and optimizes inventory levels and processes",
+            requiredSkills: ["Inventory Management", "Demand Forecasting", "Data Analysis", "Inventory Control Systems", "Supply Chain Knowledge", "ABC Analysis", "Cycle Counting", "Process Improvement"],
+            averageSalary: "72000",
+            growthRate: "11.5",
+            demandScore: 7
+          },
+          {
+            title: "Warehouse Operations Manager",
+            industry: "logistics",
+            level: "senior",
+            roleType: "operations",
+            description: "Manages warehouse facilities, staff, and operations",
+            requiredSkills: ["Warehouse Management", "Inventory Control", "Team Leadership", "Process Improvement", "Safety Protocols", "WMS Systems", "Performance Metrics", "Budget Management"],
+            averageSalary: "85000",
+            growthRate: "10.2",
+            demandScore: 7
+          },
+          {
+            title: "Freight Broker",
+            industry: "logistics",
+            level: "mid",
+            roleType: "operations",
+            description: "Connects shippers with carriers and negotiates transportation services",
+            requiredSkills: ["Freight Brokering", "Carrier Management", "Rate Negotiation", "Customer Service", "Transportation Management", "Load Planning", "Market Knowledge", "Relationship Building"],
+            averageSalary: "70000",
+            growthRate: "13.8",
+            demandScore: 7
+          },
+          {
+            title: "Supply Chain Solutions Engineer",
+            industry: "logistics",
+            level: "senior",
+            roleType: "operations",
+            description: "Designs and implements supply chain and logistics solutions",
+            requiredSkills: ["Supply Chain Design", "Network Optimization", "Process Engineering", "Analytics", "Project Management", "Simulation Modeling", "Transportation Systems", "Logistics Technology"],
+            averageSalary: "98000",
+            growthRate: "14.5",
+            demandScore: 8
+          },
+          {
+            title: "Reverse Logistics Specialist",
+            industry: "logistics",
+            level: "mid",
+            roleType: "operations",
+            description: "Manages the process of product returns and disposal",
+            requiredSkills: ["Reverse Logistics", "Returns Processing", "Refurbishment", "Disposal Operations", "Process Optimization", "Inventory Management", "Sustainability", "Compliance"],
+            averageSalary: "72000",
+            growthRate: "11.2",
+            demandScore: 7
+          }
+        ];
+        
+        // Business roles
+        const businessRoles = [
+          {
+            title: "Business Analyst",
+            industry: "business",
+            level: "mid",
+            roleType: "business",
+            description: "Analyzes business processes and requirements to recommend improvements",
+            requiredSkills: ["Requirements Analysis", "Process Mapping", "Data Analysis", "Business Documentation", "Stakeholder Management", "System Design", "Project Management", "Problem Solving"],
+            averageSalary: "85000",
+            growthRate: "14.5",
+            demandScore: 8
+          },
+          {
+            title: "Business Development Manager",
+            industry: "business",
+            level: "senior",
+            roleType: "business",
+            description: "Identifies growth opportunities and builds strategic partnerships",
+            requiredSkills: ["Strategic Planning", "Market Analysis", "Relationship Building", "Sales", "Contract Negotiation", "Business Strategy", "Industry Knowledge", "Value Proposition Development"],
+            averageSalary: "105000",
+            growthRate: "12.8",
+            demandScore: 8
+          },
+          {
+            title: "Strategy Consultant",
+            industry: "business",
+            level: "senior",
+            roleType: "business",
+            description: "Advises organizations on strategic direction and business decisions",
+            requiredSkills: ["Strategic Analysis", "Business Strategy", "Market Research", "Competitive Analysis", "Financial Modeling", "Problem Solving", "Project Management", "Client Management"],
+            averageSalary: "115000",
+            growthRate: "11.5",
+            demandScore: 8
+          },
+          {
+            title: "Entrepreneur-in-Residence",
+            industry: "business",
+            level: "senior",
+            roleType: "business",
+            description: "Develops and launches new business ventures within organizations",
+            requiredSkills: ["Business Model Development", "Product Development", "Market Analysis", "Fundraising", "Leadership", "Risk Assessment", "Strategic Planning", "Innovation"],
+            averageSalary: "120000",
+            growthRate: "10.2",
+            demandScore: 7
+          },
+          {
+            title: "Corporate Innovation Manager",
+            industry: "business",
+            level: "senior",
+            roleType: "business",
+            description: "Fosters innovation and develops new ideas within a company",
+            requiredSkills: ["Innovation Management", "Design Thinking", "Product Development", "Project Management", "Change Management", "Cross-functional Collaboration", "Business Strategy", "Market Research"],
+            averageSalary: "105000",
+            growthRate: "13.5",
+            demandScore: 8
+          },
+          {
+            title: "Partnership Manager",
+            industry: "business",
+            level: "mid",
+            roleType: "business",
+            description: "Develops and manages strategic partnerships and alliances",
+            requiredSkills: ["Relationship Management", "Strategic Partnerships", "Negotiation", "Business Development", "Contract Management", "Cross-functional Collaboration", "Value Creation", "Alliance Strategy"],
+            averageSalary: "95000",
+            growthRate: "11.8",
+            demandScore: 7
+          },
+          {
+            title: "Management Consultant",
+            industry: "business",
+            level: "senior",
+            roleType: "business",
+            description: "Advises organizations on improving performance and operations",
+            requiredSkills: ["Business Analysis", "Process Improvement", "Project Management", "Change Management", "Problem Solving", "Industry Knowledge", "Client Management", "Presentation Skills"],
+            averageSalary: "110000",
+            growthRate: "10.5",
+            demandScore: 8
+          }
+        ];
+        
+        // Banking roles
+        const bankingRoles = [
+          {
+            title: "Relationship Manager",
+            industry: "banking",
+            level: "mid",
+            roleType: "finance",
+            description: "Manages client relationships and provides financial services",
+            requiredSkills: ["Customer Relationship Management", "Financial Products", "Sales", "Client Service", "Financial Analysis", "Needs Assessment", "Regulatory Knowledge", "Portfolio Management"],
+            averageSalary: "90000",
+            growthRate: "11.2",
+            demandScore: 7
+          },
+          {
+            title: "Loan Officer",
+            industry: "banking",
+            level: "mid",
+            roleType: "finance",
+            description: "Evaluates, authorizes, and processes loan applications",
+            requiredSkills: ["Loan Underwriting", "Credit Analysis", "Banking Regulations", "Financial Assessment", "Customer Service", "Documentation Review", "Risk Assessment", "Communication"],
+            averageSalary: "75000",
+            growthRate: "9.8",
+            demandScore: 7
+          },
+          {
+            title: "Mortgage Underwriter",
+            industry: "banking",
+            level: "mid",
+            roleType: "finance",
+            description: "Evaluates mortgage loan applications for approval",
+            requiredSkills: ["Mortgage Underwriting", "Risk Assessment", "Financial Analysis", "Credit Evaluation", "Regulatory Compliance", "Documentation Review", "Decision Making", "Attention to Detail"],
+            averageSalary: "78000",
+            growthRate: "8.5",
+            demandScore: 6
+          },
+          {
+            title: "Compliance Officer",
+            industry: "banking",
+            level: "senior",
+            roleType: "finance",
+            description: "Ensures banking operations comply with regulations and internal policies",
+            requiredSkills: ["Banking Regulations", "Compliance Programs", "Risk Assessment", "Audit Procedures", "Policy Development", "Training", "Regulatory Reporting", "Analytical Skills"],
+            averageSalary: "95000",
+            growthRate: "12.5",
+            demandScore: 8
+          },
+          {
+            title: "Anti-Money Laundering Analyst",
+            industry: "banking",
+            level: "mid",
+            roleType: "finance",
+            description: "Detects and prevents money laundering and financial crimes",
+            requiredSkills: ["AML Regulations", "Transaction Monitoring", "Suspicious Activity Investigation", "Risk Assessment", "Compliance", "Customer Due Diligence", "Financial Crime", "Reporting"],
+            averageSalary: "82000",
+            growthRate: "13.8",
+            demandScore: 8
+          },
+          {
+            title: "Commercial Banker",
+            industry: "banking",
+            level: "senior",
+            roleType: "finance",
+            description: "Provides banking services to business and corporate clients",
+            requiredSkills: ["Commercial Banking", "Corporate Finance", "Relationship Management", "Credit Analysis", "Financial Products", "Business Development", "Industry Knowledge", "Negotiation"],
+            averageSalary: "110000",
+            growthRate: "10.5",
+            demandScore: 7
+          },
+          {
+            title: "Retail Banker",
+            industry: "banking",
+            level: "mid",
+            roleType: "finance",
+            description: "Provides banking services to individual consumers",
+            requiredSkills: ["Retail Banking", "Customer Service", "Sales", "Financial Products", "Cross-selling", "Cash Handling", "Banking Operations", "Regulatory Compliance"],
+            averageSalary: "65000",
+            growthRate: "8.2",
+            demandScore: 6
+          },
+          {
+            title: "Financial Risk Manager",
+            industry: "banking",
+            level: "senior",
+            roleType: "finance",
+            description: "Identifies and mitigates financial risks in banking operations",
+            requiredSkills: ["Risk Management", "Financial Analysis", "Regulatory Requirements", "Risk Models", "Credit Risk", "Market Risk", "Operational Risk", "Stress Testing"],
+            averageSalary: "115000",
+            growthRate: "14.5",
+            demandScore: 8
+          }
+        ];
+        
+        // Construction roles
+        const constructionRoles = [
+          {
+            title: "Construction Project Manager",
+            industry: "construction",
+            level: "senior",
+            roleType: "operations",
+            description: "Plans, coordinates, and supervises construction projects",
+            requiredSkills: ["Project Management", "Construction Methods", "Budget Management", "Schedule Development", "Contract Administration", "Team Leadership", "Risk Management", "Quality Control"],
+            averageSalary: "95000",
+            growthRate: "10.2",
+            demandScore: 7
+          },
+          {
+            title: "Site Engineer",
+            industry: "construction",
+            level: "mid",
+            roleType: "technical",
+            description: "Oversees technical aspects of construction projects on-site",
+            requiredSkills: ["Construction Engineering", "Technical Documentation", "Quality Control", "Site Coordination", "Drawing Interpretation", "Construction Methods", "Problem Solving", "Safety Protocols"],
+            averageSalary: "78000",
+            growthRate: "9.5",
+            demandScore: 7
+          },
+          {
+            title: "Estimator",
+            industry: "construction",
+            level: "mid",
+            roleType: "business",
+            description: "Calculates construction project costs for bidding and planning",
+            requiredSkills: ["Cost Estimation", "Quantity Takeoff", "Construction Methods", "Bidding Procedures", "Material Pricing", "Blueprint Reading", "Estimating Software", "Industry Knowledge"],
+            averageSalary: "82000",
+            growthRate: "10.8",
+            demandScore: 7
+          },
+          {
+            title: "BIM Specialist",
+            industry: "construction",
+            level: "mid",
+            roleType: "technical",
+            description: "Creates and manages building information models for construction projects",
+            requiredSkills: ["BIM Software", "3D Modeling", "Construction Knowledge", "Technical Documentation", "Coordination", "Revit", "Clash Detection", "Model Management"],
+            averageSalary: "85000",
+            growthRate: "13.5",
+            demandScore: 8
+          },
+          {
+            title: "Sustainability Engineer",
+            industry: "construction",
+            level: "senior",
+            roleType: "technical",
+            description: "Develops sustainable building solutions and green construction practices",
+            requiredSkills: ["Green Building Standards", "LEED Certification", "Environmental Regulations", "Energy Modeling", "Sustainable Materials", "Building Systems", "Life Cycle Assessment", "Renewable Energy"],
+            averageSalary: "92000",
+            growthRate: "12.8",
+            demandScore: 8
+          },
+          {
+            title: "Construction Safety Manager",
+            industry: "construction",
+            level: "senior",
+            roleType: "operations",
+            description: "Ensures safety compliance and develops safety programs for construction sites",
+            requiredSkills: ["Safety Regulations", "Risk Assessment", "Safety Training", "Incident Investigation", "OSHA Compliance", "Safety Program Development", "Site Inspections", "Emergency Response"],
+            averageSalary: "88000",
+            growthRate: "11.5",
+            demandScore: 7
+          },
+          {
+            title: "Quantity Surveyor",
+            industry: "construction",
+            level: "mid",
+            roleType: "business",
+            description: "Manages costs and contracts for construction projects",
+            requiredSkills: ["Cost Management", "Contract Administration", "Quantity Takeoff", "Procurement", "Financial Reporting", "Value Engineering", "Change Management", "Construction Methods"],
+            averageSalary: "80000",
+            growthRate: "9.8",
+            demandScore: 7
+          },
+          {
+            title: "Civil Engineer",
+            industry: "construction",
+            level: "mid",
+            roleType: "technical",
+            description: "Designs and oversees construction of infrastructure projects",
+            requiredSkills: ["Civil Engineering", "Structural Analysis", "AutoCAD", "Construction Methods", "Project Management", "Technical Documentation", "Regulatory Compliance", "Problem Solving"],
+            averageSalary: "88000",
+            growthRate: "8.5",
+            demandScore: 7
+          }
+        ];
+        
+        // Consulting roles
+        const consultingRoles = [
+          {
+            title: "Management Consultant",
+            industry: "consulting",
+            level: "senior",
+            roleType: "business",
+            description: "Advises organizations on improving business performance",
+            requiredSkills: ["Business Analysis", "Strategy Development", "Process Improvement", "Change Management", "Project Management", "Client Management", "Problem Solving", "Presentation Skills"],
+            averageSalary: "110000",
+            growthRate: "11.5",
+            demandScore: 8
+          },
+          {
+            title: "Strategy Consultant",
+            industry: "consulting",
+            level: "senior",
+            roleType: "business",
+            description: "Develops strategic plans and solutions for organizational challenges",
+            requiredSkills: ["Strategic Planning", "Market Analysis", "Competitive Intelligence", "Business Modeling", "Strategic Frameworks", "Financial Analysis", "Research", "Executive Communication"],
+            averageSalary: "120000",
+            growthRate: "12.2",
+            demandScore: 8
+          },
+          {
+            title: "IT Consultant",
+            industry: "consulting",
+            level: "senior",
+            roleType: "technical",
+            description: "Advises on technology strategy, implementation, and optimization",
+            requiredSkills: ["IT Strategy", "System Architecture", "Technology Assessment", "Digital Transformation", "Requirements Analysis", "Project Management", "Technical Advisory", "Solution Design"],
+            averageSalary: "105000",
+            growthRate: "13.8",
+            demandScore: 8
+          },
+          {
+            title: "HR Consultant",
+            industry: "consulting",
+            level: "senior",
+            roleType: "human_resources",
+            description: "Provides expert advice on human resources strategies and practices",
+            requiredSkills: ["HR Strategy", "Organizational Development", "Talent Management", "Compensation & Benefits", "Change Management", "Employee Relations", "Training & Development", "HR Technology"],
+            averageSalary: "95000",
+            growthRate: "10.5",
+            demandScore: 7
+          },
+          {
+            title: "Financial Advisory Consultant",
+            industry: "consulting",
+            level: "senior",
+            roleType: "finance",
+            description: "Provides financial expertise and advisory services to clients",
+            requiredSkills: ["Financial Analysis", "Valuation", "Due Diligence", "Financial Modeling", "Transaction Advisory", "Risk Assessment", "Financial Strategy", "M&A"],
+            averageSalary: "115000",
+            growthRate: "11.8",
+            demandScore: 8
+          },
+          {
+            title: "Sustainability Consultant",
+            industry: "consulting",
+            level: "mid",
+            roleType: "business",
+            description: "Advises on environmental sustainability practices and strategies",
+            requiredSkills: ["Sustainability Strategy", "Environmental Regulations", "Carbon Footprint Analysis", "ESG Reporting", "Stakeholder Engagement", "Sustainable Business Models", "Impact Assessment", "CSR"],
+            averageSalary: "90000",
+            growthRate: "14.5",
+            demandScore: 8
+          },
+          {
+            title: "Operations Consultant",
+            industry: "consulting",
+            level: "senior",
+            roleType: "operations",
+            description: "Helps organizations improve operational efficiency and processes",
+            requiredSkills: ["Operations Analysis", "Process Improvement", "Lean Six Sigma", "Supply Chain Management", "Performance Metrics", "Cost Reduction", "Production Systems", "Change Implementation"],
+            averageSalary: "105000",
+            growthRate: "12.5",
+            demandScore: 8
+          },
+          {
+            title: "Risk and Compliance Consultant",
+            industry: "consulting",
+            level: "senior",
+            roleType: "business",
+            description: "Advises on risk management and regulatory compliance",
+            requiredSkills: ["Risk Assessment", "Compliance Frameworks", "Regulatory Knowledge", "Control Design", "Audit Procedures", "Governance", "Policy Development", "Risk Mitigation"],
+            averageSalary: "100000",
+            growthRate: "13.2",
+            demandScore: 8
+          }
+        ];
+        
+        // Pharmaceutical industry roles
+        const pharmaceuticalRoles = [
+          {
+            title: "Clinical Trials Manager",
+            industry: "pharmaceutical",
+            level: "senior",
+            roleType: "healthcare",
+            description: "Plans and oversees clinical trials for drug development",
+            requiredSkills: ["Clinical Trial Management", "Regulatory Compliance", "Protocol Development", "Site Management", "Budget Planning", "GCP Guidelines", "Team Leadership", "Data Management"],
+            averageSalary: "105000",
+            growthRate: "11.8",
+            demandScore: 8
+          },
+          {
+            title: "Pharmacovigilance Specialist",
+            industry: "pharmaceutical",
+            level: "mid",
+            roleType: "healthcare",
+            description: "Monitors and evaluates adverse drug reactions and safety",
+            requiredSkills: ["Drug Safety", "Adverse Event Reporting", "Regulatory Requirements", "Signal Detection", "Safety Databases", "Risk Management", "Medical Terminology", "Case Processing"],
+            averageSalary: "85000",
+            growthRate: "12.5",
+            demandScore: 7
+          },
+          {
+            title: "Regulatory Affairs Specialist",
+            industry: "pharmaceutical",
+            level: "mid",
+            roleType: "healthcare",
+            description: "Ensures compliance with regulatory requirements for drug approval",
+            requiredSkills: ["Regulatory Compliance", "Submission Preparation", "FDA Regulations", "Documentation", "Product Labeling", "Regulatory Strategy", "Liaison with Authorities", "Submission Management"],
+            averageSalary: "90000",
+            growthRate: "10.5",
+            demandScore: 7
+          },
+          {
+            title: "Pharmaceutical Sales Representative",
+            industry: "pharmaceutical",
+            level: "mid",
+            roleType: "sales",
+            description: "Promotes pharmaceutical products to healthcare professionals",
+            requiredSkills: ["Pharmaceutical Knowledge", "Sales Techniques", "Medical Terminology", "Relationship Building", "Product Knowledge", "Territory Management", "Healthcare Industry", "Presentation Skills"],
+            averageSalary: "85000",
+            growthRate: "8.5",
+            demandScore: 7
+          },
+          {
+            title: "Biostatistician",
+            industry: "pharmaceutical",
+            level: "senior",
+            roleType: "research",
+            description: "Analyzes and interprets data from clinical trials and research",
+            requiredSkills: ["Biostatistics", "Statistical Software", "Clinical Trial Design", "Data Analysis", "Study Protocol", "Statistical Methods", "Regulatory Requirements", "Research Methodology"],
+            averageSalary: "98000",
+            growthRate: "13.2",
+            demandScore: 8
+          },
+          {
+            title: "Medical Science Liaison",
+            industry: "pharmaceutical",
+            level: "senior",
+            roleType: "healthcare",
+            description: "Serves as scientific resource for healthcare professionals",
+            requiredSkills: ["Medical Knowledge", "Scientific Communication", "Healthcare Industry", "Relationship Building", "Clinical Research", "Therapeutic Area Expertise", "Presentation Skills", "KOL Management"],
+            averageSalary: "115000",
+            growthRate: "12.8",
+            demandScore: 8
+          },
+          {
+            title: "Drug Safety Associate",
+            industry: "pharmaceutical",
+            level: "mid",
+            roleType: "healthcare",
+            description: "Monitors and reports on drug safety issues",
+            requiredSkills: ["Pharmacovigilance", "Adverse Event Processing", "Medical Terminology", "Safety Databases", "Regulatory Reporting", "Case Assessment", "Risk Management", "Medical Writing"],
+            averageSalary: "80000",
+            growthRate: "11.5",
+            demandScore: 7
+          },
+          {
+            title: "Formulation Scientist",
+            industry: "pharmaceutical",
+            level: "senior",
+            roleType: "research",
+            description: "Develops pharmaceutical formulations for drug delivery",
+            requiredSkills: ["Formulation Development", "Pharmaceutical Chemistry", "Product Development", "Analytical Methods", "Stability Testing", "Manufacturing Processes", "Problem Solving", "Documentation"],
+            averageSalary: "95000",
+            growthRate: "9.8",
+            demandScore: 7
+          },
+          {
+            title: "Pharmaceutical Research Scientist",
+            industry: "pharmaceutical",
+            level: "senior",
+            roleType: "research",
+            description: "Conducts research to develop new drugs and therapies",
+            requiredSkills: ["Drug Discovery", "Laboratory Techniques", "Research Design", "Data Analysis", "Scientific Literature", "Experimental Methods", "Collaboration", "Technical Writing"],
+            averageSalary: "100000",
+            growthRate: "10.2",
+            demandScore: 7
+          }
+        ];
+        
+        // Add all roles to the database
+        const allNewRoles = [
+          ...marketingRoles,
+          ...financeRoles,
+          ...healthcareRoles,
+          ...educationRoles,
+          ...hrRoles,
+          ...operationsRoles,
+          ...logisticsRoles,
+          ...businessRoles,
+          ...bankingRoles,
+          ...constructionRoles,
+          ...consultingRoles,
+          ...pharmaceuticalRoles
+        ];
+        
+        // Create all the roles
+        const createdRoles = [];
+        for (const role of allNewRoles) {
+          const newRole = await storage.createInterviewRole(role);
+          createdRoles.push(newRole);
+          totalCreated++;
+        }
+        
+        res.status(200).json({
+          message: "Industry roles updated successfully",
+          deletedCount: totalDeleted,
+          addedCount: totalCreated,
+          roles: createdRoles
+        });
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
 
   // Create a new interview question
   app.post(
