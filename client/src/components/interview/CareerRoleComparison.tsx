@@ -94,12 +94,12 @@ export default function CareerRoleComparison() {
 
   // Fetch specific roles when comparing
   const { data: currentRole, isLoading: isLoadingCurrentRole } = useQuery<InterviewRole>({
-    queryKey: ["/api/interview/roles", currentRoleId],
+    queryKey: [`/api/interview/roles/${currentRoleId}`],
     enabled: isComparing && !!currentRoleId,
   });
 
   const { data: targetRole, isLoading: isLoadingTargetRole } = useQuery<InterviewRole>({
-    queryKey: ["/api/interview/roles", targetRoleId],
+    queryKey: [`/api/interview/roles/${targetRoleId}`],
     enabled: isComparing && !!targetRoleId,
   });
   
@@ -182,12 +182,29 @@ export default function CareerRoleComparison() {
   const calculateSkillGaps = () => {
     if (!currentRole || !targetRole) {
       console.error("Role data missing for skill gap calculation", { currentRole, targetRole });
+      setSkillGaps([]);
       return;
     }
 
     // Get skills from both roles
     const currentSkills = Array.isArray(currentRole.requiredSkills) ? currentRole.requiredSkills : [];
     const targetSkills = Array.isArray(targetRole.requiredSkills) ? targetRole.requiredSkills : [];
+    
+    // Show warning if skill data isn't defined
+    if (!currentSkills.length || !targetSkills.length) {
+      console.warn("Missing skill data for comparison between", { 
+        currentRole: currentRole.title, 
+        currentSkillsLength: currentSkills.length, 
+        targetRole: targetRole.title, 
+        targetSkillsLength: targetSkills.length 
+      });
+      
+      // Return empty array if no skills to compare
+      if (!targetSkills.length) {
+        setSkillGaps([]);
+        return;
+      }
+    }
     
     console.log("Processing skill gaps between:", { 
       currentRole: currentRole.title, 
@@ -196,7 +213,7 @@ export default function CareerRoleComparison() {
       targetSkills 
     });
     
-    // Create a mapping of current skills with an assumed proficiency level
+    // Create a mapping of current skills with an assumed proficiency level (case-insensitive comparison)
     const currentSkillsMap = new Map();
     currentSkills.forEach(skill => {
       if (skill && typeof skill === 'string') {
@@ -223,14 +240,16 @@ export default function CareerRoleComparison() {
         ? currentSkillInfo.proficiency 
         : 30; // If skill doesn't exist in current role, assume 30% baseline
       
-      const gap = requiredLevel - currentLevel;
+      const gap = Math.max(0, requiredLevel - currentLevel); // Ensure gap is never negative
       
       // Determine skill status based on gap
-      let status: 'missing' | 'partial' | 'proficient' = 'proficient';
+      let status: 'missing' | 'partial' | 'proficient';
       if (gap > 40) {
         status = 'missing'; // Skill is completely missing or very underdeveloped
       } else if (gap > 0) {
         status = 'partial'; // Skill exists but needs further development
+      } else {
+        status = 'proficient';
       }
       
       // Add all target skills to show complete comparison
