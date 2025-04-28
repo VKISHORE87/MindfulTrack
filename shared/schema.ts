@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, json, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -215,7 +215,22 @@ export const skillCategorySchema = z.enum([
   "leadership",
   "communication",
   "analytical",
-  "creative"
+  "creative",
+  "management",
+  "business",
+  "marketing",
+  "sales",
+  "design",
+  "finance",
+  "healthcare",
+  "education",
+  "legal",
+  "human_resources",
+  "operations",
+  "product_management",
+  "customer_service",
+  "research",
+  "consulting"
 ]);
 
 export const resourceTypeSchema = z.enum([
@@ -252,6 +267,10 @@ export const interviewRoles = pgTable("interview_roles", {
   requiredSkills: text("required_skills").array(),
   industry: text("industry").notNull(),
   level: text("level").notNull(), // junior, mid, senior
+  roleType: text("role_type").notNull(), // technical, business, creative, etc.
+  averageSalary: decimal("average_salary"), // Average salary for this role
+  growthRate: decimal("growth_rate"), // Estimated annual growth rate (%)
+  demandScore: integer("demand_score"), // Demand score on a scale of 1-10
   createdAt: timestamp("created_at").defaultNow()
 });
 
@@ -279,12 +298,9 @@ export const interviewSessions = pgTable("interview_sessions", {
 });
 
 // Insert schemas
-export const insertInterviewRoleSchema = createInsertSchema(interviewRoles).pick({
-  title: true,
-  description: true,
-  requiredSkills: true,
-  industry: true,
-  level: true
+export const insertInterviewRoleSchema = createInsertSchema(interviewRoles).omit({
+  id: true,
+  createdAt: true
 });
 
 export const insertInterviewQuestionSchema = createInsertSchema(interviewQuestions).pick({
@@ -318,13 +334,41 @@ export type InterviewQuestion = typeof interviewQuestions.$inferSelect;
 export type InsertInterviewSession = z.infer<typeof insertInterviewSessionSchema>;
 export type InterviewSession = typeof interviewSessions.$inferSelect;
 
+export const industrySchema = z.enum([
+  "technology",
+  "healthcare",
+  "finance",
+  "education",
+  "manufacturing",
+  "retail",
+  "government",
+  "nonprofit",
+  "media",
+  "entertainment",
+  "hospitality",
+  "real_estate",
+  "legal",
+  "consulting",
+  "transportation",
+  "energy",
+  "agriculture",
+  "construction",
+  "pharmaceutical",
+  "telecommunications"
+]);
+
 export const interviewQuestionCategorySchema = z.enum([
   "technical",
   "behavioral",
   "scenario",
   "system_design",
   "coding",
-  "domain_knowledge"
+  "domain_knowledge",
+  "role_specific",
+  "industry_knowledge",
+  "leadership",
+  "problem_solving",
+  "communication"
 ]);
 
 export const interviewDifficultySchema = z.enum([
@@ -339,13 +383,41 @@ export const careerLevelSchema = z.enum([
   "mid",
   "senior",
   "lead",
-  "manager"
+  "manager",
+  "director",
+  "vp",
+  "c_level",
+  "associate",
+  "specialist",
+  "coordinator",
+  "analyst",
+  "consultant",
+  "advisor"
+]);
+
+export const roleTypeSchema = z.enum([
+  "technical", // software engineer, data scientist, etc.
+  "creative", // designer, writer, artist, etc.
+  "business", // business analyst, product manager, etc.
+  "leadership", // manager, director, etc.
+  "operations", // operations manager, logistics, etc.
+  "customer_facing", // sales, customer support, etc.
+  "healthcare", // nurse, doctor, therapist, etc.
+  "education", // teacher, professor, trainer, etc.
+  "administrative", // administrator, coordinator, etc.
+  "finance", // accountant, financial analyst, etc.
+  "legal", // lawyer, paralegal, etc.
+  "marketing", // marketer, brand specialist, etc.
+  "research", // researcher, scientist, etc.
+  "human_resources" // HR specialist, recruiter, etc.
 ]);
 
 export type SkillCategory = z.infer<typeof skillCategorySchema>;
 export type ResourceType = z.infer<typeof resourceTypeSchema>;
 export type ActivityType = z.infer<typeof activityTypeSchema>;
 export type ValidationType = z.infer<typeof validationTypeSchema>;
+export type Industry = z.infer<typeof industrySchema>;
 export type InterviewQuestionCategory = z.infer<typeof interviewQuestionCategorySchema>;
 export type InterviewDifficulty = z.infer<typeof interviewDifficultySchema>;
 export type CareerLevel = z.infer<typeof careerLevelSchema>;
+export type RoleType = z.infer<typeof roleTypeSchema>;
