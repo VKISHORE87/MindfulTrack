@@ -2555,7 +2555,11 @@ Return a JSON response with the following structure:
         for (const industry of industries) {
           // Clear existing industry roles
           const existingRoles = await storage.getInterviewRolesByIndustry(industry);
+          console.log(`Found ${existingRoles.length} existing ${industry} industry roles`);
+          
+          // Log the existing role titles for debugging
           if (existingRoles.length > 0) {
+            console.log(`Existing ${industry} role titles:`, existingRoles.map(r => r.title));
             console.log(`Removing existing ${industry} industry roles...`);
             for (const role of existingRoles) {
               await storage.deleteInterviewRole(role.id);
