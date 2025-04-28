@@ -84,7 +84,7 @@ export default function CareerRoleComparison() {
 
   // Filter roles by industry if set
   const filteredRoles = roles 
-    ? industryFilter 
+    ? (industryFilter && industryFilter !== "all_industries")
       ? roles.filter(role => role.industry === industryFilter) 
       : roles
     : [];
@@ -182,7 +182,7 @@ export default function CareerRoleComparison() {
                       <SelectValue placeholder="All Industries" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Industries</SelectItem>
+                      <SelectItem value="all_industries">All Industries</SelectItem>
                       {industries.map((industry) => (
                         <SelectItem key={industry} value={industry}>
                           {industry.charAt(0).toUpperCase() + industry.slice(1).replace(/_/g, ' ')}
