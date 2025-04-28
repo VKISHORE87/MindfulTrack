@@ -1411,9 +1411,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           keySkills: await (async () => {
             // If the user has a career goal with a target role, fetch those skills instead
             if (primaryCareerGoal && primaryCareerGoal.targetRoleId) {
+              // Debug career goal and target role ID
+              console.log("[DEBUG] Career goal with targetRoleId:", {
+                goalId: primaryCareerGoal.id,
+                title: primaryCareerGoal.title,
+                targetRoleId: primaryCareerGoal.targetRoleId,
+                targetRoleIdType: typeof primaryCareerGoal.targetRoleId
+              });
+              
               try {
                 // Get the target role
                 const targetRole = await storage.getInterviewRole(primaryCareerGoal.targetRoleId);
+                // Debug target role
+                console.log("[DEBUG] Target role:", targetRole ? {
+                  id: targetRole.id,
+                  title: targetRole.title,
+                  requiredSkills: targetRole.requiredSkills,
+                  hasSkills: Array.isArray(targetRole.requiredSkills)
+                } : 'Not found');
+                
                 if (targetRole && Array.isArray(targetRole.requiredSkills)) {
                   // Map the current user skills to a lookup object
                   const userSkillsMap = new Map(
