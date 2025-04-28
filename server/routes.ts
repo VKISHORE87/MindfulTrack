@@ -1769,22 +1769,10 @@ Return a JSON response with the following structure:
     "/api/interview/update-tech-roles",
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        // First, get existing tech roles
-        const existingTechRoles = await storage.getInterviewRolesByIndustry("technology");
+        // Log what we're doing
+        console.log("Updating technology industry roles...");
         
-        // Log the existing roles
-        console.log(`Found ${existingTechRoles.length} existing technology roles`);
-        if (existingTechRoles.length > 0) {
-          console.log("Existing technology role titles:", existingTechRoles.map(r => r.title));
-          
-          // Clear existing tech roles if they exist
-          console.log("Removing existing technology industry roles...");
-          for (const role of existingTechRoles) {
-            await storage.deleteInterviewRole(role.id);
-          }
-        }
-        
-        console.log("Adding new technology industry roles...");
+        let addedCount = 0;
         
         const updatedTechRoles = [
           // Software Development
@@ -2523,15 +2511,36 @@ Return a JSON response with the following structure:
           }
         ];
         
-        // Insert the tech roles
+        // Use the upsert pattern for each role
         const createdRoles = [];
+        let updatedCount = 0;
+        let newCount = 0;
+        
         for (const role of updatedTechRoles) {
-          const newRole = await storage.createInterviewRole(role);
-          createdRoles.push(newRole);
+          // Check if role with this title already exists
+          const existingRole = await storage.getInterviewRoleByTitle(role.title);
+          
+          if (existingRole) {
+            // Update existing role
+            const updatedRole = await storage.updateInterviewRole(existingRole.id, role);
+            if (updatedRole) {
+              createdRoles.push(updatedRole);
+              updatedCount++;
+              console.log(`Updated role: ${role.title}`);
+            }
+          } else {
+            // Create new role
+            const newRole = await storage.createInterviewRole(role);
+            createdRoles.push(newRole);
+            newCount++;
+            console.log(`Created new role: ${role.title}`);
+          }
         }
         
         res.status(200).json({
           message: "Technology industry roles updated successfully",
+          newRoles: newCount,
+          updatedRoles: updatedCount,
           count: createdRoles.length,
           roles: createdRoles
         });
@@ -2565,20 +2574,15 @@ Return a JSON response with the following structure:
         let totalDeleted = 0;
         let totalCreated = 0;
         
-        // For each industry, clear existing roles and add new ones
+        // We'll use upsert pattern - no need to delete existing roles
         for (const industry of industries) {
-          // Clear existing industry roles
+          // Get existing industry roles for reporting purposes
           const existingRoles = await storage.getInterviewRolesByIndustry(industry);
           console.log(`Found ${existingRoles.length} existing ${industry} industry roles`);
           
           // Log the existing role titles for debugging
           if (existingRoles.length > 0) {
             console.log(`Existing ${industry} role titles:`, existingRoles.map(r => r.title));
-            console.log(`Removing existing ${industry} industry roles...`);
-            for (const role of existingRoles) {
-              await storage.deleteInterviewRole(role.id);
-              totalDeleted++;
-            }
           }
         }
         
