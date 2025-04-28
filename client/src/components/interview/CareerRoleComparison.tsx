@@ -234,23 +234,28 @@ export default function CareerRoleComparison() {
       const skillName = skill;
       const requiredLevel = 90; // Assume 90% proficiency needed for target role
       
-      // If the skill exists in current skills, gap is smaller
+      // Try exact match and case-insensitive match
       const currentSkillInfo = currentSkillsMap.get(skill.toLowerCase());
-      const currentLevel = currentSkillInfo 
-        ? currentSkillInfo.proficiency 
-        : 30; // If skill doesn't exist in current role, assume 30% baseline
+      let status: 'missing' | 'partial' | 'proficient';
+      let currentLevel: number;
+      
+      if (currentSkillInfo) {
+        // Skill exists in current role
+        currentLevel = currentSkillInfo.proficiency;
+        const gap = requiredLevel - currentLevel;
+        
+        if (gap > 20) {
+          status = 'partial'; // Needs improvement
+        } else {
+          status = 'proficient'; // Already good enough
+        }
+      } else {
+        // Skill doesn't exist in current role at all
+        currentLevel = 30; // Baseline knowledge (30%)
+        status = 'missing'; // Completely missing skill
+      }
       
       const gap = Math.max(0, requiredLevel - currentLevel); // Ensure gap is never negative
-      
-      // Determine skill status based on gap
-      let status: 'missing' | 'partial' | 'proficient';
-      if (gap > 40) {
-        status = 'missing'; // Skill is completely missing or very underdeveloped
-      } else if (gap > 0) {
-        status = 'partial'; // Skill exists but needs further development
-      } else {
-        status = 'proficient';
-      }
       
       // Add all target skills to show complete comparison
       calculatedGaps.push({
