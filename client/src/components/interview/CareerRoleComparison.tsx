@@ -50,6 +50,7 @@ interface SkillGap {
   currentLevel: number;
   requiredLevel: number;
   gap: number;
+  status: 'missing' | 'partial' | 'proficient';
 }
 
 export default function CareerRoleComparison() {
@@ -193,18 +194,37 @@ export default function CareerRoleComparison() {
       
       const gap = requiredLevel - currentLevel;
       
+      // Determine skill status based on gap
+      let status: 'missing' | 'partial' | 'proficient' = 'proficient';
+      if (gap > 40) {
+        status = 'missing'; // Skill is completely missing or very underdeveloped
+      } else if (gap > 0) {
+        status = 'partial'; // Skill exists but needs further development
+      }
+      
+      // Only add skills with a gap
       if (gap > 0) {
         calculatedGaps.push({
           skillName,
           currentLevel,
           requiredLevel,
-          gap
+          gap,
+          status
         });
       }
     });
     
-    // Sort gaps by largest gap first
-    calculatedGaps.sort((a, b) => b.gap - a.gap);
+    // Sort gaps by status (missing first, then partial) and then by gap size
+    calculatedGaps.sort((a, b) => {
+      // First sort by status
+      if (a.status === 'missing' && b.status !== 'missing') return -1;
+      if (a.status !== 'missing' && b.status === 'missing') return 1;
+      if (a.status === 'partial' && b.status === 'proficient') return -1;
+      if (a.status === 'proficient' && b.status === 'partial') return 1;
+      
+      // Then sort by gap size for same status
+      return b.gap - a.gap;
+    });
     
     setSkillGaps(calculatedGaps);
   };
@@ -480,31 +500,103 @@ export default function CareerRoleComparison() {
                   
                   <div>
                     <h3 className="text-xl font-bold mb-4">Skills Gap Analysis</h3>
-                    <div className="space-y-6">
-                      {skillGaps.map((skill: SkillGap, index: number) => (
-                        <div key={index} className="space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium">{skill.skillName}</span>
-                            <span className="text-sm text-gray-500">
-                              Current: {skill.currentLevel}% | Required: {skill.requiredLevel}%
-                            </span>
-                          </div>
-                          <Progress value={skill.currentLevel} max={skill.requiredLevel} className="h-2" />
-                          <div className="text-sm text-right">
-                            {skill.gap > 0 ? (
-                              <span className="text-orange-500">Gap: {skill.gap}%</span>
-                            ) : (
-                              <span className="text-green-500">Proficient</span>
+                    <div className="grid gap-6 md:grid-cols-2">
+                      <Card className="bg-blue-50 border-blue-200">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg">Required Skills for {currentRole?.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-1">
+                            {currentRole?.requiredSkills?.map((skill, index) => (
+                              <div key={index} className="flex items-center py-1 border-b border-blue-100 last:border-0">
+                                <CheckCircle className="h-4 w-4 text-blue-600 mr-2 flex-shrink-0" />
+                                <span className="text-sm">{skill}</span>
+                              </div>
+                            ))}
+                            {!currentRole?.requiredSkills?.length && (
+                              <div className="text-center py-2 text-gray-500">No skills listed</div>
                             )}
                           </div>
-                        </div>
-                      ))}
+                        </CardContent>
+                      </Card>
                       
-                      {skillGaps.length === 0 && (
-                        <div className="text-center py-8 text-gray-500">
-                          No skill gap analysis available
-                        </div>
-                      )}
+                      <Card className="bg-purple-50 border-purple-200">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg">Required Skills for {targetRole?.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-1">
+                            {targetRole?.requiredSkills?.map((skill, index) => (
+                              <div key={index} className="flex items-center py-1 border-b border-purple-100 last:border-0">
+                                <CheckCircle className="h-4 w-4 text-purple-600 mr-2 flex-shrink-0" />
+                                <span className="text-sm">{skill}</span>
+                              </div>
+                            ))}
+                            {!targetRole?.requiredSkills?.length && (
+                              <div className="text-center py-2 text-gray-500">No skills listed</div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    <div className="mt-6">
+                      <h4 className="text-lg font-semibold mb-3">Skill Gaps to Address</h4>
+                      <div className="space-y-4">
+                        {skillGaps.map((skill: SkillGap, index: number) => (
+                          <div key={index} className="space-y-2 bg-white p-3 rounded-md border">
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-2">
+                                <div className={`
+                                  h-2 w-2 rounded-full flex-shrink-0
+                                  ${skill.status === 'missing' ? 'bg-red-500' : skill.status === 'partial' ? 'bg-yellow-500' : 'bg-green-500'}
+                                `}></div>
+                                <span className="font-medium">{skill.skillName}</span>
+                                {skill.status === 'missing' && (
+                                  <Badge variant="destructive" className="ml-2 text-xs">Missing</Badge>
+                                )}
+                                {skill.status === 'partial' && (
+                                  <Badge variant="outline" className="ml-2 text-xs bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Improvement Needed</Badge>
+                                )}
+                              </div>
+                              <span className="text-sm text-gray-500">
+                                Current: {skill.currentLevel}% | Required: {skill.requiredLevel}%
+                              </span>
+                            </div>
+                            <Progress 
+                              value={skill.currentLevel} 
+                              max={skill.requiredLevel} 
+                              className="h-2"
+                              style={{
+                                backgroundColor: skill.status === 'missing' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)'
+                              }}
+                            />
+                            <div className="text-sm flex justify-between items-center">
+                              <span className={`
+                                ${skill.status === 'missing' 
+                                  ? 'text-red-600' 
+                                  : skill.status === 'partial' 
+                                    ? 'text-amber-600' 
+                                    : 'text-green-600'}
+                              `}>
+                                {skill.status === 'missing' 
+                                  ? 'Priority Skill to Acquire' 
+                                  : skill.status === 'partial' 
+                                    ? 'Need to Improve' 
+                                    : 'Already Proficient'}
+                              </span>
+                              <span className="text-orange-500 font-medium">Gap: {skill.gap}%</span>
+                            </div>
+                          </div>
+                        ))}
+                        
+                        {skillGaps.length === 0 && (
+                          <div className="text-center py-8 bg-green-50 rounded-md border border-green-200">
+                            <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                            <p className="text-green-800">Congratulations! You already have all the skills needed for the target role.</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                   
