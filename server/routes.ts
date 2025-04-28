@@ -3807,18 +3807,37 @@ Return a JSON response with the following structure:
           ...pharmaceuticalRoles
         ];
         
-        // Create all the roles
+        // Use upsert pattern for all roles
         const createdRoles = [];
+        let updatedCount = 0;
+        let newCount = 0;
+        
         for (const role of allNewRoles) {
-          const newRole = await storage.createInterviewRole(role);
-          createdRoles.push(newRole);
-          totalCreated++;
+          // Check if a role with this title already exists
+          const existingRole = await storage.getInterviewRoleByTitle(role.title);
+          
+          if (existingRole) {
+            // Update the existing role
+            const updatedRole = await storage.updateInterviewRole(existingRole.id, role);
+            if (updatedRole) {
+              createdRoles.push(updatedRole);
+              updatedCount++;
+              console.log(`Updated existing role: ${role.title}`);
+            }
+          } else {
+            // Create a new role
+            const newRole = await storage.createInterviewRole(role);
+            createdRoles.push(newRole);
+            newCount++;
+            console.log(`Added new role: ${role.title}`);
+          }
         }
         
         res.status(200).json({
           message: "Industry roles updated successfully",
-          deletedCount: totalDeleted,
-          addedCount: totalCreated,
+          updatedCount: updatedCount,
+          newCount: newCount,
+          totalCount: createdRoles.length,
           roles: createdRoles
         });
       } catch (error) {
