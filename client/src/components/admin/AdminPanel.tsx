@@ -230,7 +230,8 @@ function RoleDebugger() {
           size="sm"
           onClick={() => {
             // Just focus the input since search is automatic
-            document.querySelector('input[placeholder="Search for a role..."]')?.focus();
+            const input = document.querySelector('input[placeholder="Search for a role..."]') as HTMLInputElement;
+            if (input) input.focus();
           }}
         >
           <Search className="h-4 w-4 mr-2" />

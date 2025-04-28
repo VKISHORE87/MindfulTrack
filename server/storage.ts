@@ -1346,6 +1346,11 @@ export class DatabaseStorage implements IStorage {
     return role;
   }
 
+  async getInterviewRoleByTitle(title: string): Promise<InterviewRole | undefined> {
+    const [role] = await db.select().from(interviewRoles).where(eq(interviewRoles.title, title));
+    return role;
+  }
+
   async getAllInterviewRoles(): Promise<InterviewRole[]> {
     return await db.select().from(interviewRoles);
   }

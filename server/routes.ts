@@ -1746,8 +1746,18 @@ Return a JSON response with the following structure:
           });
         }
 
-        const newRole = await storage.createInterviewRole(roleDataResult.data);
-        res.status(201).json(newRole);
+        // Check if a role with the same title already exists
+        const existingRole = await storage.getInterviewRoleByTitle(roleDataResult.data.title);
+        
+        if (existingRole) {
+          // Update the existing role
+          const updatedRole = await storage.updateInterviewRole(existingRole.id, roleDataResult.data);
+          res.status(200).json(updatedRole);
+        } else {
+          // Create a new role
+          const newRole = await storage.createInterviewRole(roleDataResult.data);
+          res.status(201).json(newRole);
+        }
       } catch (error) {
         next(error);
       }
@@ -1762,8 +1772,12 @@ Return a JSON response with the following structure:
         // First, get existing tech roles
         const existingTechRoles = await storage.getInterviewRolesByIndustry("technology");
         
-        // Clear existing tech roles if they exist
+        // Log the existing roles
+        console.log(`Found ${existingTechRoles.length} existing technology roles`);
         if (existingTechRoles.length > 0) {
+          console.log("Existing technology role titles:", existingTechRoles.map(r => r.title));
+          
+          // Clear existing tech roles if they exist
           console.log("Removing existing technology industry roles...");
           for (const role of existingTechRoles) {
             await storage.deleteInterviewRole(role.id);
