@@ -497,7 +497,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     isAuthenticated,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const goalDataResult = insertCareerGoalSchema.safeParse(req.body);
+        // Convert targetRoleId from string to number if present
+        const goalData = {
+          ...req.body,
+          targetRoleId: req.body.targetRoleId ? parseInt(req.body.targetRoleId) : undefined
+        };
+        
+        const goalDataResult = insertCareerGoalSchema.safeParse(goalData);
         if (!goalDataResult.success) {
           return res.status(400).json({
             message: "Invalid career goal data",
@@ -545,7 +551,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(403).json({ message: "Forbidden" });
         }
 
-        const updateData = req.body;
+        const updateData = {
+          ...req.body,
+          // Convert string targetRoleId to number if it exists
+          targetRoleId: req.body.targetRoleId ? parseInt(req.body.targetRoleId) : undefined
+        };
         const updatedGoal = await storage.updateCareerGoal(goalId, updateData);
         
         res.json(updatedGoal);
@@ -598,6 +608,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const goalData = {
           ...req.body,
           userId,
+          // Convert string targetRoleId to number if it exists
+          targetRoleId: req.body.targetRoleId ? parseInt(req.body.targetRoleId) : undefined,
           readiness: req.body.readiness || 0 // Default readiness to 0 if not provided
         };
         
@@ -671,7 +683,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Update the goal
-        const updatedGoal = await storage.updateCareerGoal(goalId, req.body);
+        const updateData = {
+          ...req.body,
+          // Convert string targetRoleId to number if it exists
+          targetRoleId: req.body.targetRoleId ? parseInt(req.body.targetRoleId) : undefined
+        };
+        const updatedGoal = await storage.updateCareerGoal(goalId, updateData);
         
         // Create activity entry for updating a career goal
         await storage.createUserActivity({
