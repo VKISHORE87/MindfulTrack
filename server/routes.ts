@@ -1753,6 +1753,779 @@ Return a JSON response with the following structure:
       }
     }
   );
+  
+  // Update technology industry roles
+  app.post(
+    "/api/interview/update-tech-roles",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        // First, get existing tech roles
+        const existingTechRoles = await storage.getInterviewRolesByIndustry("technology");
+        
+        // Clear existing tech roles if they exist
+        if (existingTechRoles.length > 0) {
+          console.log("Removing existing technology industry roles...");
+          for (const role of existingTechRoles) {
+            await storage.deleteInterviewRole(role.id);
+          }
+        }
+        
+        console.log("Adding new technology industry roles...");
+        
+        const updatedTechRoles = [
+          // Software Development
+          {
+            title: "Frontend Developer",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Develops user interfaces and client-side functionality for web applications",
+            requiredSkills: ["JavaScript", "HTML", "CSS", "React", "Responsive Design", "UI/UX Principles", "Performance Optimization", "Browser DevTools"],
+            averageSalary: "95000",
+            growthRate: "13.0",
+            demandScore: 8
+          },
+          {
+            title: "Backend Developer",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Builds and maintains server-side logic, APIs, and databases for web applications",
+            requiredSkills: ["Node.js", "Express", "SQL", "NoSQL", "REST APIs", "Authentication", "Security", "Performance Optimization"],
+            averageSalary: "105000",
+            growthRate: "14.5",
+            demandScore: 9
+          },
+          {
+            title: "Full Stack Developer",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Develops both client and server-side aspects of web applications",
+            requiredSkills: ["JavaScript", "React", "Node.js", "SQL", "System Design", "Cloud Services", "API Design", "Performance Optimization"],
+            averageSalary: "120000",
+            growthRate: "15.8",
+            demandScore: 9
+          },
+          {
+            title: "Mobile App Developer",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Creates applications for iOS and Android mobile devices",
+            requiredSkills: ["Swift/Objective-C", "Kotlin/Java", "React Native", "Mobile UI Design", "App Store Guidelines", "Performance Optimization", "Mobile Security"],
+            averageSalary: "110000",
+            growthRate: "12.5",
+            demandScore: 8
+          },
+          {
+            title: "Web Developer",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Builds and maintains websites with focus on functionality and user experience",
+            requiredSkills: ["HTML", "CSS", "JavaScript", "Responsive Design", "CMS Systems", "SEO", "Accessibility", "Cross-browser Compatibility"],
+            averageSalary: "85000",
+            growthRate: "11.0",
+            demandScore: 8
+          },
+          {
+            title: "Game Developer",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Creates interactive games for various platforms including mobile, console, and PC",
+            requiredSkills: ["C++/C#", "Unity/Unreal Engine", "3D Math", "Game Physics", "Graphics Programming", "Animation Systems", "Game Design", "Performance Optimization"],
+            averageSalary: "95000",
+            growthRate: "9.3",
+            demandScore: 7
+          },
+          {
+            title: "Embedded Systems Engineer",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Develops software for embedded systems and IoT devices",
+            requiredSkills: ["C/C++", "Microcontrollers", "Real-time Operating Systems", "Hardware Interfacing", "Power Optimization", "Debugging Tools", "Electronics Fundamentals"],
+            averageSalary: "115000",
+            growthRate: "8.7",
+            demandScore: 7
+          },
+          {
+            title: "DevOps Engineer",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Automates software delivery processes and manages infrastructure",
+            requiredSkills: ["CI/CD", "Docker", "Kubernetes", "Infrastructure as Code", "Cloud Services", "Linux", "Monitoring Tools", "Automation Scripting"],
+            averageSalary: "120000",
+            growthRate: "18.5",
+            demandScore: 9
+          },
+          {
+            title: "Site Reliability Engineer",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Ensures application availability, performance, and reliability",
+            requiredSkills: ["Linux Systems", "Monitoring", "Incident Response", "Automation", "Performance Tuning", "Cloud Infrastructure", "Distributed Systems", "Capacity Planning"],
+            averageSalary: "135000",
+            growthRate: "21.0",
+            demandScore: 9
+          },
+          {
+            title: "API Developer",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Designs and implements APIs for software integration",
+            requiredSkills: ["REST/GraphQL", "API Security", "Documentation", "API Gateway Tools", "Performance Optimization", "API Design Patterns", "Versioning Strategies"],
+            averageSalary: "105000",
+            growthRate: "13.5",
+            demandScore: 8
+          },
+          
+          // Data & AI
+          {
+            title: "Data Analyst",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Analyzes and interprets data to inform business decisions",
+            requiredSkills: ["SQL", "Excel", "Data Visualization", "Statistical Analysis", "Business Intelligence Tools", "Data Cleaning", "Reporting", "Business Acumen"],
+            averageSalary: "85000",
+            growthRate: "16.0",
+            demandScore: 8
+          },
+          {
+            title: "Data Scientist",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Extracts insights from data using advanced analytics and machine learning",
+            requiredSkills: ["Python", "R", "Machine Learning", "Statistical Analysis", "Data Visualization", "SQL", "Big Data Technologies", "Domain Knowledge"],
+            averageSalary: "120000",
+            growthRate: "22.0",
+            demandScore: 9
+          },
+          {
+            title: "Machine Learning Engineer",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Develops machine learning models and deploys them to production",
+            requiredSkills: ["Python", "ML Frameworks", "MLOps", "Model Deployment", "Feature Engineering", "Deep Learning", "Computer Science Fundamentals", "Data Pipeline Development"],
+            averageSalary: "130000", 
+            growthRate: "26.0",
+            demandScore: 9
+          },
+          {
+            title: "AI Researcher",
+            industry: "technology",
+            level: "senior",
+            roleType: "research",
+            description: "Conducts advanced research in artificial intelligence and machine learning",
+            requiredSkills: ["Deep Learning", "Research Methodology", "PyTorch/TensorFlow", "Algorithm Development", "Academic Writing", "Mathematics", "Experiment Design", "Literature Review"],
+            averageSalary: "140000",
+            growthRate: "20.0",
+            demandScore: 8
+          },
+          {
+            title: "Data Engineer",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Builds and maintains data pipelines and infrastructure",
+            requiredSkills: ["SQL", "Python", "ETL Tools", "Big Data Technologies", "Data Warehousing", "Cloud Data Services", "Data Modeling", "Distributed Systems"],
+            averageSalary: "115000",
+            growthRate: "19.3",
+            demandScore: 9
+          },
+          {
+            title: "Business Intelligence Developer",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Creates data visualizations and dashboards for business insights",
+            requiredSkills: ["SQL", "Tableau/Power BI", "Data Modeling", "Dashboard Design", "Business Requirements Analysis", "ETL Processes", "Data Warehousing", "Reporting"],
+            averageSalary: "95000",
+            growthRate: "14.8",
+            demandScore: 8
+          },
+          {
+            title: "Database Administrator",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Manages and optimizes database systems and ensures data security",
+            requiredSkills: ["SQL", "Database Systems", "Performance Tuning", "Backup & Recovery", "Security", "High Availability", "Disaster Recovery", "Monitoring"],
+            averageSalary: "100000",
+            growthRate: "9.7",
+            demandScore: 7
+          },
+          {
+            title: "Applied Scientist",
+            industry: "technology",
+            level: "senior",
+            roleType: "research",
+            description: "Applies scientific methods to solve real-world business problems using data",
+            requiredSkills: ["Machine Learning", "Python", "Statistics", "Research Methods", "Domain Expertise", "Algorithm Development", "Experiment Design", "Problem Solving"],
+            averageSalary: "135000",
+            growthRate: "21.5",
+            demandScore: 9
+          },
+          {
+            title: "NLP Engineer",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Develops systems that understand and process human language",
+            requiredSkills: ["Natural Language Processing", "Python", "Deep Learning", "Text Mining", "Linguistic Knowledge", "Large Language Models", "Text Classification", "Sentiment Analysis"],
+            averageSalary: "125000",
+            growthRate: "24.6",
+            demandScore: 9
+          },
+          {
+            title: "Computer Vision Engineer",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Builds systems that analyze and interpret visual information from the world",
+            requiredSkills: ["Computer Vision Algorithms", "Deep Learning", "Image Processing", "Python", "OpenCV", "Object Detection", "Neural Networks", "Video Analysis"],
+            averageSalary: "130000",
+            growthRate: "23.8",
+            demandScore: 9
+          },
+          
+          // Cloud & Infrastructure
+          {
+            title: "Cloud Engineer",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Designs and manages cloud infrastructure and services",
+            requiredSkills: ["AWS/Azure/GCP", "Infrastructure as Code", "Cloud Architecture", "Networking", "Security", "Containerization", "Automation", "Cost Optimization"],
+            averageSalary: "115000",
+            growthRate: "22.3",
+            demandScore: 9
+          },
+          {
+            title: "Cloud Architect",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Designs complex cloud infrastructure and migration strategies",
+            requiredSkills: ["Cloud Services", "System Design", "Networking", "Security", "Disaster Recovery", "Cost Management", "Multi-cloud Strategies", "Compliance"],
+            averageSalary: "145000",
+            growthRate: "19.5",
+            demandScore: 9
+          },
+          {
+            title: "Cloud Security Engineer",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Secures cloud environments and ensures compliance with security standards",
+            requiredSkills: ["Cloud Security", "Identity Management", "Compliance", "Network Security", "Security Automation", "Threat Detection", "Encryption", "Security Governance"],
+            averageSalary: "135000",
+            growthRate: "26.7",
+            demandScore: 9
+          },
+          {
+            title: "Solutions Architect",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Designs comprehensive technology solutions for specific business needs",
+            requiredSkills: ["System Design", "Cloud Services", "Enterprise Architecture", "Technical Documentation", "Client Communication", "Business Requirements Analysis", "Technology Evaluation"],
+            averageSalary: "140000",
+            growthRate: "17.8",
+            demandScore: 9
+          },
+          {
+            title: "Infrastructure Engineer",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Designs and maintains computer networks and systems infrastructure",
+            requiredSkills: ["Networking", "Server Administration", "Virtualization", "Storage Systems", "Disaster Recovery", "Monitoring", "Automation", "Security"],
+            averageSalary: "105000",
+            growthRate: "14.3",
+            demandScore: 8
+          },
+          {
+            title: "Systems Administrator",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Maintains and troubleshoots computer systems and servers",
+            requiredSkills: ["Linux/Windows Administration", "Scripting", "Networking", "Security", "Backup & Recovery", "User Management", "Monitoring", "Troubleshooting"],
+            averageSalary: "85000",
+            growthRate: "8.5",
+            demandScore: 7
+          },
+          {
+            title: "Network Engineer",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Designs and implements computer networks",
+            requiredSkills: ["Routing & Switching", "Network Protocols", "Security", "Troubleshooting", "Network Monitoring", "Wireless Networks", "Network Design", "VPN Technologies"],
+            averageSalary: "95000",
+            growthRate: "9.4",
+            demandScore: 7
+          },
+          
+          // Cybersecurity
+          {
+            title: "Security Analyst",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Monitors and analyzes security threats and implements protective measures",
+            requiredSkills: ["Security Tools", "Threat Analysis", "Network Security", "Vulnerability Assessment", "Security Monitoring", "Incident Response", "Security Frameworks", "Risk Assessment"],
+            averageSalary: "95000",
+            growthRate: "28.2",
+            demandScore: 9
+          },
+          {
+            title: "Security Engineer",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Designs and implements security solutions and infrastructure",
+            requiredSkills: ["Security Architecture", "Network Security", "Cloud Security", "Identity & Access Management", "Encryption", "Security Automation", "Penetration Testing", "Security Controls"],
+            averageSalary: "120000",
+            growthRate: "31.5",
+            demandScore: 10
+          },
+          {
+            title: "Penetration Tester",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Identifies and exploits security vulnerabilities to help improve security",
+            requiredSkills: ["Ethical Hacking", "Security Tools", "Programming", "Network Security", "Web Application Security", "Social Engineering", "Vulnerability Research", "Exploitation Techniques"],
+            averageSalary: "110000",
+            growthRate: "29.4",
+            demandScore: 9
+          },
+          {
+            title: "Security Architect",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Designs secure information systems and infrastructure",
+            requiredSkills: ["Security Architecture", "Risk Assessment", "Security Controls", "Identity & Access Management", "Network Security", "Cloud Security", "Security Governance", "Compliance"],
+            averageSalary: "140000",
+            growthRate: "25.8",
+            demandScore: 9
+          },
+          {
+            title: "Threat Intelligence Analyst",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Analyzes potential security threats and provides actionable intelligence",
+            requiredSkills: ["Threat Analysis", "Intelligence Gathering", "Security Tools", "Malware Analysis", "Security Research", "Technical Writing", "OSINT", "Threat Modeling"],
+            averageSalary: "100000",
+            growthRate: "27.2",
+            demandScore: 9
+          },
+          {
+            title: "Incident Response Specialist",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Manages and responds to security incidents and breaches",
+            requiredSkills: ["Incident Response", "Digital Forensics", "Malware Analysis", "Security Tools", "Crisis Management", "Documentation", "Recovery Procedures", "Root Cause Analysis"],
+            averageSalary: "115000",
+            growthRate: "32.0",
+            demandScore: 10
+          },
+          {
+            title: "GRC Specialist",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Manages governance, risk, and compliance for information security",
+            requiredSkills: ["Risk Management", "Compliance Frameworks", "Security Policies", "Auditing", "Documentation", "Security Controls", "Regulations", "Risk Assessment"],
+            averageSalary: "105000",
+            growthRate: "20.5",
+            demandScore: 8
+          },
+          {
+            title: "Application Security Engineer",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Secures applications by identifying and fixing security vulnerabilities",
+            requiredSkills: ["Secure Coding", "Code Review", "SAST/DAST Tools", "Web Security", "API Security", "Threat Modeling", "Authentication/Authorization", "Security Testing"],
+            averageSalary: "125000",
+            growthRate: "30.2",
+            demandScore: 9
+          },
+          
+          // Product & Project Management
+          {
+            title: "Product Manager",
+            industry: "technology",
+            level: "mid",
+            roleType: "business",
+            description: "Defines product vision and strategy and leads cross-functional teams",
+            requiredSkills: ["Product Strategy", "Market Research", "User Experience", "Roadmapping", "Agile Methodologies", "Stakeholder Management", "Product Analytics", "Customer Feedback Analysis"],
+            averageSalary: "125000",
+            growthRate: "18.2",
+            demandScore: 9
+          },
+          {
+            title: "Technical Program Manager",
+            industry: "technology",
+            level: "senior",
+            roleType: "business",
+            description: "Manages complex technical programs involving multiple teams",
+            requiredSkills: ["Program Management", "Technical Knowledge", "Risk Management", "Stakeholder Management", "Resource Planning", "Dependencies Management", "Project Tracking", "Communication"],
+            averageSalary: "135000",
+            growthRate: "16.8",
+            demandScore: 8
+          },
+          {
+            title: "Scrum Master",
+            industry: "technology",
+            level: "mid",
+            roleType: "business",
+            description: "Facilitates agile development processes and removes team obstacles",
+            requiredSkills: ["Scrum Framework", "Agile Methodologies", "Facilitation", "Coaching", "Conflict Resolution", "Process Improvement", "Team Building", "Servant Leadership"],
+            averageSalary: "105000",
+            growthRate: "14.9",
+            demandScore: 8
+          },
+          {
+            title: "Agile Coach",
+            industry: "technology",
+            level: "senior",
+            roleType: "business",
+            description: "Guides organizations in adopting and improving agile practices",
+            requiredSkills: ["Agile Frameworks", "Coaching", "Change Management", "Team Development", "Process Design", "Leadership", "Continuous Improvement", "Organizational Development"],
+            averageSalary: "130000",
+            growthRate: "15.7",
+            demandScore: 8
+          },
+          {
+            title: "Business Analyst",
+            industry: "technology",
+            level: "mid",
+            roleType: "business",
+            description: "Analyzes business needs and translates them into technical requirements",
+            requiredSkills: ["Requirements Gathering", "Process Mapping", "Data Analysis", "User Stories", "Business Process Improvement", "Documentation", "Stakeholder Management", "Problem Solving"],
+            averageSalary: "95000",
+            growthRate: "12.8",
+            demandScore: 8
+          },
+          
+          // UI/UX & Design
+          {
+            title: "UI/UX Designer",
+            industry: "technology",
+            level: "mid",
+            roleType: "creative",
+            description: "Creates intuitive user interfaces and experiences for digital products",
+            requiredSkills: ["UI Design", "UX Design", "User Research", "Wireframing", "Prototyping", "Design Systems", "Usability Testing", "Interaction Design"],
+            averageSalary: "100000",
+            growthRate: "16.2",
+            demandScore: 8
+          },
+          {
+            title: "Product Designer",
+            industry: "technology",
+            level: "senior",
+            roleType: "creative",
+            description: "Designs comprehensive digital products with focus on both function and form",
+            requiredSkills: ["Design Thinking", "UI/UX Design", "User Research", "Product Strategy", "Information Architecture", "Design Systems", "Visual Design", "Prototyping"],
+            averageSalary: "115000",
+            growthRate: "17.5",
+            demandScore: 9
+          },
+          {
+            title: "UX Researcher",
+            industry: "technology",
+            level: "mid",
+            roleType: "creative",
+            description: "Conducts user research to inform product design decisions",
+            requiredSkills: ["User Research", "Usability Testing", "Interviewing", "Data Analysis", "Persona Development", "Journey Mapping", "Research Planning", "Behavioral Analysis"],
+            averageSalary: "105000",
+            growthRate: "15.5",
+            demandScore: 8
+          },
+          {
+            title: "Visual Designer",
+            industry: "technology",
+            level: "mid",
+            roleType: "creative",
+            description: "Creates visually appealing designs for digital products and marketing",
+            requiredSkills: ["Visual Design", "Typography", "Color Theory", "Branding", "Design Software", "Illustration", "Layout Design", "Digital Design"],
+            averageSalary: "90000",
+            growthRate: "12.3",
+            demandScore: 7
+          },
+          {
+            title: "Interaction Designer",
+            industry: "technology",
+            level: "mid",
+            roleType: "creative",
+            description: "Focuses on how users interact with digital products",
+            requiredSkills: ["Interaction Design", "Prototyping", "Animation", "Micro-interactions", "User Flows", "Wireframing", "Information Architecture", "Usability"],
+            averageSalary: "95000",
+            growthRate: "14.2",
+            demandScore: 8
+          },
+          {
+            title: "Motion Designer",
+            industry: "technology",
+            level: "mid",
+            roleType: "creative",
+            description: "Creates animations and motion graphics for digital interfaces",
+            requiredSkills: ["Motion Graphics", "Animation", "After Effects", "UI Animation", "Storyboarding", "Visual Design", "Timing & Easing", "Video Editing"],
+            averageSalary: "85000",
+            growthRate: "11.7",
+            demandScore: 7
+          },
+          
+          // Quality Assurance & Testing
+          {
+            title: "QA Engineer",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Ensures software quality through testing and quality processes",
+            requiredSkills: ["Test Planning", "Test Case Design", "Defect Management", "Quality Processes", "Regression Testing", "Test Reporting", "QA Methodologies", "Software Life Cycle"],
+            averageSalary: "85000",
+            growthRate: "11.5",
+            demandScore: 7
+          },
+          {
+            title: "Automation Test Engineer",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Develops and maintains automated tests for software applications",
+            requiredSkills: ["Test Automation", "Selenium/Playwright", "Programming", "CI/CD", "Test Frameworks", "API Testing", "Test Design", "Performance Testing"],
+            averageSalary: "95000",
+            growthRate: "13.7",
+            demandScore: 8
+          },
+          {
+            title: "Manual Tester",
+            industry: "technology",
+            level: "junior",
+            roleType: "technical",
+            description: "Performs manual testing of software applications",
+            requiredSkills: ["Manual Testing", "Test Cases", "Defect Reporting", "Exploratory Testing", "Regression Testing", "Test Documentation", "Quality Assurance", "User Acceptance Testing"],
+            averageSalary: "70000",
+            growthRate: "8.4",
+            demandScore: 6
+          },
+          {
+            title: "Performance Tester",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Tests software performance, load capacity, and scalability",
+            requiredSkills: ["Performance Testing", "Load Testing", "Stress Testing", "Performance Tools", "Performance Analysis", "Bottleneck Identification", "Scalability Testing", "Performance Monitoring"],
+            averageSalary: "100000",
+            growthRate: "12.9",
+            demandScore: 8
+          },
+          {
+            title: "Security Tester",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Evaluates software security through specialized testing",
+            requiredSkills: ["Security Testing", "Penetration Testing", "Vulnerability Assessment", "Security Tools", "OWASP", "Risk Assessment", "Security Standards", "Threat Modeling"],
+            averageSalary: "115000",
+            growthRate: "27.5",
+            demandScore: 9
+          },
+          
+          // Tech Support & Customer Success
+          {
+            title: "Technical Support Engineer",
+            industry: "technology",
+            level: "mid",
+            roleType: "customer_facing",
+            description: "Provides technical assistance to users and troubleshoots issues",
+            requiredSkills: ["Technical Troubleshooting", "Customer Service", "Problem Solving", "Documentation", "Communication", "Product Knowledge", "Ticketing Systems", "User Training"],
+            averageSalary: "75000",
+            growthRate: "10.2",
+            demandScore: 7
+          },
+          {
+            title: "IT Support Specialist",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Provides technical support for internal systems and hardware",
+            requiredSkills: ["Helpdesk Support", "Hardware Troubleshooting", "Software Support", "Networking", "User Account Management", "IT Security", "Desktop Support", "Remote Support Tools"],
+            averageSalary: "65000",
+            growthRate: "9.3",
+            demandScore: 7
+          },
+          {
+            title: "Customer Success Manager",
+            industry: "technology",
+            level: "mid",
+            roleType: "customer_facing",
+            description: "Ensures customers achieve desired outcomes with technology products",
+            requiredSkills: ["Customer Relationship Management", "Product Knowledge", "Success Planning", "Onboarding", "Retention Strategies", "Business Acumen", "Upselling", "Account Management"],
+            averageSalary: "90000",
+            growthRate: "14.8",
+            demandScore: 8
+          },
+          {
+            title: "Solutions Consultant",
+            industry: "technology",
+            level: "senior",
+            roleType: "customer_facing",
+            description: "Provides technical expertise during sales process and implementation",
+            requiredSkills: ["Technical Knowledge", "Solution Design", "Product Demonstration", "Needs Analysis", "Client Communication", "Project Planning", "Integration Knowledge", "Industry Expertise"],
+            averageSalary: "110000",
+            growthRate: "15.2",
+            demandScore: 8
+          },
+          
+          // Emerging Tech Roles
+          {
+            title: "Blockchain Developer",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Develops blockchain applications and smart contracts",
+            requiredSkills: ["Blockchain Platforms", "Smart Contracts", "Solidity", "Cryptography", "Distributed Systems", "Web3", "Security", "Consensus Mechanisms"],
+            averageSalary: "120000",
+            growthRate: "24.5",
+            demandScore: 8
+          },
+          {
+            title: "AR/VR Developer",
+            industry: "technology",
+            level: "mid",
+            roleType: "technical",
+            description: "Creates augmented and virtual reality experiences",
+            requiredSkills: ["Unity/Unreal", "3D Modeling", "AR/VR SDKs", "UI/UX for Immersive", "Performance Optimization", "Spatial Computing", "Computer Vision", "3D Mathematics"],
+            averageSalary: "105000",
+            growthRate: "22.7",
+            demandScore: 8
+          },
+          {
+            title: "Quantum Computing Researcher",
+            industry: "technology",
+            level: "senior",
+            roleType: "research",
+            description: "Researches quantum computing algorithms and applications",
+            requiredSkills: ["Quantum Mechanics", "Quantum Algorithms", "Programming", "Mathematics", "Physics", "Quantum Frameworks", "Research Methods", "Academic Writing"],
+            averageSalary: "140000",
+            growthRate: "17.3",
+            demandScore: 7
+          },
+          {
+            title: "Robotics Engineer",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Designs and builds robots and robotic systems",
+            requiredSkills: ["Robotics", "Control Systems", "Computer Vision", "Sensors", "Programming", "Mechanical Design", "Electrical Engineering", "Simulation"],
+            averageSalary: "115000",
+            growthRate: "15.6",
+            demandScore: 7
+          },
+          {
+            title: "Edge Computing Engineer",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Develops systems that process data near the source of generation",
+            requiredSkills: ["Distributed Systems", "IoT", "Networking", "Real-time Processing", "Security", "Low-latency Computing", "Embedded Systems", "Cloud Integration"],
+            averageSalary: "120000",
+            growthRate: "19.8",
+            demandScore: 8
+          },
+          
+          // Sales, Marketing, and Evangelism
+          {
+            title: "Technical Sales Engineer",
+            industry: "technology",
+            level: "mid",
+            roleType: "customer_facing",
+            description: "Provides technical expertise to support sales of complex products",
+            requiredSkills: ["Technical Knowledge", "Sales Process", "Product Demonstrations", "Solution Design", "Customer Communication", "Needs Analysis", "Technical Presentations", "Competitive Analysis"],
+            averageSalary: "110000",
+            growthRate: "14.2",
+            demandScore: 8
+          },
+          {
+            title: "Solutions Engineer",
+            industry: "technology",
+            level: "senior",
+            roleType: "technical",
+            description: "Designs and demonstrates technical solutions for prospects and customers",
+            requiredSkills: ["Solution Architecture", "Product Knowledge", "Technical Demonstrations", "Proof of Concept", "Integration Expertise", "Client Communication", "Problem Solving", "Technical Writing"],
+            averageSalary: "125000",
+            growthRate: "16.3",
+            demandScore: 8
+          },
+          {
+            title: "Developer Advocate",
+            industry: "technology",
+            level: "mid",
+            roleType: "customer_facing",
+            description: "Represents developers' interests and promotes technology adoption",
+            requiredSkills: ["Development Experience", "Community Building", "Public Speaking", "Technical Writing", "Social Media", "Content Creation", "Workshop Facilitation", "Technical Demonstrations"],
+            averageSalary: "115000",
+            growthRate: "17.9",
+            demandScore: 8
+          },
+          {
+            title: "Tech Marketing Manager",
+            industry: "technology",
+            level: "senior",
+            roleType: "business",
+            description: "Develops marketing strategies for technology products and services",
+            requiredSkills: ["Technical Understanding", "Marketing Strategy", "Product Positioning", "Content Marketing", "Digital Marketing", "Campaign Management", "Analytics", "Market Research"],
+            averageSalary: "120000",
+            growthRate: "13.8",
+            demandScore: 8
+          },
+          {
+            title: "Pre-Sales Consultant",
+            industry: "technology",
+            level: "mid",
+            roleType: "customer_facing",
+            description: "Provides technical expertise during sales process",
+            requiredSkills: ["Technical Knowledge", "Demonstrations", "Solution Design", "Requirements Gathering", "RFP Response", "Technical Presentations", "Proof of Concept", "Competitive Analysis"],
+            averageSalary: "105000",
+            growthRate: "15.1",
+            demandScore: 8
+          }
+        ];
+        
+        // Insert the tech roles
+        const createdRoles = [];
+        for (const role of updatedTechRoles) {
+          const newRole = await storage.createInterviewRole(role);
+          createdRoles.push(newRole);
+        }
+        
+        res.status(200).json({
+          message: "Technology industry roles updated successfully",
+          count: createdRoles.length,
+          roles: createdRoles
+        });
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
 
   // Create a new interview question
   app.post(
