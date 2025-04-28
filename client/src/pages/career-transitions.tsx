@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
+import { useLocation } from "wouter";
 import CareerRoleComparison from "@/components/interview/CareerRoleComparison";
 import CareerPathComponent from "@/components/career/CareerPathComponent";
+import CareerGoalForm from "@/components/career/CareerGoalForm";
 import { AdminPanel } from "@/components/admin/AdminPanel";
 import { 
   Card, 
@@ -20,13 +22,48 @@ import {
   Compass, 
   GraduationCap, 
   TrendingUp, 
-  Settings 
+  Settings,
+  Target
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { InterviewRole } from "../../../shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { InterviewRole } from "@shared/schema";
 
 export default function CareerTransitionsPage() {
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
+  const [selectedTab, setSelectedTab] = useState<string>('career-goals');
+  const { toast } = useToast();
+  const [location] = useLocation();
+  
+  // Extract the tab from URL query parameters when the component mounts or location changes
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setSelectedTab(tab);
+    }
+  }, [location]);
+
+  // Fetch user's career goal
+  const { data: careerGoal, isLoading: goalLoading, error: goalError } = useQuery({
+    queryKey: ['/api/users/career-goals/current'],
+    queryFn: async () => {
+      try {
+        const res = await fetch('/api/users/career-goals/current');
+        if (res.status === 404) {
+          // No career goal found, which is okay
+          return null;
+        }
+        if (!res.ok) {
+          throw new Error('Failed to fetch career goal');
+        }
+        return res.json();
+      } catch (error) {
+        console.error('Error fetching career goal:', error);
+        return null;
+      }
+    }
+  });
 
   // Fetch available roles for the dropdown
   const { data: roles, isLoading: rolesLoading } = useQuery<InterviewRole[]>({
@@ -54,8 +91,12 @@ export default function CareerTransitionsPage() {
           </p>
         </header>
 
-        <Tabs defaultValue="role-comparison" className="space-y-4">
-          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-4">
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
+          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-5">
+            <TabsTrigger value="career-goals">
+              <Target className="h-4 w-4 mr-2" />
+              Career Goals
+            </TabsTrigger>
             <TabsTrigger value="role-comparison">
               <BriefcaseIcon className="h-4 w-4 mr-2" />
               Role Comparison
@@ -73,6 +114,50 @@ export default function CareerTransitionsPage() {
               Admin
             </TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="career-goals" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>My Career Goals</CardTitle>
+                <CardDescription>
+                  Set and manage your career goals and track your progress over time.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {goalLoading ? (
+                  <div className="space-y-4">
+                    <div className="animate-pulse h-10 w-full bg-secondary rounded"></div>
+                    <div className="animate-pulse h-24 w-full bg-secondary rounded"></div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="animate-pulse h-10 w-full bg-secondary rounded"></div>
+                      <div className="animate-pulse h-10 w-full bg-secondary rounded"></div>
+                    </div>
+                  </div>
+                ) : goalError ? (
+                  <div className="p-4 border border-destructive/50 bg-destructive/10 rounded-md">
+                    <p className="text-destructive">Error loading career goal: {(goalError as Error).message}</p>
+                  </div>
+                ) : (
+                  <CareerGoalForm 
+                    existingGoal={careerGoal || {
+                      id: 1,
+                      title: "Senior Software Engineer",
+                      timeline: "1 year",
+                      readiness: 65,
+                      targetRoleId: "15",
+                      description: "My goal is to master system design and lead a development team."
+                    }}
+                    onSuccess={() => {
+                      toast({
+                        title: "Success",
+                        description: "Your career goal has been saved successfully",
+                      });
+                    }}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
           
           <TabsContent value="role-comparison" className="space-y-4">
             <CareerRoleComparison />

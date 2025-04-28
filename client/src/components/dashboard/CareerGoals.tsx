@@ -31,7 +31,7 @@ export default function CareerGoals({ id, title, timeline, readiness }: CareerGo
           </div>
           
           <div className="mt-4 md:mt-0 flex gap-3">
-            <Link href="/career-transitions">
+            <Link href="/career-transitions?tab=career-goals">
               <Button variant="outline" size="sm">
                 Update Goal
               </Button>

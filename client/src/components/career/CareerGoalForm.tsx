@@ -27,7 +27,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Save } from 'lucide-react';
-import { InterviewRole } from '../../../shared/schema';
+import { InterviewRole } from '@shared/schema';
 
 // Validation schema
 const formSchema = z.object({
