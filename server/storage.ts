@@ -414,31 +414,273 @@ export class MemStorage implements IStorage {
     
     // Create interview roles
     const defaultInterviewRoles = [
+      // Original roles
       {
         title: 'Frontend Developer',
         description: 'A frontend developer implements the visual elements of web applications that users interact with.',
         requiredSkills: ['JavaScript', 'React', 'HTML', 'CSS'],
         industry: 'Technology',
-        level: 'mid'
+        level: 'mid',
+        roleType: 'development'
       },
       {
         title: 'Data Scientist',
         description: 'A data scientist analyzes data to extract meaningful insights and build predictive models.',
         requiredSkills: ['Python', 'Statistics', 'Machine Learning', 'SQL'],
         industry: 'Technology',
-        level: 'senior'
+        level: 'senior',
+        roleType: 'data'
       },
       {
         title: 'Product Manager',
         description: 'A product manager oversees product development and brings products to market.',
         requiredSkills: ['Product Strategy', 'User Research', 'Roadmapping', 'Stakeholder Management'],
         industry: 'Technology',
-        level: 'mid'
+        level: 'mid',
+        roleType: 'management'
+      },
+      
+      // Software Development & Engineering
+      {
+        title: 'Software Engineer',
+        description: 'Designs, develops, and maintains software applications and systems.',
+        requiredSkills: ['Software Development', 'Algorithms', 'Data Structures', 'Problem Solving'],
+        industry: 'Technology',
+        level: 'entry',
+        roleType: 'development'
+      },
+      {
+        title: 'Senior Software Engineer',
+        description: 'Leads development efforts and provides technical guidance to junior engineers.',
+        requiredSkills: ['Advanced Programming', 'System Design', 'Architecture', 'Technical Leadership'],
+        industry: 'Technology',
+        level: 'senior',
+        roleType: 'development'
+      },
+      {
+        title: 'Full Stack Developer',
+        description: 'Develops both client and server software for web applications.',
+        requiredSkills: ['Front-end', 'Back-end', 'Databases', 'APIs'],
+        industry: 'Technology',
+        level: 'mid',
+        roleType: 'development'
+      },
+      {
+        title: 'Back-End Developer',
+        description: 'Focuses on server-side logic, databases, and application architecture.',
+        requiredSkills: ['Server Languages', 'Databases', 'APIs', 'Security'],
+        industry: 'Technology',
+        level: 'mid',
+        roleType: 'development'
+      },
+      
+      // Data Science & Analytics
+      {
+        title: 'Data Analyst',
+        description: 'Interprets data to identify trends and creates visualizations to communicate findings.',
+        requiredSkills: ['Data Analysis', 'SQL', 'Excel', 'Data Visualization'],
+        industry: 'Analytics',
+        level: 'entry',
+        roleType: 'data'
+      },
+      {
+        title: 'Data Engineer',
+        description: 'Builds and maintains data pipelines and infrastructure for data processing.',
+        requiredSkills: ['ETL', 'Data Warehousing', 'SQL', 'Big Data Technologies'],
+        industry: 'Analytics',
+        level: 'mid',
+        roleType: 'data'
+      },
+      {
+        title: 'Machine Learning Engineer',
+        description: 'Develops and deploys machine learning models into production environments.',
+        requiredSkills: ['ML Algorithms', 'Python', 'Model Deployment', 'MLOps'],
+        industry: 'Analytics',
+        level: 'senior',
+        roleType: 'data'
+      },
+      
+      // Cloud Computing & DevOps
+      {
+        title: 'Cloud Engineer',
+        description: 'Designs, implements, and manages cloud-based systems and infrastructure.',
+        requiredSkills: ['Cloud Platforms', 'Infrastructure as Code', 'Network Architecture', 'Security'],
+        industry: 'Cloud Computing',
+        level: 'mid',
+        roleType: 'infrastructure'
+      },
+      {
+        title: 'DevOps Engineer',
+        description: 'Bridges development and operations to streamline deployment processes.',
+        requiredSkills: ['CI/CD', 'Containerization', 'Infrastructure as Code', 'Monitoring'],
+        industry: 'Cloud Computing',
+        level: 'mid',
+        roleType: 'infrastructure'
+      },
+      {
+        title: 'Site Reliability Engineer',
+        description: 'Ensures that systems are reliable, scalable, and efficient.',
+        requiredSkills: ['System Design', 'Automation', 'Monitoring', 'Incident Response'],
+        industry: 'Cloud Computing',
+        level: 'senior',
+        roleType: 'infrastructure'
+      },
+      
+      // Cybersecurity
+      {
+        title: 'Cybersecurity Engineer',
+        description: 'Protects computer systems and networks from threats and vulnerabilities.',
+        requiredSkills: ['Security Systems', 'Threat Analysis', 'Vulnerability Assessment', 'Security Protocols'],
+        industry: 'Cybersecurity',
+        level: 'mid',
+        roleType: 'security'
+      },
+      {
+        title: 'Penetration Tester',
+        description: 'Identifies security vulnerabilities by simulating cyberattacks.',
+        requiredSkills: ['Ethical Hacking', 'Security Tools', 'Vulnerability Assessment', 'Security Reporting'],
+        industry: 'Cybersecurity',
+        level: 'mid',
+        roleType: 'security'
+      },
+      
+      // Project Management
+      {
+        title: 'Project Manager',
+        description: 'Plans, executes, and closes projects, ensuring they are completed on time and within budget.',
+        requiredSkills: ['Project Planning', 'Risk Management', 'Team Leadership', 'Stakeholder Communication'],
+        industry: 'Management',
+        level: 'mid',
+        roleType: 'management'
+      },
+      {
+        title: 'Scrum Master',
+        description: 'Facilitates agile development processes and removes impediments for the team.',
+        requiredSkills: ['Agile Methodologies', 'Team Facilitation', 'Servant Leadership', 'Problem Solving'],
+        industry: 'Management',
+        level: 'mid',
+        roleType: 'management'
+      },
+      
+      // Specialized Technical Roles
+      {
+        title: 'UI/UX Designer',
+        description: 'Creates user-friendly interfaces and experiences for digital products.',
+        requiredSkills: ['User Research', 'Wireframing', 'Prototyping', 'Visual Design'],
+        industry: 'Design',
+        level: 'mid',
+        roleType: 'design'
+      },
+      {
+        title: 'Blockchain Developer',
+        description: 'Develops decentralized applications and smart contracts on blockchain platforms.',
+        requiredSkills: ['Smart Contracts', 'Blockchain Protocols', 'Cryptography', 'DApp Development'],
+        industry: 'Emerging Tech',
+        level: 'mid',
+        roleType: 'development'
+      },
+      {
+        title: 'AI Specialist',
+        description: 'Develops and implements artificial intelligence solutions for business problems.',
+        requiredSkills: ['Deep Learning', 'Neural Networks', 'Natural Language Processing', 'Computer Vision'],
+        industry: 'Emerging Tech',
+        level: 'senior',
+        roleType: 'data'
       }
     ];
     
     // Create interview roles
     defaultInterviewRoles.forEach(role => this.createInterviewRole(role));
+    
+    // Create initial career paths
+    const defaultCareerPaths = [
+      // Original career paths
+      {
+        roleId: 1, // Frontend Developer
+        previousRole: "Junior Frontend Developer",
+        nextRole: "Senior Frontend Developer",
+        yearsToProgress: 3,
+        skillsToAcquire: ["Advanced JavaScript", "React Performance Optimization", "Design Systems", "Unit Testing", "CI/CD", "Architecture"],
+        typicalTransitionPath: "Junior → Mid-level → Senior → Lead → Engineering Manager"
+      },
+      {
+        roleId: 2, // Data Scientist
+        previousRole: "Data Analyst",
+        nextRole: "Lead Data Scientist",
+        yearsToProgress: 4,
+        skillsToAcquire: ["Advanced Machine Learning", "MLOps", "Team Leadership", "Business Strategy", "Research Publishing", "Domain Expertise"],
+        typicalTransitionPath: "Analyst → Data Scientist → Senior → Lead → Director of Data Science"
+      },
+      {
+        roleId: 3, // Product Manager
+        previousRole: "Business Analyst",
+        nextRole: "Senior Product Manager",
+        yearsToProgress: 3,
+        skillsToAcquire: ["User Research", "Product Strategy", "Stakeholder Management", "KPI Analysis", "Roadmapping", "Market Analysis"],
+        typicalTransitionPath: "Analyst → Associate PM → PM → Senior PM → Director of Product"
+      },
+      
+      // New career paths
+      {
+        roleId: 4, // Software Engineer
+        previousRole: "Junior Software Engineer",
+        nextRole: "Senior Software Engineer",
+        yearsToProgress: 3,
+        skillsToAcquire: ["System Design", "Design Patterns", "Code Optimization", "Mentoring", "Technical Documentation", "Architectural Decisions"],
+        typicalTransitionPath: "Junior → Software Engineer → Senior → Principal → Architect"
+      },
+      {
+        roleId: 5, // Senior Software Engineer
+        previousRole: "Software Engineer",
+        nextRole: "Principal Engineer",
+        yearsToProgress: 4,
+        skillsToAcquire: ["Technical Leadership", "System Architecture", "Cross-team Collaboration", "Project Planning", "Code Reviews", "Architectural Decisions"],
+        typicalTransitionPath: "Software Engineer → Senior → Principal → Architect or Engineering Manager"
+      },
+      {
+        roleId: 8, // Data Analyst
+        previousRole: "Junior Data Analyst",
+        nextRole: "Senior Data Analyst",
+        yearsToProgress: 2,
+        skillsToAcquire: ["Advanced SQL", "Statistical Analysis", "Data Visualization Tools", "Business Domain Knowledge", "Dashboard Creation", "Storytelling with Data"],
+        typicalTransitionPath: "Junior Analyst → Data Analyst → Senior Analyst → Data Scientist or Analytics Manager"
+      },
+      {
+        roleId: 9, // Data Engineer
+        previousRole: "Data Analyst",
+        nextRole: "Senior Data Engineer",
+        yearsToProgress: 3,
+        skillsToAcquire: ["Data Pipeline Development", "Big Data Technologies", "Cloud Data Services", "Data Modeling", "Performance Optimization", "Data Governance"],
+        typicalTransitionPath: "Data Analyst → Data Engineer → Senior Data Engineer → Data Architect"
+      },
+      {
+        roleId: 11, // Cloud Engineer
+        previousRole: "System Administrator",
+        nextRole: "Cloud Architect",
+        yearsToProgress: 3,
+        skillsToAcquire: ["Multi-Cloud Strategy", "Cloud Security", "Cost Optimization", "Serverless Architecture", "Containerization", "Infrastructure as Code"],
+        typicalTransitionPath: "SysAdmin → Cloud Engineer → Senior Cloud Engineer → Cloud Architect"
+      },
+      {
+        roleId: 12, // DevOps Engineer
+        previousRole: "System Administrator",
+        nextRole: "DevOps Lead",
+        yearsToProgress: 3,
+        skillsToAcquire: ["CI/CD Pipeline Design", "Infrastructure as Code", "Container Orchestration", "Monitoring Solutions", "Security Automation", "Release Management"],
+        typicalTransitionPath: "SysAdmin → DevOps Engineer → DevOps Lead → DevOps Architect"
+      },
+      {
+        roleId: 14, // Cybersecurity Engineer
+        previousRole: "IT Support Specialist",
+        nextRole: "Security Architect",
+        yearsToProgress: 4,
+        skillsToAcquire: ["Threat Modeling", "Security Frameworks", "Security Automation", "Risk Assessment", "Security Architecture", "Compliance Standards"],
+        typicalTransitionPath: "IT Support → Security Analyst → Security Engineer → Security Architect → CISO"
+      }
+    ];
+    
+    // Create the career paths
+    defaultCareerPaths.forEach(path => this.createCareerPath(path));
     
     // Create interview questions
     const defaultInterviewQuestions = [

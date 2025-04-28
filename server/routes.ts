@@ -2035,6 +2035,182 @@ Return a JSON response with the following structure:
     }
   );
 
+  // =====================
+  // Career Path Routes
+  // =====================
+
+  // Get all career paths
+  app.get(
+    "/api/career/paths",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const careerPaths = await storage.getAllCareerPaths();
+        res.json(careerPaths);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Get a specific career path
+  app.get(
+    "/api/career/paths/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const pathId = parseInt(req.params.id);
+        const careerPath = await storage.getCareerPath(pathId);
+        
+        if (!careerPath) {
+          return res.status(404).json({ message: "Career path not found" });
+        }
+        
+        res.json(careerPath);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Get career path by role ID
+  app.get(
+    "/api/career/paths/role/:roleId",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const roleId = parseInt(req.params.roleId);
+        const careerPath = await storage.getCareerPathByRoleId(roleId);
+        
+        if (!careerPath) {
+          return res.status(404).json({ message: "Career path not found for this role" });
+        }
+        
+        // For UI display purposes, we can enhance the career path with additional information
+        // This would come from a real database in production, but for now we'll add mock data
+        // if UI fields are requested in the query parameter
+        const { enhanceForUI } = req.query;
+        
+        if (enhanceForUI === 'true') {
+          // The frontend expects pathSteps and resources for visualization
+          const enhancedPath = {
+            ...careerPath,
+            pathSteps: [
+              {
+                title: careerPath.previousRole || "Entry Level Position",
+                subtitle: "Previous Role",
+                description: "Starting point in the career journey",
+                timeEstimate: "1-2 years",
+                keySkills: careerPath.skillsToAcquire?.slice(0, 2) || ["Communication", "Basic technical skills"]
+              },
+              {
+                title: "Current Role",
+                subtitle: "Where you are now",
+                description: "Solidify your knowledge and expand your skills",
+                timeEstimate: `${careerPath.yearsToProgress || 2}-3 years`,
+                keySkills: careerPath.skillsToAcquire?.slice(2, 4) || ["Specialized knowledge", "Project management"]
+              },
+              {
+                title: careerPath.nextRole || "Senior Position",
+                subtitle: "Future Opportunity",
+                description: "Next step in your career progression",
+                timeEstimate: "2-4 years",
+                keySkills: careerPath.skillsToAcquire?.slice(4) || ["Leadership", "Strategic thinking"]
+              }
+            ],
+            resources: [
+              {
+                title: "Career Development Workshop",
+                provider: "Upcraft Academy",
+                type: "workshop",
+                url: "https://example.com/workshops/career-development"
+              },
+              {
+                title: "Leadership Essentials",
+                provider: "Skill Masters",
+                type: "course",
+                url: "https://example.com/courses/leadership"
+              },
+              {
+                title: "Technical Skills Assessment",
+                provider: "Upcraft",
+                type: "assessment",
+                url: "https://example.com/assessments/technical"
+              }
+            ]
+          };
+          
+          return res.json(enhancedPath);
+        }
+        
+        res.json(careerPath);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Create a new career path
+  app.post(
+    "/api/career/paths",
+    isAuthenticated,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const pathDataResult = insertCareerPathSchema.safeParse(req.body);
+        if (!pathDataResult.success) {
+          return res.status(400).json({
+            message: "Invalid career path data",
+            errors: pathDataResult.error.errors,
+          });
+        }
+
+        const newPath = await storage.createCareerPath(pathDataResult.data);
+        res.status(201).json(newPath);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Update a career path
+  app.patch(
+    "/api/career/paths/:id",
+    isAuthenticated,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const pathId = parseInt(req.params.id);
+        const existingPath = await storage.getCareerPath(pathId);
+        
+        if (!existingPath) {
+          return res.status(404).json({ message: "Career path not found" });
+        }
+        
+        const updatedPath = await storage.updateCareerPath(pathId, req.body);
+        res.json(updatedPath);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Delete a career path
+  app.delete(
+    "/api/career/paths/:id",
+    isAuthenticated,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const pathId = parseInt(req.params.id);
+        const existingPath = await storage.getCareerPath(pathId);
+        
+        if (!existingPath) {
+          return res.status(404).json({ message: "Career path not found" });
+        }
+        
+        await storage.deleteCareerPath(pathId);
+        res.status(204).end();
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
   const httpServer = createServer(app);
   return httpServer;
 }

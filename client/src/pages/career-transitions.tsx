@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Helmet } from "react-helmet";
 import CareerRoleComparison from "@/components/interview/CareerRoleComparison";
+import CareerPathComponent from "@/components/career/CareerPathComponent";
 import { 
   Card, 
   CardContent, 
@@ -8,9 +9,11 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { 
+  ArrowRight,
   BriefcaseIcon, 
   ChevronRight, 
   Compass, 
@@ -19,8 +22,24 @@ import {
   TrendingUp, 
   Layers 
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { InterviewRole } from "../../shared/schema";
 
 export default function CareerTransitionsPage() {
+  const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
+
+  // Fetch available roles for the dropdown
+  const { data: roles, isLoading: rolesLoading } = useQuery<InterviewRole[]>({
+    queryKey: ['/api/interview/roles'],
+    queryFn: async () => {
+      const res = await fetch('/api/interview/roles');
+      if (!res.ok) {
+        throw new Error('Failed to fetch roles');
+      }
+      return res.json();
+    }
+  });
+
   return (
     <>
       <Helmet>
@@ -67,14 +86,51 @@ export default function CareerTransitionsPage() {
                   Discover common career progression paths for various roles and industries.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <Layers className="h-12 w-12 text-primary mx-auto mb-4 opacity-60" />
-                  <h3 className="text-lg font-medium mb-2">Coming Soon</h3>
-                  <p className="text-muted-foreground max-w-md mx-auto">
-                    We're building comprehensive career path visualizations to help you plan your long-term career progression. Stay tuned!
-                  </p>
+              <CardContent className="space-y-6">
+                {/* Role selection */}
+                <div className="w-full md:max-w-lg">
+                  <h3 className="text-base font-medium mb-2">Select a role to view its career progression path:</h3>
+                  
+                  {rolesLoading ? (
+                    <div className="animate-pulse h-10 w-full bg-secondary rounded"></div>
+                  ) : (
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {roles?.slice(0, 6).map((role) => (
+                        <Button
+                          key={role.id}
+                          variant={selectedRoleId === role.id ? "default" : "outline"}
+                          className="justify-start h-auto py-3 text-left"
+                          onClick={() => setSelectedRoleId(role.id)}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${selectedRoleId === role.id ? 'bg-primary-foreground' : 'bg-primary/30'}`}></div>
+                            <div>
+                              <div className="font-medium">{role.title}</div>
+                              <div className="text-xs text-muted-foreground">{role.industry}</div>
+                            </div>
+                          </div>
+                          {selectedRoleId === role.id && (
+                            <ArrowRight className="h-4 w-4 ml-auto" />
+                          )}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
+                {/* Career path visualization */}
+                {selectedRoleId ? (
+                  <div className="mt-8">
+                    <CareerPathComponent roleId={selectedRoleId} />
+                  </div>
+                ) : (
+                  <div className="text-center py-6 bg-muted/30 rounded-lg">
+                    <Compass className="h-12 w-12 text-primary mx-auto mb-2 opacity-60" />
+                    <p className="text-muted-foreground">
+                      Select a role above to view its career progression path
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

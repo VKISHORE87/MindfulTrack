@@ -1,0 +1,186 @@
+ Software Development & Engineering
+Software Engineer
+
+Senior Software Engineer
+
+Full Stack Developer
+
+Front-End Developer
+
+Back-End Developer
+
+Application Developer
+
+Java Developer
+
+C++ Developer
+
+Python Developer
+
+Go Developer
+
+C# Developer
+
+Ruby on Rails Developer
+
+Kotlin Developer
+
+Swift Developer
+
+React Native Developer
+
+Xamarin Developer
+
+Mobile App Developer
+
+Cross-Platform Developer
+
+Site Performance Engineer
+
+📊 Data Science & Analytics
+Data Scientist
+
+Data Analyst
+
+Data Engineer
+
+Data Architect
+
+Data Modeler
+
+Big Data Engineer
+
+Business Intelligence (BI) Developer
+
+Machine Learning Engineer
+
+AI Specialist
+
+Quantitative Analyst
+
+Data Visualization Expert
+
+☁️ Cloud Computing & DevOps
+Cloud Engineer
+
+Cloud Architect
+
+DevOps Engineer
+
+Site Reliability Engineer (SRE)
+
+Infrastructure Engineer
+
+AWS/Azure/GCP Specialist
+
+Automation Engineer
+
+🔐 Cybersecurity
+Cybersecurity Engineer
+
+Information Security Analyst
+
+Penetration Tester (Ethical Hacker)
+
+Security Architect
+
+Network Security Engineer
+
+Compliance & Risk Analyst
+
+IT Systems Security Manager
+
+🤖 Emerging Technologies
+Blockchain Developer
+
+AI/ML Specialist
+
+Robotic Process Automation (RPA) Developer
+
+Robotics Engineer
+
+IoT Engineer
+
+AR/VR Developer
+
+Quantum Computing Researcher
+
+🧪 Quality Assurance & Testing
+Software Test Engineer
+
+QA Engineer
+
+Automation Test Engineer
+
+Manual Test Engineer
+
+Performance Test Engineer
+
+Test Architect
+
+🧠 Product & Project Management
+Product Manager
+
+Project Manager
+
+Technical Program Manager
+
+Scrum Master
+
+Agile Coach
+
+Business Analyst
+
+Technical Lead
+
+🧑‍💼 Support & Operations
+Technical Support Engineer
+
+System Administrator
+
+Network Administrator
+
+Database Administrator (DBA)
+
+IT Support Specialist
+
+Operations Manager
+
+📈 Marketing & Sales (Tech Focused)
+Digital Marketing Specialist
+
+SEO/SEM Specialist
+
+Growth Manager
+
+Lead Generation Specialist
+
+Customer Success Specialist
+
+Salesforce Administrator
+
+CRM Specialist
+
+🧑‍🏫 Research & Academia
+Research Scientist (AI/ML)
+
+Data Researcher
+
+Technology Evangelist
+
+University Faculty (Computer Science)
+
+Technical Writer
+
+🧩 Specialized Roles
+UI/UX Designer
+
+Game Developer
+
+Embedded Systems Engineer
+
+Firmware Engineer
+
+Hardware Engineer
+
+Site Reliability Engineer
