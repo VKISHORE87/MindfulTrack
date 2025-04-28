@@ -186,8 +186,8 @@ export default function CareerRoleComparison() {
     }
 
     // Get skills from both roles
-    const currentSkills = currentRole.requiredSkills || [];
-    const targetSkills = targetRole.requiredSkills || [];
+    const currentSkills = Array.isArray(currentRole.requiredSkills) ? currentRole.requiredSkills : [];
+    const targetSkills = Array.isArray(targetRole.requiredSkills) ? targetRole.requiredSkills : [];
     
     console.log("Processing skill gaps between:", { 
       currentRole: currentRole.title, 
@@ -199,8 +199,12 @@ export default function CareerRoleComparison() {
     // Create a mapping of current skills with an assumed proficiency level
     const currentSkillsMap = new Map();
     currentSkills.forEach(skill => {
-      if (skill) {
-        currentSkillsMap.set(skill.toLowerCase(), 80); // Assume 80% proficiency in current role skills
+      if (skill && typeof skill === 'string') {
+        // Store both original case and lowercase for matching
+        currentSkillsMap.set(skill.toLowerCase(), {
+          originalSkill: skill,
+          proficiency: 80 // Assume 80% proficiency in current role skills
+        });
       }
     });
     
@@ -208,14 +212,15 @@ export default function CareerRoleComparison() {
     
     // For each target skill, check if it exists in current skills
     targetSkills.forEach(skill => {
-      if (!skill) return; // Skip null or undefined skills
+      if (!skill || typeof skill !== 'string') return; // Skip null or undefined skills
       
       const skillName = skill;
       const requiredLevel = 90; // Assume 90% proficiency needed for target role
       
       // If the skill exists in current skills, gap is smaller
-      const currentLevel = currentSkillsMap.has(skill.toLowerCase()) 
-        ? currentSkillsMap.get(skill.toLowerCase()) 
+      const currentSkillInfo = currentSkillsMap.get(skill.toLowerCase());
+      const currentLevel = currentSkillInfo 
+        ? currentSkillInfo.proficiency 
         : 30; // If skill doesn't exist in current role, assume 30% baseline
       
       const gap = requiredLevel - currentLevel;
