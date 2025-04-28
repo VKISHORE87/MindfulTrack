@@ -168,22 +168,42 @@ export class MemStorage implements IStorage {
       { username: 'priya', password: 'password', name: 'Priya Sharma', role: 'Software Developer', email: 'priya@example.com' },
       { username: 'ananya', password: 'password', name: 'Ananya Mehta', role: 'Finance Professional', email: 'ananya@example.com' }
     ];
-
-    defaultUsers.forEach(user => this.createUser(user));
-
-    // Create default skills
+    
+    // Create default skills for assessment
     const defaultSkills = [
-      { name: 'Data Analysis', category: 'analytical', description: 'Ability to interpret data to inform decisions' },
-      { name: 'Digital Marketing', category: 'technical', description: 'Knowledge of digital marketing platforms and strategies' },
-      { name: 'Marketing Analytics', category: 'analytical', description: 'Using data to measure marketing performance' },
-      { name: 'Content Strategy', category: 'creative', description: 'Planning and managing content creation' },
-      { name: 'Leadership', category: 'leadership', description: 'Ability to guide and inspire teams' },
-      { name: 'Python Programming', category: 'technical', description: 'Programming in Python language' },
-      { name: 'Financial Analysis', category: 'analytical', description: 'Evaluating financial performance and forecasting' },
-      { name: 'Project Management', category: 'leadership', description: 'Planning and executing projects effectively' }
+      // Technical skills
+      { name: 'JavaScript', category: 'technical', description: 'Programming language for web development' },
+      { name: 'React', category: 'technical', description: 'Frontend library for building user interfaces' },
+      { name: 'Node.js', category: 'technical', description: 'JavaScript runtime for server-side development' },
+      { name: 'Python', category: 'technical', description: 'General-purpose programming language' },
+      { name: 'SQL', category: 'technical', description: 'Language for managing relational databases' },
+      { name: 'Machine Learning', category: 'technical', description: 'Building systems that learn from data' },
+      { name: 'Cloud Computing', category: 'technical', description: 'Using remote servers for computing resources' },
+      { name: 'DevOps', category: 'technical', description: 'Development and operations integration' },
+      
+      // Communication skills
+      { name: 'Written Communication', category: 'soft', description: 'Ability to write clearly and effectively' },
+      { name: 'Verbal Communication', category: 'soft', description: 'Ability to speak clearly and articulate ideas' },
+      { name: 'Presentation Skills', category: 'soft', description: 'Creating and delivering effective presentations' },
+      { name: 'Negotiation', category: 'soft', description: 'Finding mutually beneficial agreements' },
+      
+      // Leadership skills
+      { name: 'Team Management', category: 'leadership', description: 'Coordinating and motivating teams' },
+      { name: 'Strategic Planning', category: 'leadership', description: 'Creating and implementing strategic objectives' },
+      { name: 'Decision Making', category: 'leadership', description: 'Making sound decisions in complex situations' },
+      { name: 'Conflict Resolution', category: 'leadership', description: 'Resolving disputes constructively' },
+      
+      // Creative skills
+      { name: 'Design Thinking', category: 'creative', description: 'Problem-solving approach centered on users' },
+      { name: 'UX/UI Design', category: 'creative', description: 'Creating intuitive and engaging user experiences' },
+      { name: 'Content Creation', category: 'creative', description: 'Developing compelling written, visual, or audio content' },
+      { name: 'Innovation', category: 'creative', description: 'Generating and implementing new ideas' }
     ];
 
-    const skillIds = defaultSkills.map(skill => this.createSkill(skill).id);
+    defaultUsers.forEach(user => this.createUser(user));
+    
+    // Create default skills for assessment
+    defaultSkills.forEach(skill => this.createSkill(skill));
 
     // Create user skills for the first user (Rahul)
     const userSkills = [
