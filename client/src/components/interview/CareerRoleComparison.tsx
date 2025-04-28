@@ -59,8 +59,31 @@ export default function CareerRoleComparison() {
   const [industryFilter, setIndustryFilter] = useState<string>("");
   const [currentRoleSearch, setCurrentRoleSearch] = useState<string>("");
   const [targetRoleSearch, setTargetRoleSearch] = useState<string>("");
+  const [showCurrentSuggestions, setShowCurrentSuggestions] = useState<boolean>(false);
+  const [showTargetSuggestions, setShowTargetSuggestions] = useState<boolean>(false);
   const [isComparing, setIsComparing] = useState<boolean>(false);
   const [skillGaps, setSkillGaps] = useState<SkillGap[]>([]);
+  
+  // References for click outside detection
+  const currentSearchRef = React.useRef<HTMLDivElement>(null);
+  const targetSearchRef = React.useRef<HTMLDivElement>(null);
+  
+  // Close suggestions when clicking outside
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (currentSearchRef.current && !currentSearchRef.current.contains(event.target as Node)) {
+        setShowCurrentSuggestions(false);
+      }
+      if (targetSearchRef.current && !targetSearchRef.current.contains(event.target as Node)) {
+        setShowTargetSuggestions(false);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Fetch all roles
   const { data: roles, isLoading } = useQuery<InterviewRole[]>({
@@ -159,6 +182,32 @@ export default function CareerRoleComparison() {
     setSkillGaps(mockSkills);
   };
 
+  // Handle current role search
+  const handleCurrentRoleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentRoleSearch(e.target.value);
+    setShowCurrentSuggestions(e.target.value.length > 0);
+  };
+
+  // Handle target role search
+  const handleTargetRoleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTargetRoleSearch(e.target.value);
+    setShowTargetSuggestions(e.target.value.length > 0);
+  };
+
+  // Handle selecting a current role from suggestions
+  const handleSelectCurrentRole = (role: InterviewRole) => {
+    setCurrentRoleId(role.id.toString());
+    setCurrentRoleSearch(role.title);
+    setShowCurrentSuggestions(false);
+  };
+
+  // Handle selecting a target role from suggestions
+  const handleSelectTargetRole = (role: InterviewRole) => {
+    setTargetRoleId(role.id.toString());
+    setTargetRoleSearch(role.title);
+    setShowTargetSuggestions(false);
+  };
+
   const getRoleTypeColor = (roleType: string) => {
     const colors: {[key: string]: string} = {
       technical: "bg-blue-100 text-blue-800",
@@ -223,14 +272,33 @@ export default function CareerRoleComparison() {
                 <div>
                   <Label htmlFor="current-role-select">Your Current Role</Label>
                   <div className="space-y-2">
-                    <div className="relative">
+                    <div className="relative" ref={currentSearchRef}>
                       <Input
                         type="text"
                         placeholder="Search current role..."
                         value={currentRoleSearch}
-                        onChange={(e) => setCurrentRoleSearch(e.target.value)}
+                        onChange={handleCurrentRoleSearch}
                         className="mb-2"
                       />
+                      {showCurrentSuggestions && filteredCurrentRoles.length > 0 && (
+                        <div className="absolute w-full bg-white dark:bg-gray-900 shadow-md rounded-md border z-10 mt-1 max-h-56 overflow-y-auto">
+                          {filteredCurrentRoles.slice(0, 8).map((role) => (
+                            <button
+                              key={role.id}
+                              className="w-full text-left px-3 py-2 hover:bg-primary/10 flex items-center gap-2 cursor-pointer"
+                              onClick={() => handleSelectCurrentRole(role)}
+                            >
+                              <div className="flex-1 truncate">
+                                <div className="font-medium">{role.title}</div>
+                                <div className="text-xs text-muted-foreground">{role.industry}</div>
+                              </div>
+                              <Badge className={getRoleTypeColor(role.roleType || "")+" text-xs"}>
+                                {role.roleType}
+                              </Badge>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <Select value={currentRoleId} onValueChange={setCurrentRoleId}>
                       <SelectTrigger id="current-role-select">
@@ -250,14 +318,33 @@ export default function CareerRoleComparison() {
                 <div>
                   <Label htmlFor="target-role-select">Target Role</Label>
                   <div className="space-y-2">
-                    <div className="relative">
+                    <div className="relative" ref={targetSearchRef}>
                       <Input
                         type="text"
                         placeholder="Search target role..."
                         value={targetRoleSearch}
-                        onChange={(e) => setTargetRoleSearch(e.target.value)}
+                        onChange={handleTargetRoleSearch}
                         className="mb-2"
                       />
+                      {showTargetSuggestions && filteredTargetRoles.length > 0 && (
+                        <div className="absolute w-full bg-white dark:bg-gray-900 shadow-md rounded-md border z-10 mt-1 max-h-56 overflow-y-auto">
+                          {filteredTargetRoles.slice(0, 8).map((role) => (
+                            <button
+                              key={role.id}
+                              className="w-full text-left px-3 py-2 hover:bg-primary/10 flex items-center gap-2 cursor-pointer"
+                              onClick={() => handleSelectTargetRole(role)}
+                            >
+                              <div className="flex-1 truncate">
+                                <div className="font-medium">{role.title}</div>
+                                <div className="text-xs text-muted-foreground">{role.industry}</div>
+                              </div>
+                              <Badge className={getRoleTypeColor(role.roleType || "")+" text-xs"}>
+                                {role.roleType}
+                              </Badge>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <Select value={targetRoleId} onValueChange={setTargetRoleId}>
                       <SelectTrigger id="target-role-select">
