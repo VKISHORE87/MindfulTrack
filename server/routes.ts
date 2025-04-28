@@ -1396,7 +1396,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (primaryCareerGoal && primaryCareerGoal.targetRoleId) {
               try {
                 // Get the target role
-                const targetRole = await storage.getInterviewRole(parseInt(primaryCareerGoal.targetRoleId));
+                const targetRole = await storage.getInterviewRole(primaryCareerGoal.targetRoleId);
                 if (targetRole && Array.isArray(targetRole.requiredSkills)) {
                   // Map the current user skills to a lookup object
                   const userSkillsMap = new Map(

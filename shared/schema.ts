@@ -122,7 +122,8 @@ export const insertCareerGoalSchema = createInsertSchema(careerGoals).pick({
   title: true,
   description: true,
   timelineMonths: true,
-  targetDate: true
+  targetDate: true,
+  targetRoleId: true
 });
 
 export const insertSkillSchema = createInsertSchema(skills).pick({
