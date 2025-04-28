@@ -138,6 +138,7 @@ export class MemStorage implements IStorage {
   private interviewRolesMap: Map<number, InterviewRole>;
   private interviewQuestionsMap: Map<number, InterviewQuestion>;
   private interviewSessionsMap: Map<number, InterviewSession>;
+  private careerPathsMap: Map<number, CareerPath>;
 
   private currentUserID: number = 1;
   private currentCareerGoalID: number = 1;
@@ -151,6 +152,7 @@ export class MemStorage implements IStorage {
   private currentInterviewRoleID: number = 1;
   private currentInterviewQuestionID: number = 1;
   private currentInterviewSessionID: number = 1;
+  private currentCareerPathID: number = 1;
 
   constructor() {
     this.usersMap = new Map();
@@ -165,6 +167,7 @@ export class MemStorage implements IStorage {
     this.interviewRolesMap = new Map();
     this.interviewQuestionsMap = new Map();
     this.interviewSessionsMap = new Map();
+    this.careerPathsMap = new Map();
 
     // Initialize with some seed data
     this.seedInitialData();

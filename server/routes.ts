@@ -24,6 +24,7 @@ import {
   insertInterviewRoleSchema,
   insertInterviewQuestionSchema,
   insertInterviewSessionSchema,
+  insertCareerPathSchema,
   User
 } from "@shared/schema";
 
