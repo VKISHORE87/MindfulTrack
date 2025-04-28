@@ -102,29 +102,48 @@ export default function Dashboard({ user }: { user: any }) {
         </TabsList>
         
         <TabsContent value="overview" className="pt-6">
+          {/* Career Goals - Now full width and prominent */}
+          <div className="mb-8">
+            {dashboardData?.careerGoal ? (
+              <CareerGoals 
+                id={dashboardData.careerGoal.id}
+                title={dashboardData.careerGoal.title}
+                timeline={dashboardData.careerGoal.timeline}
+                readiness={dashboardData.careerGoal.readiness}
+              />
+            ) : (
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-primary/10 rounded-xl shadow-md p-8 flex flex-col items-center justify-center text-center">
+                <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">Set Your Career Goal</h2>
+                <p className="text-gray-600 mb-6 max-w-2xl">Define your target role to get personalized skill development recommendations and a tailored learning path</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mb-6">
+                  <div className="bg-white rounded-lg p-5 shadow-sm">
+                    <div className="text-primary text-xl font-bold mb-1">1.</div>
+                    <h3 className="font-medium mb-2">Assess your skills</h3>
+                    <p className="text-sm text-gray-500">Evaluate your current skill levels across various domains</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-5 shadow-sm">
+                    <div className="text-primary text-xl font-bold mb-1">2.</div>
+                    <h3 className="font-medium mb-2">Define your target role</h3>
+                    <p className="text-sm text-gray-500">Select or create a custom career transition goal</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-5 shadow-sm">
+                    <div className="text-primary text-xl font-bold mb-1">3.</div>
+                    <h3 className="font-medium mb-2">Follow your learning path</h3>
+                    <p className="text-sm text-gray-500">Get a personalized roadmap to achieve your goal</p>
+                  </div>
+                </div>
+                <a href="/assessment" className="bg-primary text-white px-6 py-3 rounded-full font-medium hover:bg-primary-600 transition-colors">
+                  Get Started Now →
+                </a>
+              </div>
+            )}
+          </div>
+          
           {/* Primary content sections */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Skill Gap Analysis */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-3">
               <SkillGapAnalysis skillGaps={dashboardData?.skillGaps || []} />
-            </div>
-            
-            {/* Career Goals */}
-            <div>
-              {dashboardData?.careerGoal ? (
-                <CareerGoals 
-                  id={dashboardData.careerGoal.id}
-                  title={dashboardData.careerGoal.title}
-                  timeline={dashboardData.careerGoal.timeline}
-                  readiness={dashboardData.careerGoal.readiness}
-                />
-              ) : (
-                <div className="bg-white rounded-xl shadow p-6 h-full flex flex-col items-center justify-center text-center">
-                  <h3 className="text-lg font-bold mb-4">Set Your Career Goal</h3>
-                  <p className="text-gray-600 mb-4">Define your target role to get personalized skill development recommendations</p>
-                  <a href="/assessment" className="text-primary hover:text-primary-700 font-medium">Get Started →</a>
-                </div>
-              )}
             </div>
           </div>
           
