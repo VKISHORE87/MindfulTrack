@@ -559,6 +559,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
+  
+  // Create default skills - temporary endpoint for development
+  app.post(
+    "/api/skills/create-defaults",
+    async (_req: Request, res: Response, next: NextFunction) => {
+      try {
+        // Technical skills
+        await storage.createSkill({ name: 'JavaScript', category: 'technical', description: 'Programming language for web development' });
+        await storage.createSkill({ name: 'React', category: 'technical', description: 'Frontend library for building user interfaces' });
+        await storage.createSkill({ name: 'Node.js', category: 'technical', description: 'JavaScript runtime for server-side development' });
+        await storage.createSkill({ name: 'Python', category: 'technical', description: 'General-purpose programming language' });
+        await storage.createSkill({ name: 'SQL', category: 'technical', description: 'Language for managing relational databases' });
+        await storage.createSkill({ name: 'Machine Learning', category: 'technical', description: 'Building systems that learn from data' });
+        await storage.createSkill({ name: 'Cloud Computing', category: 'technical', description: 'Using remote servers for computing resources' });
+        await storage.createSkill({ name: 'DevOps', category: 'technical', description: 'Development and operations integration' });
+        
+        // Communication skills
+        await storage.createSkill({ name: 'Written Communication', category: 'soft', description: 'Ability to write clearly and effectively' });
+        await storage.createSkill({ name: 'Verbal Communication', category: 'soft', description: 'Ability to speak clearly and articulate ideas' });
+        await storage.createSkill({ name: 'Presentation Skills', category: 'soft', description: 'Creating and delivering effective presentations' });
+        await storage.createSkill({ name: 'Negotiation', category: 'soft', description: 'Finding mutually beneficial agreements' });
+        
+        // Leadership skills
+        await storage.createSkill({ name: 'Team Management', category: 'leadership', description: 'Coordinating and motivating teams' });
+        await storage.createSkill({ name: 'Strategic Planning', category: 'leadership', description: 'Creating and implementing strategic objectives' });
+        await storage.createSkill({ name: 'Decision Making', category: 'leadership', description: 'Making sound decisions in complex situations' });
+        await storage.createSkill({ name: 'Conflict Resolution', category: 'leadership', description: 'Resolving disputes constructively' });
+        
+        // Creative skills
+        await storage.createSkill({ name: 'Design Thinking', category: 'creative', description: 'Problem-solving approach centered on users' });
+        await storage.createSkill({ name: 'UX/UI Design', category: 'creative', description: 'Creating intuitive and engaging user experiences' });
+        await storage.createSkill({ name: 'Content Creation', category: 'creative', description: 'Developing compelling written, visual, or audio content' });
+        await storage.createSkill({ name: 'Innovation', category: 'creative', description: 'Generating and implementing new ideas' });
+        
+        const skills = await storage.getAllSkills();
+        res.status(201).json(skills);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
 
   // =====================
   // User Skills Routes
