@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import SkillAssessmentForm from "@/components/assessment/SkillAssessmentForm";
 import SkillProgressBar from "@/components/ui/SkillProgressBar";
+import CareerPlan from "@/components/career/CareerPlan";
+import { useLocation } from "wouter";
 import { 
   BrainCircuit, 
   TrendingUp, 
@@ -19,7 +21,17 @@ import {
 
 export default function Assessment({ user }: { user: any }) {
   const { toast } = useToast();
+  const [location] = useLocation();
   const [activeTab, setActiveTab] = useState("assessment");
+  
+  // Handle URL query parameters for tab selection
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'analysis') {
+      setActiveTab('analysis');
+    }
+  }, [location]);
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Fetch all skills
@@ -243,6 +255,20 @@ export default function Assessment({ user }: { user: any }) {
               </CardContent>
             </Card>
           </div>
+          
+          {/* Career Plan section */}
+          {dashboardData?.careerGoal && dashboardData?.keySkills && (
+            <div className="mt-8">
+              <h3 className="text-lg font-bold mb-4">Create Your Career Plan</h3>
+              <CareerPlan 
+                userId={user.id}
+                careerGoalId={dashboardData.careerGoal.id}
+                targetRole={dashboardData.careerGoal.title}
+                skills={dashboardData.keySkills}
+                timeline={parseInt(dashboardData.careerGoal.timeline.match(/\d+/)?.[0] || "6")}
+              />
+            </div>
+          )}
           
           <div className="mt-6 flex justify-end">
             <Button

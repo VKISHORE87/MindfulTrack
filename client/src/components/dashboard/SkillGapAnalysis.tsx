@@ -34,9 +34,9 @@ export default function SkillGapAnalysis({ skillGaps }: SkillGapAnalysisProps) {
         ))}
         
         <div className="mt-6">
-          <Link href="/assessment">
+          <Link href="/assessment?tab=analysis">
             <a className="inline-flex items-center text-sm font-medium text-primary hover:text-primary-800">
-              View full skill assessment
+              View full skill gap analysis
               <ChevronRight className="h-4 w-4 ml-1" />
             </a>
           </Link>

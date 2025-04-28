@@ -1315,6 +1315,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
+  
+  // AI-powered career plan generation
+  app.post(
+    "/api/ai/career-plan",
+    isAuthenticated,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const userId = (req.user as any).id;
+        const { careerGoalId, targetRole, skills, timeline } = req.body;
+
+        if (!careerGoalId) {
+          return res.status(400).json({ message: "Career goal ID is required" });
+        }
+
+        // Get user data
+        const user = await storage.getUser(userId);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        // Get career goal
+        const careerGoal = await storage.getCareerGoal(parseInt(careerGoalId));
+        if (!careerGoal) {
+          return res.status(404).json({ message: "Career goal not found" });
+        }
+
+        // Get learning resources for recommendations
+        const learningResources = await storage.getAllLearningResources();
+
+        // Generate career plan using OpenAI
+        try {
+          const response = await openai.chat.completions.create({
+            model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+            messages: [
+              {
+                role: "system",
+                content: `You are an AI career advisor that creates comprehensive career transition plans. 
+                Your task is to generate a step-by-step career plan to help the user transition to their target role.
+                Base your plan on the user's current skills, skill gaps, and target timeline.
+                
+                The career plan should include:
+                1. A brief summary of the transition path
+                2. Key focus areas (3-5 main categories of skills/knowledge to develop)
+                3. 3-5 milestones with specific skills to acquire for each milestone
+                4. Estimated timeline in months for the entire transition
+                
+                Return a JSON object with this structure:
+                {
+                  "summary": "Brief overview of the career transition path",
+                  "estimatedMonths": number,
+                  "focusAreas": ["Area 1", "Area 2", ...],
+                  "milestones": [
+                    {
+                      "title": "Milestone title",
+                      "description": "Brief description",
+                      "skills": ["Skill 1", "Skill 2", ...],
+                      "timeframe": "X-Y months"
+                    },
+                    ...
+                  ]
+                }`
+              },
+              {
+                role: "user",
+                content: JSON.stringify({
+                  user: {
+                    name: user.name,
+                    currentRole: user.currentRole
+                  },
+                  careerGoal: {
+                    title: careerGoal.title,
+                    targetRole: targetRole,
+                    timelineMonths: timeline
+                  },
+                  skills: skills,
+                  availableLearningResources: learningResources.map(resource => ({
+                    title: resource.title,
+                    type: resource.type,
+                    skill: resource.skill
+                  })).slice(0, 20) // Limit to prevent token issues
+                })
+              }
+            ],
+            response_format: { type: "json_object" }
+          });
+
+          const careerPlan = JSON.parse(response.choices[0].message.content);
+          res.json(careerPlan);
+        } catch (error) {
+          console.error("OpenAI API error:", error);
+          
+          // Fallback to a basic career plan
+          const fallbackPlan = {
+            summary: `Transition plan to ${targetRole} focusing on closing key skill gaps over ${timeline} months.`,
+            estimatedMonths: timeline,
+            focusAreas: [
+              "Technical skill development",
+              "Industry knowledge acquisition",
+              "Building practical experience",
+              "Professional network expansion",
+            ],
+            milestones: [
+              {
+                title: "Core skill foundation",
+                description: "Build fundamental skills required for the role",
+                skills: skills.filter(s => s.status === 'missing').slice(0, 3).map(s => s.name),
+                timeframe: "1-3 months"
+              },
+              {
+                title: "Skill enhancement",
+                description: "Improve existing skills to required levels",
+                skills: skills.filter(s => s.status === 'improvement').slice(0, 3).map(s => s.name),
+                timeframe: "3-6 months"
+              },
+              {
+                title: "Practical application",
+                description: "Apply skills in real-world scenarios",
+                skills: skills.filter(s => s.percentage > 50).slice(0, 3).map(s => s.name),
+                timeframe: "6-9 months"
+              }
+            ]
+          };
+          
+          res.json(fallbackPlan);
+        }
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
 
   // =====================
   // Dashboard Data Route
