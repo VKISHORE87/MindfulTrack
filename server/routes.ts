@@ -1682,7 +1682,16 @@ Return a JSON response with the following structure:
           return res.status(404).json({ message: "Career path not found for this role" });
         }
         
-        res.json(path);
+        // Get the role information to include in the response
+        const role = await storage.getInterviewRole(roleId);
+        
+        // Create a combined response with both path and role information
+        const enhancedPath = {
+          ...path,
+          roleInfo: role
+        };
+        
+        res.json(enhancedPath);
       } catch (error) {
         next(error);
       }

@@ -24,9 +24,24 @@ interface PathResource {
   url: string;
 }
 
+// For the role information included in the response
+interface RoleInfo {
+  id: number;
+  title: string;
+  description: string | null;
+  industry: string;
+  level: string;
+  roleType: string;
+  requiredSkills: string[] | null;
+  averageSalary: string | null;
+  growthRate: string | null;
+  demandScore: number | null;
+}
+
 interface CareerPath extends BaseCareerPath {
   pathSteps?: PathStep[];
   resources?: PathResource[];
+  roleInfo?: RoleInfo;
 }
 
 interface CareerPathComponentProps {
@@ -65,17 +80,29 @@ const CareerPathComponent: React.FC<CareerPathComponentProps> = ({ roleId }) => 
           });
         }
         
-        // Current role - using the role ID to get the current role info
-        const roleRes = await fetch(`/api/interview/roles/${roleId}`);
-        if (roleRes.ok) {
-          const role = await roleRes.json();
+        // Current role - using role info from the enhanced path response
+        if (path.roleInfo) {
+          // Use the role info that was included in the response
           pathSteps.push({
-            title: role.title,
+            title: path.roleInfo.title,
             subtitle: "Current Position",
-            description: "Your current career position or target role",
+            description: path.roleInfo.description || "Your current career position or target role",
             timeEstimate: "Present",
-            keySkills: role.requiredSkills || []
+            keySkills: path.roleInfo.requiredSkills || []
           });
+        } else {
+          // Fallback to fetching the role if not included
+          const roleRes = await fetch(`/api/interview/roles/${roleId}`);
+          if (roleRes.ok) {
+            const role = await roleRes.json();
+            pathSteps.push({
+              title: role.title,
+              subtitle: "Current Position",
+              description: "Your current career position or target role",
+              timeEstimate: "Present",
+              keySkills: role.requiredSkills || []
+            });
+          }
         }
         
         // Next role step

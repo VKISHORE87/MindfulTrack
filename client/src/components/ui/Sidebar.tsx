@@ -41,8 +41,8 @@ export default function Sidebar({ user, currentRoute }: SidebarProps) {
       <nav className="flex-1 px-2 py-4 space-y-1">
         {navItems.map((item) => (
           <Link key={item.href} href={item.href}>
-            <a 
-              className={`flex items-center px-4 py-2 rounded-lg ${
+            <div 
+              className={`flex items-center px-4 py-2 rounded-lg cursor-pointer ${
                 currentRoute === item.href || 
                 (item.href === '/dashboard' && currentRoute === '/') 
                   ? 'text-gray-900 bg-gray-100' 
@@ -51,14 +51,14 @@ export default function Sidebar({ user, currentRoute }: SidebarProps) {
             >
               {item.icon}
               {item.label}
-            </a>
+            </div>
           </Link>
         ))}
       </nav>
       
       <div className="p-4 border-t border-gray-200">
         <Link href="/profile">
-          <a className="flex items-center">
+          <div className="flex items-center cursor-pointer">
             <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold">
               {user.name.charAt(0)}
             </div>
@@ -66,7 +66,7 @@ export default function Sidebar({ user, currentRoute }: SidebarProps) {
               <p className="text-sm font-medium">{user.name}</p>
               <p className="text-xs text-gray-500">{user.role || 'User'}</p>
             </div>
-          </a>
+          </div>
         </Link>
       </div>
     </aside>
