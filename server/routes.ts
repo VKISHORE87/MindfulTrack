@@ -2096,6 +2096,167 @@ Return a JSON response with the following structure:
               averageSalary: "140000",
               growthRate: "14.5",
               demandScore: 8
+            },
+            // Legal Industry Roles
+            {
+              title: "Legal Associate",
+              industry: "Legal",
+              level: "Mid-level",
+              roleType: "legal",
+              description: "Provides legal support and conducts research for cases and transactions",
+              requiredSkills: ["Legal Research", "Contract Review", "Legal Writing", "Case Analysis", "Client Communication", "Legal Documentation", "Regulatory Compliance", "Litigation Support", "Legal Technology"],
+              averageSalary: "95000",
+              growthRate: "8.5",
+              demandScore: 7
+            },
+            {
+              title: "Corporate Counsel",
+              industry: "Legal",
+              level: "Senior",
+              roleType: "legal",
+              description: "Advises organizations on legal matters and ensures compliance with laws and regulations",
+              requiredSkills: ["Corporate Law", "Contract Negotiation", "Regulatory Compliance", "Risk Assessment", "Intellectual Property", "Employment Law", "Dispute Resolution", "Business Acumen", "Legal Strategy"],
+              averageSalary: "145000",
+              growthRate: "7.0",
+              demandScore: 7
+            },
+            // Consulting Industry Roles
+            {
+              title: "Management Consultant",
+              industry: "Consulting",
+              level: "Mid-level",
+              roleType: "business",
+              description: "Helps organizations improve performance and solve business challenges",
+              requiredSkills: ["Business Analysis", "Problem Solving", "Strategic Thinking", "Project Management", "Client Management", "Data Analysis", "Research", "Process Improvement", "Presentation Skills"],
+              averageSalary: "105000",
+              growthRate: "11.0",
+              demandScore: 8
+            },
+            {
+              title: "Strategy Consultant",
+              industry: "Consulting",
+              level: "Senior",
+              roleType: "business",
+              description: "Advises organizations on high-level strategic decisions and initiatives",
+              requiredSkills: ["Strategic Planning", "Market Analysis", "Financial Modeling", "Competitive Analysis", "Business Case Development", "Executive Communication", "Industry Knowledge", "Change Management", "Due Diligence"],
+              averageSalary: "155000",
+              growthRate: "9.5",
+              demandScore: 8
+            },
+            // Operations Industry Roles
+            {
+              title: "Operations Manager",
+              industry: "Operations",
+              level: "Mid-level",
+              roleType: "operations",
+              description: "Oversees daily operations and ensures efficiency in production or service delivery",
+              requiredSkills: ["Process Optimization", "Team Management", "Resource Allocation", "Performance Metrics", "Quality Control", "Project Management", "Supply Chain Knowledge", "Continuous Improvement", "Problem Solving"],
+              averageSalary: "85000",
+              growthRate: "9.0",
+              demandScore: 7
+            },
+            {
+              title: "Supply Chain Manager",
+              industry: "Operations",
+              level: "Senior",
+              roleType: "operations",
+              description: "Oversees the end-to-end supply chain process from suppliers to customers",
+              requiredSkills: ["Supply Chain Management", "Logistics", "Inventory Management", "Demand Planning", "Vendor Management", "Cost Optimization", "Risk Management", "ERP Systems", "Global Trade Knowledge"],
+              averageSalary: "115000",
+              growthRate: "10.5",
+              demandScore: 8
+            },
+            // Human Resources Roles
+            {
+              title: "HR Business Partner",
+              industry: "Human Resources",
+              level: "Mid-level",
+              roleType: "human_resources",
+              description: "Partners with business units to develop and implement HR strategies",
+              requiredSkills: ["Employee Relations", "Performance Management", "Talent Development", "HR Policies", "Change Management", "Business Acumen", "Conflict Resolution", "Recruitment", "Employee Engagement"],
+              averageSalary: "90000",
+              growthRate: "8.5",
+              demandScore: 7
+            },
+            {
+              title: "Talent Acquisition Manager",
+              industry: "Human Resources",
+              level: "Senior",
+              roleType: "human_resources",
+              description: "Leads recruitment strategies and processes to attract and hire top talent",
+              requiredSkills: ["Recruitment Strategy", "Candidate Assessment", "Employer Branding", "ATS Systems", "Interview Techniques", "Market Analysis", "Diversity & Inclusion", "Negotiation", "Talent Pipeline Development"],
+              averageSalary: "105000",
+              growthRate: "9.0",
+              demandScore: 7
+            },
+            // Research Industry Roles
+            {
+              title: "Research Scientist",
+              industry: "Research",
+              level: "Mid-level",
+              roleType: "research",
+              description: "Conducts scientific research and experiments to advance knowledge in a specialized field",
+              requiredSkills: ["Research Methodology", "Statistical Analysis", "Scientific Writing", "Data Collection", "Experiment Design", "Literature Review", "Research Ethics", "Grant Writing", "Problem Solving"],
+              averageSalary: "95000",
+              growthRate: "10.0",
+              demandScore: 7
+            },
+            {
+              title: "Principal Researcher",
+              industry: "Research",
+              level: "Senior",
+              roleType: "research",
+              description: "Leads research programs and teams to explore new frontiers in a scientific domain",
+              requiredSkills: ["Advanced Research Methods", "Team Leadership", "Research Strategy", "Publishing", "Grant Management", "Interdisciplinary Collaboration", "Mentoring", "Technical Expertise", "Research Program Development"],
+              averageSalary: "135000",
+              growthRate: "8.5",
+              demandScore: 7
+            },
+            // Cybersecurity Industry Roles
+            {
+              title: "Cybersecurity Analyst",
+              industry: "Tech",
+              level: "Mid-level",
+              roleType: "technical",
+              description: "Protects computer systems and networks from cyber threats and security breaches",
+              requiredSkills: ["Network Security", "Vulnerability Assessment", "Security Monitoring", "Incident Response", "Security Tools", "Threat Intelligence", "Security Compliance", "Risk Assessment", "Security Protocols"],
+              averageSalary: "95000",
+              growthRate: "31.0",
+              demandScore: 10
+            },
+            {
+              title: "Security Architect",
+              industry: "Tech",
+              level: "Senior",
+              roleType: "technical",
+              description: "Designs and implements secure computer systems, networks, and architectures",
+              requiredSkills: ["Security Architecture", "Security Frameworks", "Risk Management", "Identity & Access Management", "Security Controls", "Network Architecture", "Cloud Security", "Security Governance", "Cryptography"],
+              averageSalary: "140000",
+              growthRate: "25.0",
+              demandScore: 9
+            },
+            // Cloud Computing Roles
+            {
+              title: "Cloud Engineer",
+              industry: "Tech",
+              level: "Mid-level",
+              roleType: "technical",
+              description: "Designs, implements, and manages cloud-based systems and infrastructure",
+              requiredSkills: ["Cloud Platforms (AWS/Azure/GCP)", "Infrastructure as Code", "Containerization", "CI/CD Pipelines", "Serverless Architecture", "Cloud Security", "Networking", "Monitoring & Logging", "Scripting"],
+              averageSalary: "115000",
+              growthRate: "22.0",
+              demandScore: 9
+            },
+            {
+              title: "Cloud Architect",
+              industry: "Tech",
+              level: "Senior",
+              roleType: "technical",
+              description: "Designs and oversees cloud computing strategies and solutions for organizations",
+              requiredSkills: ["Multi-Cloud Strategy", "Solution Architecture", "Cloud Migration", "Distributed Systems", "Cost Optimization", "Security Architecture", "Performance Tuning", "Enterprise Integration", "Governance"],
+              averageSalary: "150000",
+              growthRate: "20.0",
+              demandScore: 9
             }
           ];
           
