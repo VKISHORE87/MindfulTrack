@@ -23,7 +23,7 @@ import {
   Layers 
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { InterviewRole } from "../../shared/schema";
+import { InterviewRole } from "../../../shared/schema";
 
 export default function CareerTransitionsPage() {
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);

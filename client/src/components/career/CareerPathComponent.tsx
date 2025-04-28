@@ -45,7 +45,64 @@ const CareerPathComponent: React.FC<CareerPathComponentProps> = ({ roleId }) => 
         }
         throw new Error('Failed to fetch career path data');
       }
-      return res.json();
+      
+      const path = await res.json();
+      
+      // Transform the DB data into our UI-specific format
+      // This would normally be done on the server, but for now we'll do it here
+      if (path) {
+        // Create path steps from the career path data
+        const pathSteps: PathStep[] = [];
+        
+        // Previous role step
+        if (path.previousRole) {
+          pathSteps.push({
+            title: path.previousRole,
+            subtitle: "Previous Position",
+            description: "The common role that precedes this career position",
+            timeEstimate: "Past",
+            keySkills: ["Foundation skills for this career track"]
+          });
+        }
+        
+        // Current role - using the role ID to get the current role info
+        const roleRes = await fetch(`/api/interview/roles/${roleId}`);
+        if (roleRes.ok) {
+          const role = await roleRes.json();
+          pathSteps.push({
+            title: role.title,
+            subtitle: "Current Position",
+            description: "Your current career position or target role",
+            timeEstimate: "Present",
+            keySkills: role.requiredSkills || []
+          });
+        }
+        
+        // Next role step
+        if (path.nextRole) {
+          pathSteps.push({
+            title: path.nextRole,
+            subtitle: "Next Position",
+            description: `Takes approximately ${path.yearsToProgress || 2}-${(path.yearsToProgress || 2) + 1} years to progress`,
+            timeEstimate: `${path.yearsToProgress || 2} years`,
+            keySkills: path.skillsToAcquire || []
+          });
+        }
+        
+        // Sample resources based on skills to acquire
+        const resources: PathResource[] = (path.skillsToAcquire || []).slice(0, 2).map(skill => ({
+          title: `Master ${skill}`,
+          provider: "Upcraft Learning",
+          type: "Course",
+          url: "#"
+        }));
+        
+        // Add the UI-specific fields to the path
+        path.pathSteps = pathSteps;
+        path.resources = resources;
+      }
+      
+      return path;
     },
     enabled: !!roleId,
   });

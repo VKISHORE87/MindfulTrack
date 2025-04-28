@@ -1632,6 +1632,25 @@ Return a JSON response with the following structure:
     }
   );
   
+  // Get career path by role ID - THIS MUST COME BEFORE THE /:id ROUTE!
+  app.get(
+    "/api/career/paths/role/:roleId",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const roleId = parseInt(req.params.roleId);
+        const careerPath = await storage.getCareerPathByRoleId(roleId);
+        
+        if (!careerPath) {
+          return res.status(404).json({ message: "Career path not found for this role" });
+        }
+        
+        res.json(careerPath);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+  
   // Get career path by ID
   app.get(
     "/api/career/paths/:id",
