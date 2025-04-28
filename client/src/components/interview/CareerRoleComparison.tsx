@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Loader2, ArrowRight, TrendingUp, DollarSign, BarChart4, CheckCircle } from "lucide-react";
+import { Loader2, ArrowRight, TrendingUp, DollarSign, BarChart4, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
@@ -587,6 +587,9 @@ export default function CareerRoleComparison() {
                                 {skill.status === 'partial' && (
                                   <Badge variant="outline" className="ml-2 text-xs bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Improvement Needed</Badge>
                                 )}
+                                {skill.status === 'proficient' && (
+                                  <Badge variant="outline" className="ml-2 text-xs bg-green-100 text-green-800 hover:bg-green-100">Proficient</Badge>
+                                )}
                               </div>
                               <span className="text-sm text-gray-500">
                                 Current: {skill.currentLevel}% | Required: {skill.requiredLevel}%
@@ -597,7 +600,11 @@ export default function CareerRoleComparison() {
                               max={skill.requiredLevel} 
                               className="h-2"
                               style={{
-                                backgroundColor: skill.status === 'missing' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)'
+                                backgroundColor: skill.status === 'missing' 
+                                  ? 'rgba(239, 68, 68, 0.2)' 
+                                  : skill.status === 'partial'
+                                    ? 'rgba(245, 158, 11, 0.2)'
+                                    : 'rgba(34, 197, 94, 0.2)'
                               }}
                             />
                             <div className="text-sm flex justify-between items-center">
@@ -620,10 +627,24 @@ export default function CareerRoleComparison() {
                         ))}
                         
                         {skillGaps.length === 0 && (
-                          <div className="text-center py-8 bg-green-50 rounded-md border border-green-200">
-                            <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                            <p className="text-green-800">Congratulations! You already have all the skills needed for the target role.</p>
-                          </div>
+                          <>
+                            {(!currentRole?.requiredSkills?.length || !targetRole?.requiredSkills?.length) ? (
+                              <div className="text-center py-8 bg-gray-50 rounded-md border border-gray-200">
+                                <AlertCircle className="h-8 w-8 text-amber-500 mx-auto mb-2" />
+                                <p className="text-gray-800 font-medium">Missing skill data for comparison</p>
+                                <p className="text-gray-600 text-sm mt-2">
+                                  {!currentRole?.requiredSkills?.length && "Current role has no skills defined. "}
+                                  {!targetRole?.requiredSkills?.length && "Target role has no skills defined."}
+                                </p>
+                                <p className="text-gray-600 text-sm mt-2">Please try selecting different roles with defined skill sets.</p>
+                              </div>
+                            ) : (
+                              <div className="text-center py-8 bg-green-50 rounded-md border border-green-200">
+                                <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                                <p className="text-green-800">Congratulations! You already have all the skills needed for the target role.</p>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
