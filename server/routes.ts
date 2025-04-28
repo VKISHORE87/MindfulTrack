@@ -43,6 +43,18 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
+// Helper function to format timeline months in a human-readable way
+function formatTimelineMonths(months: number): string {
+  if (months < 12) {
+    return `${months} months`;
+  } else if (months % 12 === 0) {
+    const years = months / 12;
+    return `${years} ${years === 1 ? 'year' : 'years'}`;
+  } else {
+    return `${months} months`;
+  }
+}
+
 // Utility function to convert user data for OpenAI
 function formatUserDataForAI(user: any, userSkills: any[], careerGoals: any[], learningHistory: any[] = [], learningPreferences: any = {}) {
   return {
@@ -1381,7 +1393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           careerGoal: primaryCareerGoal ? {
             id: primaryCareerGoal.id,
             title: primaryCareerGoal.title,
-            timeline: `Target timeline: ${primaryCareerGoal.timelineMonths} months`,
+            timeline: `Target timeline: ${formatTimelineMonths(primaryCareerGoal.timelineMonths)}`,
             readiness: overallProgress
           } : null,
           learningPath: primaryLearningPath,
