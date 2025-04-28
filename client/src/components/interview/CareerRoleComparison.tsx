@@ -180,22 +180,36 @@ export default function CareerRoleComparison() {
 
   // Calculate skill gaps by comparing current role skills with target role skills
   const calculateSkillGaps = () => {
-    if (!currentRole || !targetRole) return;
+    if (!currentRole || !targetRole) {
+      console.error("Role data missing for skill gap calculation", { currentRole, targetRole });
+      return;
+    }
 
     // Get skills from both roles
     const currentSkills = currentRole.requiredSkills || [];
     const targetSkills = targetRole.requiredSkills || [];
     
+    console.log("Processing skill gaps between:", { 
+      currentRole: currentRole.title, 
+      currentSkills, 
+      targetRole: targetRole.title, 
+      targetSkills 
+    });
+    
     // Create a mapping of current skills with an assumed proficiency level
     const currentSkillsMap = new Map();
     currentSkills.forEach(skill => {
-      currentSkillsMap.set(skill.toLowerCase(), 80); // Assume 80% proficiency in current role skills
+      if (skill) {
+        currentSkillsMap.set(skill.toLowerCase(), 80); // Assume 80% proficiency in current role skills
+      }
     });
     
     const calculatedGaps: SkillGap[] = [];
     
     // For each target skill, check if it exists in current skills
     targetSkills.forEach(skill => {
+      if (!skill) return; // Skip null or undefined skills
+      
       const skillName = skill;
       const requiredLevel = 90; // Assume 90% proficiency needed for target role
       
@@ -214,16 +228,14 @@ export default function CareerRoleComparison() {
         status = 'partial'; // Skill exists but needs further development
       }
       
-      // Only add skills with a gap
-      if (gap > 0) {
-        calculatedGaps.push({
-          skillName,
-          currentLevel,
-          requiredLevel,
-          gap,
-          status
-        });
-      }
+      // Add all target skills to show complete comparison
+      calculatedGaps.push({
+        skillName,
+        currentLevel,
+        requiredLevel,
+        gap,
+        status
+      });
     });
     
     // Sort gaps by status (missing first, then partial) and then by gap size
