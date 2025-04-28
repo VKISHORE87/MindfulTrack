@@ -38,7 +38,7 @@ export function AdminPanel() {
       });
       
       // Invalidate roles cache so the UI updates
-      queryClient.invalidateQueries(['/api/interview/roles']);
+      queryClient.invalidateQueries({ queryKey: ['/api/interview/roles'] });
       
       toast({
         title: "Success",
@@ -72,7 +72,7 @@ export function AdminPanel() {
       });
       
       // Invalidate roles cache so the UI updates
-      queryClient.invalidateQueries(['/api/interview/roles']);
+      queryClient.invalidateQueries({ queryKey: ['/api/interview/roles'] });
       
       toast({
         title: "Success",

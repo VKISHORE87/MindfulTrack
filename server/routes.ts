@@ -3619,6 +3619,50 @@ Return a JSON response with the following structure:
             averageSalary: "100000",
             growthRate: "13.2",
             demandScore: 8
+          },
+          {
+            title: "Scrum Master",
+            industry: "consulting",
+            level: "mid",
+            roleType: "business",
+            description: "Facilitates agile development processes and removes team obstacles",
+            requiredSkills: ["Scrum Framework", "Agile Methodologies", "Facilitation", "Coaching", "Conflict Resolution", "Process Improvement", "Team Building", "Servant Leadership"],
+            averageSalary: "105000",
+            growthRate: "14.9",
+            demandScore: 8
+          },
+          {
+            title: "Agile Coach",
+            industry: "consulting",
+            level: "senior",
+            roleType: "business",
+            description: "Guides organizations in adopting and improving agile practices",
+            requiredSkills: ["Agile Frameworks", "Coaching", "Change Management", "Team Development", "Process Design", "Leadership", "Continuous Improvement", "Organizational Development"],
+            averageSalary: "130000",
+            growthRate: "15.7",
+            demandScore: 8
+          },
+          {
+            title: "Agile Project Manager",
+            industry: "consulting",
+            level: "mid",
+            roleType: "business",
+            description: "Manages projects using agile methodologies and practices",
+            requiredSkills: ["Agile Project Management", "Scrum", "Kanban", "Sprint Planning", "Stakeholder Management", "Risk Management", "Team Leadership", "Agile Metrics"],
+            averageSalary: "95000",
+            growthRate: "13.9",
+            demandScore: 8
+          },
+          {
+            title: "Product Owner",
+            industry: "consulting",
+            level: "mid",
+            roleType: "business",
+            description: "Represents stakeholders and defines product features in agile teams",
+            requiredSkills: ["Product Backlog Management", "User Story Creation", "Prioritization", "Stakeholder Management", "Product Vision", "Requirements Analysis", "Acceptance Criteria", "Business Value Assessment"],
+            averageSalary: "110000",
+            growthRate: "16.2",
+            demandScore: 8
           }
         ];
         
