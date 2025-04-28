@@ -10,7 +10,8 @@ import {
   skillValidations, SkillValidation, InsertSkillValidation,
   interviewRoles, InterviewRole, InsertInterviewRole,
   interviewQuestions, InterviewQuestion, InsertInterviewQuestion,
-  interviewSessions, InterviewSession, InsertInterviewSession
+  interviewSessions, InterviewSession, InsertInterviewSession,
+  careerPaths, CareerPath, InsertCareerPath
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, sql, desc } from "drizzle-orm";
@@ -114,6 +115,14 @@ export interface IStorage {
   createInterviewSession(session: InsertInterviewSession): Promise<InterviewSession>;
   updateInterviewSession(id: number, sessionData: Partial<InsertInterviewSession>): Promise<InterviewSession | undefined>;
   deleteInterviewSession(id: number): Promise<boolean>;
+
+  // Career path methods
+  getCareerPath(id: number): Promise<CareerPath | undefined>;
+  getAllCareerPaths(): Promise<CareerPath[]>;
+  getCareerPathByRoleId(roleId: number): Promise<CareerPath | undefined>;
+  createCareerPath(path: InsertCareerPath): Promise<CareerPath>;
+  updateCareerPath(id: number, pathData: Partial<InsertCareerPath>): Promise<CareerPath | undefined>;
+  deleteCareerPath(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -1489,6 +1498,39 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSkillValidation(id: number): Promise<boolean> {
     const result = await db.delete(skillValidations).where(eq(skillValidations.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Career path methods
+  async getCareerPath(id: number): Promise<CareerPath | undefined> {
+    const [path] = await db.select().from(careerPaths).where(eq(careerPaths.id, id));
+    return path;
+  }
+
+  async getAllCareerPaths(): Promise<CareerPath[]> {
+    return await db.select().from(careerPaths);
+  }
+
+  async getCareerPathByRoleId(roleId: number): Promise<CareerPath | undefined> {
+    const [path] = await db.select().from(careerPaths).where(eq(careerPaths.roleId, roleId));
+    return path;
+  }
+
+  async createCareerPath(path: InsertCareerPath): Promise<CareerPath> {
+    const [createdPath] = await db.insert(careerPaths).values(path).returning();
+    return createdPath;
+  }
+
+  async updateCareerPath(id: number, pathData: Partial<InsertCareerPath>): Promise<CareerPath | undefined> {
+    const [updatedPath] = await db.update(careerPaths)
+      .set(pathData)
+      .where(eq(careerPaths.id, id))
+      .returning();
+    return updatedPath;
+  }
+
+  async deleteCareerPath(id: number): Promise<boolean> {
+    const result = await db.delete(careerPaths).where(eq(careerPaths.id, id));
     return result.rowCount > 0;
   }
 }

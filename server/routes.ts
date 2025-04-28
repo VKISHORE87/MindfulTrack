@@ -1613,6 +1613,82 @@ Return a JSON response with the following structure:
       }
     }
   );
+  
+  // =====================
+  // Career Path Routes
+  // =====================
+  
+  // Get all career paths
+  app.get(
+    "/api/career/paths",
+    async (_req: Request, res: Response, next: NextFunction) => {
+      try {
+        const paths = await storage.getAllCareerPaths();
+        res.json(paths);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+  
+  // Get career path by ID
+  app.get(
+    "/api/career/paths/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const pathId = parseInt(req.params.id);
+        const path = await storage.getCareerPath(pathId);
+        
+        if (!path) {
+          return res.status(404).json({ message: "Career path not found" });
+        }
+        
+        res.json(path);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+  
+  // Get career path by role ID
+  app.get(
+    "/api/career/paths/role/:roleId",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const roleId = parseInt(req.params.roleId);
+        const path = await storage.getCareerPathByRoleId(roleId);
+        
+        if (!path) {
+          return res.status(404).json({ message: "Career path not found for this role" });
+        }
+        
+        res.json(path);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+  
+  // Create a new career path
+  app.post(
+    "/api/career/paths",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const pathDataResult = insertCareerPathSchema.safeParse(req.body);
+        if (!pathDataResult.success) {
+          return res.status(400).json({
+            message: "Invalid career path data",
+            errors: pathDataResult.error.errors,
+          });
+        }
+
+        const newPath = await storage.createCareerPath(pathDataResult.data);
+        res.status(201).json(newPath);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
 
   // Get questions by role ID
   app.get(
