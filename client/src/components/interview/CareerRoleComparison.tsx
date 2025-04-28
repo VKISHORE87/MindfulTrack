@@ -57,6 +57,8 @@ export default function CareerRoleComparison() {
   const [currentRoleId, setCurrentRoleId] = useState<string>("");
   const [targetRoleId, setTargetRoleId] = useState<string>("");
   const [industryFilter, setIndustryFilter] = useState<string>("");
+  const [currentRoleSearch, setCurrentRoleSearch] = useState<string>("");
+  const [targetRoleSearch, setTargetRoleSearch] = useState<string>("");
   const [isComparing, setIsComparing] = useState<boolean>(false);
   const [skillGaps, setSkillGaps] = useState<SkillGap[]>([]);
 
@@ -82,11 +84,37 @@ export default function CareerRoleComparison() {
     ? Array.from(new Set(roles.map((role: InterviewRole) => role.industry)))
     : [];
 
-  // Filter roles by industry if set
-  const filteredRoles = roles 
-    ? (industryFilter && industryFilter !== "all_industries")
-      ? roles.filter((role: InterviewRole) => role.industry === industryFilter) 
-      : roles
+  // Filter roles by industry and search terms
+  const filteredCurrentRoles = roles 
+    ? roles.filter((role: InterviewRole) => {
+        // Apply industry filter if set
+        const industryMatch = !industryFilter || industryFilter === "all_industries" || role.industry === industryFilter;
+        
+        // Apply search filter if provided
+        const searchMatch = !currentRoleSearch || 
+          role.title.toLowerCase().includes(currentRoleSearch.toLowerCase()) || 
+          (role.description && role.description.toLowerCase().includes(currentRoleSearch.toLowerCase())) ||
+          role.industry.toLowerCase().includes(currentRoleSearch.toLowerCase()) ||
+          (role.roleType && role.roleType.toLowerCase().includes(currentRoleSearch.toLowerCase()));
+        
+        return industryMatch && searchMatch;
+      })
+    : [];
+    
+  const filteredTargetRoles = roles 
+    ? roles.filter((role: InterviewRole) => {
+        // Apply industry filter if set
+        const industryMatch = !industryFilter || industryFilter === "all_industries" || role.industry === industryFilter;
+        
+        // Apply search filter if provided
+        const searchMatch = !targetRoleSearch || 
+          role.title.toLowerCase().includes(targetRoleSearch.toLowerCase()) || 
+          (role.description && role.description.toLowerCase().includes(targetRoleSearch.toLowerCase())) ||
+          role.industry.toLowerCase().includes(targetRoleSearch.toLowerCase()) ||
+          (role.roleType && role.roleType.toLowerCase().includes(targetRoleSearch.toLowerCase()));
+        
+        return industryMatch && searchMatch;
+      })
     : [];
 
   // Start comparison
@@ -194,34 +222,56 @@ export default function CareerRoleComparison() {
                 
                 <div>
                   <Label htmlFor="current-role-select">Your Current Role</Label>
-                  <Select value={currentRoleId} onValueChange={setCurrentRoleId}>
-                    <SelectTrigger id="current-role-select">
-                      <SelectValue placeholder="Select your current role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filteredRoles.map((role: InterviewRole) => (
-                        <SelectItem key={role.id} value={role.id.toString()}>
-                          {role.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Input
+                        type="text"
+                        placeholder="Search current role..."
+                        value={currentRoleSearch}
+                        onChange={(e) => setCurrentRoleSearch(e.target.value)}
+                        className="mb-2"
+                      />
+                    </div>
+                    <Select value={currentRoleId} onValueChange={setCurrentRoleId}>
+                      <SelectTrigger id="current-role-select">
+                        <SelectValue placeholder="Select your current role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filteredCurrentRoles.map((role: InterviewRole) => (
+                          <SelectItem key={role.id} value={role.id.toString()}>
+                            {role.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 
                 <div>
                   <Label htmlFor="target-role-select">Target Role</Label>
-                  <Select value={targetRoleId} onValueChange={setTargetRoleId}>
-                    <SelectTrigger id="target-role-select">
-                      <SelectValue placeholder="Select your target role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filteredRoles.map((role: InterviewRole) => (
-                        <SelectItem key={role.id} value={role.id.toString()}>
-                          {role.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Input
+                        type="text"
+                        placeholder="Search target role..."
+                        value={targetRoleSearch}
+                        onChange={(e) => setTargetRoleSearch(e.target.value)}
+                        className="mb-2"
+                      />
+                    </div>
+                    <Select value={targetRoleId} onValueChange={setTargetRoleId}>
+                      <SelectTrigger id="target-role-select">
+                        <SelectValue placeholder="Select your target role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filteredTargetRoles.map((role: InterviewRole) => (
+                          <SelectItem key={role.id} value={role.id.toString()}>
+                            {role.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
               
