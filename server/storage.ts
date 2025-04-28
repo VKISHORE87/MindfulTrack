@@ -282,7 +282,8 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    const resourceIds = defaultResources.map(resource => this.createLearningResource(resource).id);
+    // Create the learning resources
+    defaultResources.forEach(resource => this.createLearningResource(resource));
 
     // Create a learning path for Rahul
     const modules = [
@@ -424,7 +425,8 @@ export class MemStorage implements IStorage {
       }
     ];
     
-    const roleIds = defaultInterviewRoles.map(role => this.createInterviewRole(role).id);
+    // Create interview roles
+    defaultInterviewRoles.forEach(role => this.createInterviewRole(role));
     
     // Create interview questions
     const defaultInterviewQuestions = [
