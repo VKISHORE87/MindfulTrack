@@ -43,7 +43,8 @@ interface CareerGoalFormProps {
   existingGoal?: {
     id: number;
     title: string;
-    timeline: string;
+    timeline?: string;
+    timelineMonths?: number;
     readiness: number;
     targetRoleId?: string;
     description?: string;
@@ -62,16 +63,45 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
     placeholderData: [],
   });
 
+  // Helper function to convert months to display format
+  const convertMonthsToTimeline = (months: number): string => {
+    if (months < 12) {
+      return `${months} months`;
+    } else if (months % 12 === 0) {
+      const years = months / 12;
+      return `${years} ${years === 1 ? 'year' : 'years'}`;
+    } else {
+      return `${months} months`;
+    }
+  };
+
+  // Get timelineMonths from existingGoal if it exists
+  const timelineDisplay = existingGoal?.timelineMonths 
+    ? convertMonthsToTimeline(existingGoal.timelineMonths)
+    : existingGoal?.timeline || '';
+
   // Create form instance
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: existingGoal?.title || '',
-      timeline: existingGoal?.timeline || '',
+      timeline: timelineDisplay,
       targetRoleId: existingGoal?.targetRoleId || '',
       description: existingGoal?.description || '',
     },
   });
+
+  // Helper function to convert string timeline to months
+  const convertTimelineToMonths = (timeline: string): number => {
+    if (timeline.includes('months')) {
+      return parseInt(timeline.split(' ')[0]);
+    } else if (timeline.includes('year')) {
+      const years = parseInt(timeline.split(' ')[0]);
+      return years * 12;
+    }
+    // Default to 12 months if format is unknown
+    return 12;
+  };
 
   // Create or update career goal
   const mutation = useMutation({
@@ -82,7 +112,13 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
       
       const method = existingGoal ? 'PATCH' : 'POST';
       
-      const res = await apiRequest(method, endpoint, data);
+      // Convert timeline string to months for API
+      const processedData = {
+        ...data,
+        timelineMonths: convertTimelineToMonths(data.timeline)
+      };
+      
+      const res = await apiRequest(method, endpoint, processedData);
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || 'Failed to save career goal');
