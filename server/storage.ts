@@ -1053,6 +1053,47 @@ export class MemStorage implements IStorage {
   async deleteInterviewSession(id: number): Promise<boolean> {
     return this.interviewSessionsMap.delete(id);
   }
+
+  // Career path methods
+  async getCareerPath(id: number): Promise<CareerPath | undefined> {
+    return this.careerPathsMap.get(id);
+  }
+
+  async getAllCareerPaths(): Promise<CareerPath[]> {
+    return Array.from(this.careerPathsMap.values());
+  }
+
+  async getCareerPathByRoleId(roleId: number): Promise<CareerPath | undefined> {
+    return Array.from(this.careerPathsMap.values())
+      .find(path => path.roleId === roleId);
+  }
+
+  async createCareerPath(path: InsertCareerPath): Promise<CareerPath> {
+    const id = this.currentCareerPathID++;
+    const careerPath: CareerPath = {
+      ...path,
+      id,
+      createdAt: new Date()
+    };
+    this.careerPathsMap.set(id, careerPath);
+    return careerPath;
+  }
+
+  async updateCareerPath(id: number, pathData: Partial<InsertCareerPath>): Promise<CareerPath | undefined> {
+    const currentPath = await this.getCareerPath(id);
+    if (!currentPath) return undefined;
+
+    const updatedPath: CareerPath = {
+      ...currentPath,
+      ...pathData
+    };
+    this.careerPathsMap.set(id, updatedPath);
+    return updatedPath;
+  }
+
+  async deleteCareerPath(id: number): Promise<boolean> {
+    return this.careerPathsMap.delete(id);
+  }
 }
 
 // Database implementation of the storage interface
