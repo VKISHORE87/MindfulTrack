@@ -1891,33 +1891,211 @@ Return a JSON response with the following structure:
           console.log("Creating sample interview roles...");
           
           const sampleRoles = [
+            // Tech Industry Roles
             {
               title: "Frontend Developer",
               industry: "Tech",
               level: "Junior",
+              roleType: "technical",
               description: "Entry-level position focused on UI/UX implementation",
-              requiredSkills: ["JavaScript", "HTML", "CSS", "React"]
+              requiredSkills: ["JavaScript", "HTML", "CSS", "React", "Responsive Design", "Git", "Browser DevTools", "Performance Optimization"],
+              averageSalary: "65000",
+              growthRate: "12.2",
+              demandScore: 8
             },
             {
               title: "Backend Developer",
               industry: "Tech",
               level: "Mid-level",
+              roleType: "technical",
               description: "Backend developer with focus on API design and implementation",
-              requiredSkills: ["Node.js", "Express", "SQL", "REST APIs"]
+              requiredSkills: ["Node.js", "Express", "SQL", "REST APIs", "Database Design", "Authentication", "Security", "Performance Optimization", "Docker"],
+              averageSalary: "95000",
+              growthRate: "14.5",
+              demandScore: 9
             },
             {
               title: "Full Stack Developer",
               industry: "Tech",
               level: "Senior",
+              roleType: "technical",
               description: "Senior developer proficient in both frontend and backend technologies",
-              requiredSkills: ["JavaScript", "React", "Node.js", "SQL", "System Design"]
+              requiredSkills: ["JavaScript", "React", "Node.js", "SQL", "System Design", "Cloud Services", "API Design", "Performance Optimization", "Security", "Team Leadership"],
+              averageSalary: "130000",
+              growthRate: "15.8",
+              demandScore: 9
             },
             {
               title: "Data Scientist",
               industry: "Tech",
               level: "Mid-level",
+              roleType: "technical",
               description: "Data scientist with focus on analysis and machine learning",
-              requiredSkills: ["Python", "SQL", "Machine Learning", "Data Visualization"]
+              requiredSkills: ["Python", "SQL", "Machine Learning", "Data Visualization", "Statistical Analysis", "Deep Learning", "Natural Language Processing", "Data Engineering", "ETL Processes"],
+              averageSalary: "115000",
+              growthRate: "22.0",
+              demandScore: 9
+            },
+            // Finance Industry Roles
+            {
+              title: "Financial Analyst",
+              industry: "Finance",
+              level: "Mid-level",
+              roleType: "finance",
+              description: "Analyzes financial data to help companies make investment decisions",
+              requiredSkills: ["Financial Modeling", "Excel", "Financial Statement Analysis", "Forecasting", "Valuation Methods", "Industry Research", "Data Analysis", "Statistical Software"],
+              averageSalary: "85000",
+              growthRate: "10.5",
+              demandScore: 8
+            },
+            {
+              title: "Investment Banker",
+              industry: "Finance",
+              level: "Senior",
+              roleType: "finance",
+              description: "Advises clients on financial transactions, mergers, and acquisitions",
+              requiredSkills: ["Financial Modeling", "Valuation", "Deal Structuring", "Negotiations", "Client Relationship Management", "Industry Knowledge", "Corporate Finance", "Capital Markets"],
+              averageSalary: "150000",
+              growthRate: "8.0",
+              demandScore: 7
+            },
+            // Healthcare Industry Roles
+            {
+              title: "Clinical Research Coordinator",
+              industry: "Healthcare",
+              level: "Mid-level",
+              roleType: "healthcare",
+              description: "Coordinates and manages clinical trials and research studies",
+              requiredSkills: ["Clinical Trial Management", "Medical Terminology", "Regulatory Compliance", "Data Collection", "Patient Recruitment", "IRB Protocols", "Good Clinical Practice", "Electronic Medical Records"],
+              averageSalary: "70000",
+              growthRate: "11.2",
+              demandScore: 8
+            },
+            {
+              title: "Healthcare Administrator",
+              industry: "Healthcare",
+              level: "Senior",
+              roleType: "healthcare",
+              description: "Manages healthcare facilities and ensures efficient operations",
+              requiredSkills: ["Healthcare Regulations", "Policy Development", "Budget Management", "Staff Supervision", "Quality Improvement", "Healthcare IT Systems", "Strategic Planning", "Operations Management"],
+              averageSalary: "110000",
+              growthRate: "13.0",
+              demandScore: 8
+            },
+            // Education Industry Roles
+            {
+              title: "Instructional Designer",
+              industry: "Education",
+              level: "Mid-level",
+              roleType: "education",
+              description: "Develops educational content and learning experiences",
+              requiredSkills: ["Learning Experience Design", "Curriculum Development", "E-Learning Tools", "Assessment Design", "Educational Technology", "Adult Learning Theory", "Multimedia Content Creation", "Project Management"],
+              averageSalary: "75000",
+              growthRate: "10.0",
+              demandScore: 7
+            },
+            {
+              title: "EdTech Product Manager",
+              industry: "Education",
+              level: "Senior",
+              roleType: "education",
+              description: "Manages the development and implementation of educational technology products",
+              requiredSkills: ["Product Management", "Educational Technology", "User Research", "Product Roadmapping", "Agile Methodologies", "Learning Experience Design", "Data Analytics", "Market Research"],
+              averageSalary: "105000",
+              growthRate: "14.5",
+              demandScore: 8
+            },
+            // Marketing Industry Roles
+            {
+              title: "Digital Marketing Specialist",
+              industry: "Marketing",
+              level: "Mid-level",
+              roleType: "marketing",
+              description: "Plans and executes digital marketing strategies across various platforms",
+              requiredSkills: ["SEO", "SEM", "Social Media Marketing", "Content Marketing", "Email Marketing", "Analytics Tools", "A/B Testing", "Campaign Management", "Marketing Automation"],
+              averageSalary: "72000",
+              growthRate: "16.2",
+              demandScore: 8
+            },
+            {
+              title: "Brand Manager",
+              industry: "Marketing",
+              level: "Senior",
+              roleType: "marketing",
+              description: "Develops and implements brand strategies to increase brand value and recognition",
+              requiredSkills: ["Brand Strategy", "Market Research", "Consumer Behavior", "Campaign Management", "Creative Direction", "Budget Management", "Stakeholder Management", "Content Strategy", "Competitive Analysis"],
+              averageSalary: "110000",
+              growthRate: "9.8",
+              demandScore: 7
+            },
+            // Design Industry Roles
+            {
+              title: "UX/UI Designer",
+              industry: "Design",
+              level: "Mid-level",
+              roleType: "creative",
+              description: "Creates user-centered designs for digital products and experiences",
+              requiredSkills: ["User Research", "Wireframing", "Prototyping", "Usability Testing", "Information Architecture", "Visual Design", "Design Systems", "Figma/Sketch/Adobe XD", "Interaction Design"],
+              averageSalary: "90000",
+              growthRate: "18.5",
+              demandScore: 9
+            },
+            {
+              title: "Product Designer",
+              industry: "Design",
+              level: "Senior",
+              roleType: "creative",
+              description: "Designs end-to-end product experiences combining UX, visual design, and product thinking",
+              requiredSkills: ["Design Systems", "User-Centered Design", "Prototyping", "Interaction Design", "Visual Design", "User Research", "Design Thinking", "A/B Testing", "Cross-functional Collaboration"],
+              averageSalary: "120000",
+              growthRate: "15.0",
+              demandScore: 8
+            },
+            // Data Industry Roles
+            {
+              title: "Data Analyst",
+              industry: "Tech",
+              level: "Mid-level",
+              roleType: "technical",
+              description: "Analyzes complex data sets to identify trends and insights for business decision-making",
+              requiredSkills: ["SQL", "Data Visualization", "Excel/Sheets", "Statistical Analysis", "Python/R", "Business Intelligence Tools", "Critical Thinking", "Data Cleaning", "Dashboard Design"],
+              averageSalary: "80000",
+              growthRate: "20.0",
+              demandScore: 9
+            },
+            {
+              title: "Data Engineer",
+              industry: "Tech",
+              level: "Senior",
+              roleType: "technical",
+              description: "Builds and maintains data pipelines and infrastructure for data processing",
+              requiredSkills: ["Big Data Technologies", "ETL Processes", "SQL", "NoSQL Databases", "Data Warehouse Solutions", "Python/Scala", "Cloud Platforms", "Data Modeling", "Distributed Computing"],
+              averageSalary: "125000",
+              growthRate: "25.5",
+              demandScore: 9
+            },
+            // Product Management Roles
+            {
+              title: "Product Manager",
+              industry: "Tech",
+              level: "Mid-level",
+              roleType: "business",
+              description: "Manages product development from conception to launch, balancing business needs with user experience",
+              requiredSkills: ["Product Strategy", "User Research", "Market Analysis", "Roadmapping", "Agile Methodologies", "Stakeholder Management", "Data Analysis", "Prioritization", "Technical Understanding"],
+              averageSalary: "110000",
+              growthRate: "17.0",
+              demandScore: 9
+            },
+            {
+              title: "Senior Product Manager",
+              industry: "Tech",
+              level: "Senior",
+              roleType: "business",
+              description: "Leads complex product initiatives, driving vision and strategy across multiple teams",
+              requiredSkills: ["Product Strategy", "Team Leadership", "Market Research", "Business Model Development", "Stakeholder Management", "KPI Definition", "Product Analytics", "Cross-functional Leadership", "User Experience Design"],
+              averageSalary: "140000",
+              growthRate: "14.5",
+              demandScore: 8
             }
           ];
           
