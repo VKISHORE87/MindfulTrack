@@ -152,6 +152,12 @@ export default function Dashboard({ user }: { user: any }) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Skill Gap Analysis */}
             <div className="lg:col-span-3">
+              {/* Debug info */}
+              {process.env.NODE_ENV !== 'production' && (
+                <div className="text-xs text-gray-400 mb-2">
+                  Debug - Target Role ID: {dashboardData?.careerGoal?.targetRoleId || 'not set'} (type: {typeof dashboardData?.careerGoal?.targetRoleId})
+                </div>
+              )}
               <SkillGapAnalysis 
                 skillGaps={dashboardData?.skillGaps || []} 
                 userId={user.id} 
