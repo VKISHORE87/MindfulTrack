@@ -56,7 +56,7 @@ export default function Dashboard({ user }: { user: any }) {
             className="gap-2"
             onClick={() => window.location.href = "/career-transitions"}
           >
-            <Briefcase className="h-4 w-4" />
+            <PanelLeft className="h-4 w-4" />
             Explore Career Options
           </Button>
           

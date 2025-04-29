@@ -3002,7 +3002,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Get career goals
         const careerGoals = await storage.getCareerGoalsByUserId(userId);
-        const primaryCareerGoal = careerGoals.length > 0 ? careerGoals[0] : null;
+        // Sort career goals by creation date (newest first) to ensure we get the latest one
+        const sortedCareerGoals = [...careerGoals].sort((a, b) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        const primaryCareerGoal = sortedCareerGoals.length > 0 ? sortedCareerGoals[0] : null;
 
         // Get learning paths
         const learningPaths = await storage.getLearningPathsByUserId(userId);
