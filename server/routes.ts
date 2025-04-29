@@ -1560,14 +1560,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   hasSkills: Array.isArray(targetRole.requiredSkills)
                 } : 'Not found');
                 
-                if (targetRole && Array.isArray(targetRole.requiredSkills)) {
+                if (targetRole && Array.isArray(targetRole.requiredSkills) && targetRole.requiredSkills.length > 0) {
+                  console.log("[DEBUG] Processing target role skills for keySkills");
+                  
                   // Map the current user skills to a lookup object
                   const userSkillsMap = new Map(
                     userSkills.map(skill => [skill.skillName.toLowerCase(), skill])
                   );
                   
                   // For each target skill, check if user has it
-                  return targetRole.requiredSkills
+                  const targetSkills = targetRole.requiredSkills
                     .filter(skill => skill && typeof skill === 'string')
                     .map(skillName => {
                       const userSkill = userSkillsMap.get(skillName.toLowerCase());
@@ -1604,12 +1606,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       return a.percentage - b.percentage;
                     })
                     .slice(0, 5); // Top 5 skills to focus on
+                  
+                  console.log("[DEBUG] Target role skills processed:", targetSkills.map(s => s.name));
+                  return targetSkills;
+                } else {
+                  console.log("[DEBUG] Target role has no skills or is invalid, falling back to user skills");
                 }
               } catch (error) {
                 console.error("Error fetching target role skills:", error);
               }
             }
             
+            console.log("[DEBUG] Using fallback skills (user's current skills with lowest percentages)");
             // Fallback to user's current skills with lowest percentages
             return userSkills
               .map(skill => ({
