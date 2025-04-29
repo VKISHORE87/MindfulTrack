@@ -228,11 +228,9 @@ export default function CareerGoals({ id, title, timeline, readiness, skills = [
                   <h4 className="font-medium">Skill Gap Analysis</h4>
                 </div>
                 <div className="pl-10">
-                  <Link href="/assessment?tab=skill-gap">
-                    <a className="text-sm font-medium text-primary hover:text-primary-800 flex items-center">
-                      View detailed skill gap analysis
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </a>
+                  <Link href="/assessment?tab=skill-gap" className="text-sm font-medium text-primary hover:text-primary-800 flex items-center">
+                    View detailed skill gap analysis
+                    <ChevronRight className="h-4 w-4 ml-1" />
                   </Link>
                 </div>
               </div>

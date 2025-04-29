@@ -36,12 +36,16 @@ export default function SkillAssessmentForm({ skills, userSkills, userId }: Skil
   const [skillLevels, setSkillLevels] = useState<Record<number, { current: number; target: number }>>(() => {
     const initialLevels: Record<number, { current: number; target: number }> = {};
     
-    // Initialize with existing user skills or defaults
+    // Initialize with existing user skills for current level, but always use industry standard for target level
     skills.forEach(skill => {
       const userSkill = userSkills?.find(us => us.skillId === skill.id);
+      
+      // Always use industry standard as target level if available, regardless of user's previous setting
+      const targetLevel = skill.industryStandardLevel || 75; // Default to 75% if no industry standard
+      
       initialLevels[skill.id] = {
         current: userSkill?.currentLevel || 0,
-        target: userSkill?.targetLevel || skill.industryStandardLevel || 75 // Use industry standard if available
+        target: targetLevel
       };
     });
     
@@ -181,28 +185,6 @@ export default function SkillAssessmentForm({ skills, userSkills, userId }: Skil
                     <div className="flex items-center">
                       <h4 className="font-medium text-lg">{skill.name}</h4>
                       
-                      {/* Industry standard badge */}
-                      {skill.industryStandardLevel && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge 
-                                variant="outline" 
-                                className="ml-3 hover:bg-gray-100 cursor-help"
-                              >
-                                Industry: {skill.industryStandardLevel}%
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="max-w-xs">
-                                Industry standard proficiency level for {skill.name} in this role is {skill.industryStandardLevel}% 
-                                ({getSkillLevelDescription(skill.industryStandardLevel)}).
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                      
                       {expandedSkills[skill.id] && 
                         <p className="text-sm text-gray-500 mt-1 ml-3">{skill.description}</p>
                       }
@@ -339,8 +321,8 @@ export default function SkillAssessmentForm({ skills, userSkills, userId }: Skil
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p>
-                                      Industry standard is {skill.industryStandardLevel}%. 
-                                      Click to reset to industry standard.
+                                      Industry standard for this skill is {skill.industryStandardLevel}%. 
+                                      This is your recommended target proficiency level.
                                     </p>
                                   </TooltipContent>
                                 </Tooltip>
@@ -358,7 +340,7 @@ export default function SkillAssessmentForm({ skills, userSkills, userId }: Skil
                               }}
                               className="text-xs h-7"
                             >
-                              Reset to Industry Standard
+                              Use Recommended Level
                             </Button>
                           )}
                         </div>
@@ -388,7 +370,7 @@ export default function SkillAssessmentForm({ skills, userSkills, userId }: Skil
                                 marginTop: '-10px' 
                               }}
                             >
-                              Industry standard
+                              Recommended level
                             </div>
                           </div>
                         )}
