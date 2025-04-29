@@ -865,10 +865,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // In production, we would check if user is creating a skill for themselves 
         // For development, we allow any access for testing purposes
 
-        // Check if the skill exists
-        const existingSkill = await storage.getSkill(skillDataResult.data.skillId);
-        if (!existingSkill) {
-          return res.status(404).json({ message: "Skill not found" });
+        // Handle negative skillIds (virtual role-specific skills)
+        const skillId = skillDataResult.data.skillId;
+        let skillName = "";
+        let actualSkillId = skillId;
+        
+        if (skillId < 0) {
+          // This is a virtual skill from a target role
+          // First, try to find if we have a matching skill in the database by name
+          // Get the role that this skill might be associated with
+          const userCareerGoals = await storage.getCareerGoalsByUserId(skillDataResult.data.userId);
+          if (userCareerGoals.length > 0 && userCareerGoals[0].targetRoleId) {
+            const targetRoleId = parseInt(userCareerGoals[0].targetRoleId);
+            const role = await storage.getInterviewRole(targetRoleId);
+            
+            if (role && Array.isArray(role.requiredSkills)) {
+              // Find which skill this negative ID corresponds to
+              // We used negative index-based IDs when creating virtual skills
+              const skillIndex = Math.abs(skillId) - 1; // Convert back to 0-based index
+              if (skillIndex < role.requiredSkills.length) {
+                skillName = role.requiredSkills[skillIndex];
+                
+                // Try to find an existing skill with this name
+                const allSkills = await storage.getAllSkills();
+                const matchingSkill = allSkills.find(
+                  s => s.name.toLowerCase() === skillName.toLowerCase()
+                );
+                
+                if (matchingSkill) {
+                  actualSkillId = matchingSkill.id; // Use the real skill ID
+                } else {
+                  // Create the skill in the database
+                  const newSkill = await storage.createSkill({
+                    name: skillName,
+                    category: "technical", // Default category
+                    description: `Skill required for ${role.title} role`
+                  });
+                  actualSkillId = newSkill.id;
+                }
+              } else {
+                return res.status(404).json({ message: "Invalid skill index for role" });
+              }
+            }
+          }
+          
+          if (actualSkillId === skillId) {
+            // We couldn't resolve the virtual skill
+            return res.status(404).json({ message: "Could not resolve virtual skill" });
+          }
+          
+          // Update the skill ID with the actual ID
+          skillDataResult.data.skillId = actualSkillId;
+        } else {
+          // Check if the skill exists for positive IDs
+          const existingSkill = await storage.getSkill(skillId);
+          if (!existingSkill) {
+            return res.status(404).json({ message: "Skill not found" });
+          }
+          skillName = existingSkill.name;
         }
 
         // Check if user already has this skill
@@ -888,8 +942,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.createUserActivity({
           userId: skillDataResult.data.userId,
           activityType: "updated_skill",
-          description: `Updated skill: ${existingSkill.name}`,
-          metadata: { skillId: existingSkill.id, currentLevel: skillDataResult.data.currentLevel }
+          description: `Updated skill: ${skillName}`,
+          metadata: { skillId: actualSkillId, currentLevel: skillDataResult.data.currentLevel }
         });
 
         res.status(201).json(result);
