@@ -6715,3 +6715,255 @@ Return a JSON response with the following structure:
   const httpServer = createServer(app);
   return httpServer;
 }
+    const roleTitleLower = roleTitle.toLowerCase();
+    const industryLower = industry?.toLowerCase() || "";
+    
+    // Default categories
+    const technicalCategory = "Technical Skills";
+    const softCategory = "Soft Skills";
+    const domainCategory = "Domain Knowledge";
+    const toolsCategory = "Tools & Technologies";
+    const managementCategory = "Management Skills";
+    
+    // Common soft skills that apply to most roles
+    const commonSoftSkills = [
+      { name: "Communication", category: softCategory, description: "Ability to communicate clearly and effectively with team members and stakeholders" },
+      { name: "Problem Solving", category: softCategory, description: "Ability to identify, analyze, and solve complex problems" },
+      { name: "Teamwork", category: softCategory, description: "Ability to work effectively within a team environment" },
+      { name: "Time Management", category: softCategory, description: "Ability to prioritize tasks and manage time effectively" }
+    ];
+    
+    // Role-specific skills
+    let roleSpecificSkills: Array<{ name: string; category: string; description?: string }> = [];
+    
+    // Software Development Roles
+    if (roleTitleLower.includes("frontend") || roleTitleLower.includes("front end") || roleTitleLower.includes("front-end")) {
+      roleSpecificSkills = [
+        { name: "HTML/CSS", category: technicalCategory, description: "Proficiency in creating structured, responsive web layouts" },
+        { name: "JavaScript", category: technicalCategory, description: "Strong knowledge of JavaScript language fundamentals and modern ES6+ features" },
+        { name: "React", category: toolsCategory, description: "Experience building applications using React component architecture" },
+        { name: "UI/UX Principles", category: domainCategory, description: "Understanding of user interface design principles and usability" },
+        { name: "Responsive Design", category: technicalCategory, description: "Creating interfaces that work well across different screen sizes and devices" },
+        { name: "CSS Frameworks", category: toolsCategory, description: "Experience with Bootstrap, Tailwind CSS, or other CSS frameworks" },
+        { name: "Front-End Performance", category: technicalCategory, description: "Optimizing website speed and performance" },
+        { name: "Browser DevTools", category: toolsCategory, description: "Proficiency using browser developer tools for debugging" },
+        { name: "Web Accessibility", category: technicalCategory, description: "Creating accessible web applications (WCAG compliance)" },
+        { name: "Version Control (Git)", category: toolsCategory, description: "Using Git for source control and collaboration" }
+      ];
+    }
+    else if (roleTitleLower.includes("backend") || roleTitleLower.includes("back end") || roleTitleLower.includes("back-end")) {
+      roleSpecificSkills = [
+        { name: "Server-side Programming", category: technicalCategory, description: "Proficiency in languages like Node.js, Python, Java, etc." },
+        { name: "Database Design", category: technicalCategory, description: "Designing efficient database schemas and relationships" },
+        { name: "SQL", category: technicalCategory, description: "Writing efficient database queries and managing database operations" },
+        { name: "API Development", category: technicalCategory, description: "Building RESTful or GraphQL APIs following best practices" },
+        { name: "Authentication/Authorization", category: technicalCategory, description: "Implementing secure user authentication and authorization systems" },
+        { name: "Server Management", category: toolsCategory, description: "Configuring and maintaining server environments" },
+        { name: "Caching Strategies", category: technicalCategory, description: "Implementing efficient caching to improve performance" },
+        { name: "Security Best Practices", category: technicalCategory, description: "Protecting against common vulnerabilities (OWASP)" },
+        { name: "Microservices Architecture", category: domainCategory, description: "Understanding distributed system design principles" },
+        { name: "CI/CD Pipelines", category: toolsCategory, description: "Setting up automated testing and deployment workflows" }
+      ];
+    }
+    else if (roleTitleLower.includes("fullstack") || roleTitleLower.includes("full stack") || roleTitleLower.includes("full-stack")) {
+      roleSpecificSkills = [
+        { name: "Frontend Development", category: technicalCategory, description: "Building responsive user interfaces with HTML, CSS, and JavaScript" },
+        { name: "Backend Development", category: technicalCategory, description: "Developing server-side applications and APIs" },
+        { name: "Database Management", category: technicalCategory, description: "Working with both SQL and NoSQL databases" },
+        { name: "API Integration", category: technicalCategory, description: "Connecting systems through API development and consumption" },
+        { name: "Deployment Strategies", category: toolsCategory, description: "Managing application deployment across different environments" },
+        { name: "Testing Methodologies", category: technicalCategory, description: "Implementing unit, integration, and end-to-end tests" },
+        { name: "DevOps Practices", category: toolsCategory, description: "Understanding CI/CD and infrastructure automation" },
+        { name: "System Architecture", category: domainCategory, description: "Designing scalable application architectures" },
+        { name: "Performance Optimization", category: technicalCategory, description: "Optimizing applications for speed and efficiency" },
+        { name: "Security Implementation", category: technicalCategory, description: "Securing applications against common vulnerabilities" }
+      ];
+    }
+    else if (roleTitleLower.includes("devops")) {
+      roleSpecificSkills = [
+        { name: "Infrastructure as Code", category: technicalCategory, description: "Using tools like Terraform or CloudFormation to manage infrastructure" },
+        { name: "CI/CD Pipeline Management", category: toolsCategory, description: "Setting up and maintaining continuous integration/deployment pipelines" },
+        { name: "Monitoring & Observability", category: toolsCategory, description: "Implementing systems for monitoring application health and performance" },
+        { name: "Container Orchestration", category: toolsCategory, description: "Managing containerized environments with Kubernetes or similar tools" },
+        { name: "Cloud Services", category: toolsCategory, description: "Working with AWS, Azure, GCP, or other cloud platforms" },
+        { name: "Linux Administration", category: technicalCategory, description: "Managing and troubleshooting Linux-based systems" },
+        { name: "Network Configuration", category: technicalCategory, description: "Setting up and managing network infrastructure" },
+        { name: "Security Implementation", category: technicalCategory, description: "Implementing security best practices in infrastructure" },
+        { name: "Scripting & Automation", category: technicalCategory, description: "Creating automation scripts for routine tasks" },
+        { name: "Incident Response", category: domainCategory, description: "Responding to and resolving production incidents" }
+      ];
+    }
+    else if (roleTitleLower.includes("data scientist") || roleTitleLower.includes("data science")) {
+      roleSpecificSkills = [
+        { name: "Statistical Analysis", category: technicalCategory, description: "Applying statistical methods to analyze data" },
+        { name: "Machine Learning", category: technicalCategory, description: "Developing and implementing machine learning models" },
+        { name: "Python Programming", category: toolsCategory, description: "Proficiency in Python for data analysis and modeling" },
+        { name: "Data Visualization", category: technicalCategory, description: "Creating informative visual representations of data" },
+        { name: "Feature Engineering", category: technicalCategory, description: "Selecting and transforming variables for model development" },
+        { name: "SQL", category: technicalCategory, description: "Querying databases to extract and manipulate data" },
+        { name: "Big Data Technologies", category: toolsCategory, description: "Working with large datasets using tools like Spark or Hadoop" },
+        { name: "Experimental Design", category: domainCategory, description: "Designing experiments to test hypotheses and validate results" },
+        { name: "Model Deployment", category: technicalCategory, description: "Moving models from development to production environments" },
+        { name: "Research Methodology", category: domainCategory, description: "Applying scientific research principles to data problems" }
+      ];
+    }
+    else if (roleTitleLower.includes("data engineer")) {
+      roleSpecificSkills = [
+        { name: "Data Pipeline Development", category: technicalCategory, description: "Building robust data extraction and processing pipelines" },
+        { name: "Database Systems", category: toolsCategory, description: "Working with SQL and NoSQL databases at scale" },
+        { name: "ETL Processes", category: technicalCategory, description: "Implementing Extract, Transform, Load workflows" },
+        { name: "Big Data Technologies", category: toolsCategory, description: "Using Hadoop, Spark, or similar technologies for large-scale data processing" },
+        { name: "Data Modeling", category: technicalCategory, description: "Designing efficient data schemas and models" },
+        { name: "Data Warehousing", category: toolsCategory, description: "Implementing and maintaining data warehouse solutions" },
+        { name: "Scripting Languages", category: technicalCategory, description: "Proficiency in Python, Scala, or other languages for data processing" },
+        { name: "Cloud Data Services", category: toolsCategory, description: "Working with cloud-based data services (AWS, Azure, GCP)" },
+        { name: "Data Security", category: technicalCategory, description: "Implementing data protection and privacy measures" },
+        { name: "Data Quality Management", category: domainCategory, description: "Ensuring consistency and quality of data" }
+      ];
+    }
+    // Banking & Financial Services Roles
+    else if (roleTitleLower.includes("banking analyst") || roleTitleLower.includes("financial analyst")) {
+      roleSpecificSkills = [
+        { name: "Financial Analysis", category: technicalCategory, description: "Analyzing financial statements and market trends" },
+        { name: "Risk Assessment", category: domainCategory, description: "Evaluating financial risks and developing mitigation strategies" },
+        { name: "Banking Regulations", category: domainCategory, description: "Understanding of banking laws and regulatory requirements" },
+        { name: "Financial Modeling", category: technicalCategory, description: "Creating financial models to forecast performance" },
+        { name: "Credit Analysis", category: technicalCategory, description: "Assessing creditworthiness of individuals or organizations" },
+        { name: "Banking Software", category: toolsCategory, description: "Proficiency with financial analysis and banking software" },
+        { name: "Market Research", category: domainCategory, description: "Analyzing market trends and competitive landscape" },
+        { name: "Valuation Methods", category: technicalCategory, description: "Applying various methods to determine asset values" },
+        { name: "Financial Reporting", category: technicalCategory, description: "Preparing and analyzing financial reports" },
+        { name: "Excel Advanced Functions", category: toolsCategory, description: "Advanced spreadsheet analysis and financial functions" }
+      ];
+    }
+    else if (roleTitleLower.includes("product manager")) {
+      roleSpecificSkills = [
+        { name: "Product Roadmapping", category: technicalCategory, description: "Developing and maintaining product roadmaps" },
+        { name: "User Story Creation", category: technicalCategory, description: "Writing clear, valuable user stories" },
+        { name: "Market Research", category: domainCategory, description: "Analyzing market trends and competitive landscape" },
+        { name: "Product Metrics Analysis", category: technicalCategory, description: "Defining and tracking key product performance metrics" },
+        { name: "Stakeholder Management", category: managementCategory, description: "Managing relationships with internal and external stakeholders" },
+        { name: "Agile Methodologies", category: toolsCategory, description: "Working in Agile environments (Scrum, Kanban)" },
+        { name: "Product Launch Planning", category: managementCategory, description: "Planning and executing successful product launches" },
+        { name: "Feature Prioritization", category: technicalCategory, description: "Prioritizing product features based on value and effort" },
+        { name: "UX/UI Knowledge", category: domainCategory, description: "Understanding user experience principles and best practices" },
+        { name: "Customer Feedback Analysis", category: technicalCategory, description: "Gathering and analyzing customer feedback" }
+      ];
+    }
+    else if (roleTitleLower.includes("scrum master")) {
+      roleSpecificSkills = [
+        { name: "Agile Facilitation", category: managementCategory, description: "Facilitating Scrum events effectively" },
+        { name: "Impediment Removal", category: managementCategory, description: "Identifying and removing obstacles for the team" },
+        { name: "Servant Leadership", category: softCategory, description: "Coaching teams with a servant-leader mentality" },
+        { name: "Scrum Framework", category: domainCategory, description: "Deep understanding of Scrum roles, artifacts, and events" },
+        { name: "Conflict Resolution", category: softCategory, description: "Mediating and resolving team conflicts" },
+        { name: "Team Building", category: managementCategory, description: "Creating cohesive, high-performing teams" },
+        { name: "Agile Metrics", category: technicalCategory, description: "Tracking and interpreting agile performance metrics" },
+        { name: "Continuous Improvement", category: managementCategory, description: "Implementing process improvements based on retrospectives" },
+        { name: "Sprint Planning", category: managementCategory, description: "Facilitating effective sprint planning sessions" },
+        { name: "Agile Tools", category: toolsCategory, description: "Using Jira, Trello, or other agile project management tools" }
+      ];
+    }
+    else if (roleTitleLower.includes("agile coach")) {
+      roleSpecificSkills = [
+        { name: "Agile Transformation", category: managementCategory, description: "Guiding organizational agile transformations" },
+        { name: "Multiple Agile Frameworks", category: domainCategory, description: "Knowledge of Scrum, Kanban, SAFe, LeSS, etc." },
+        { name: "Advanced Facilitation", category: managementCategory, description: "Facilitating complex agile events and workshops" },
+        { name: "Change Management", category: managementCategory, description: "Managing organizational change processes" },
+        { name: "Leadership Coaching", category: managementCategory, description: "Coaching executives and managers on agile leadership" },
+        { name: "Team Performance Coaching", category: managementCategory, description: "Improving team dynamics and performance" },
+        { name: "Organizational Design", category: domainCategory, description: "Advising on organizational structures that support agility" },
+        { name: "Lean Principles", category: domainCategory, description: "Applying lean thinking to eliminate waste" },
+        { name: "Metrics & Measurements", category: technicalCategory, description: "Establishing appropriate metrics for agile maturity" },
+        { name: "Training Design", category: managementCategory, description: "Creating and delivering agile training programs" }
+      ];
+    }
+    else if (roleTitleLower.includes("product owner")) {
+      roleSpecificSkills = [
+        { name: "Product Backlog Management", category: managementCategory, description: "Creating and refining the product backlog" },
+        { name: "Value Maximization", category: managementCategory, description: "Ensuring the product delivers maximum business value" },
+        { name: "User Story Writing", category: technicalCategory, description: "Creating clear, valuable user stories" },
+        { name: "Business Case Development", category: domainCategory, description: "Creating business cases for product initiatives" },
+        { name: "Feature Prioritization", category: managementCategory, description: "Prioritizing features based on value and effort" },
+        { name: "Stakeholder Communication", category: softCategory, description: "Effectively communicating with diverse stakeholders" },
+        { name: "Product Vision", category: domainCategory, description: "Establishing and communicating product vision" },
+        { name: "Acceptance Criteria Definition", category: technicalCategory, description: "Defining clear acceptance criteria for features" },
+        { name: "ROI Analysis", category: domainCategory, description: "Analyzing return on investment for product features" },
+        { name: "Sprint Review Facilitation", category: managementCategory, description: "Leading effective sprint reviews" }
+      ];
+    }
+    // Software Development (Specific Technologies)
+    else if (roleTitleLower.includes("java")) {
+      roleSpecificSkills = [
+        { name: "Java Programming", category: technicalCategory, description: "Strong proficiency in Java language and JVM concepts" },
+        { name: "Spring Framework", category: toolsCategory, description: "Experience with Spring Boot, Spring MVC, or other Spring projects" },
+        { name: "OOP Principles", category: technicalCategory, description: "Solid understanding of object-oriented programming concepts" },
+        { name: "JUnit Testing", category: toolsCategory, description: "Writing effective unit and integration tests with JUnit" },
+        { name: "Hibernate/JPA", category: toolsCategory, description: "Working with Java Persistence API and ORM frameworks" },
+        { name: "Concurrency", category: technicalCategory, description: "Understanding thread management and concurrent programming" },
+        { name: "Design Patterns", category: technicalCategory, description: "Implementing common design patterns in Java applications" },
+        { name: "Build Tools", category: toolsCategory, description: "Using Maven or Gradle for dependency management and builds" },
+        { name: "Microservices in Java", category: technicalCategory, description: "Building microservices-based applications with Java" },
+        { name: "Java Performance Tuning", category: technicalCategory, description: "Optimizing Java applications for performance" }
+      ];
+    }
+    else if (roleTitleLower.includes("python")) {
+      roleSpecificSkills = [
+        { name: "Python Programming", category: technicalCategory, description: "Strong proficiency in Python language and ecosystem" },
+        { name: "Django/Flask", category: toolsCategory, description: "Building web applications with Python frameworks" },
+        { name: "Data Analysis (Pandas)", category: toolsCategory, description: "Analyzing and manipulating data with Python libraries" },
+        { name: "Python Testing", category: technicalCategory, description: "Writing tests with pytest or unittest" },
+        { name: "API Development", category: technicalCategory, description: "Creating RESTful or GraphQL APIs with Python" },
+        { name: "Python OOP", category: technicalCategory, description: "Implementing object-oriented programming in Python" },
+        { name: "Asyncio", category: technicalCategory, description: "Writing asynchronous code with Python's asyncio" },
+        { name: "Package Management", category: toolsCategory, description: "Managing dependencies with pip, conda, or Poetry" },
+        { name: "Web Scraping", category: technicalCategory, description: "Extracting data from websites with Beautiful Soup or Scrapy" },
+        { name: "Automation Scripting", category: technicalCategory, description: "Creating automation scripts with Python" }
+      ];
+    }
+    else if (roleTitleLower.includes("animation")) {
+      roleSpecificSkills = [
+        { name: "3D Modeling", category: technicalCategory, description: "Creating three-dimensional models for animation" },
+        { name: "Animation Principles", category: domainCategory, description: "Understanding and applying the fundamental principles of animation" },
+        { name: "Character Rigging", category: technicalCategory, description: "Setting up character skeletons and controls for animation" },
+        { name: "Texturing", category: technicalCategory, description: "Creating and applying textures to 3D models" },
+        { name: "Storyboarding", category: technicalCategory, description: "Planning out animation sequences visually" },
+        { name: "Animation Software", category: toolsCategory, description: "Proficiency with tools like Maya, Blender, After Effects" },
+        { name: "Rendering Techniques", category: technicalCategory, description: "Understanding various rendering methods and settings" },
+        { name: "Motion Capture", category: technicalCategory, description: "Working with motion capture data for realistic movement" },
+        { name: "Compositing", category: technicalCategory, description: "Combining various visual elements into final scenes" },
+        { name: "Visual Storytelling", category: domainCategory, description: "Conveying narrative through visual animation techniques" }
+      ];
+    }
+    else if (roleTitleLower.includes("cybersecurity") || roleTitleLower.includes("security engineer")) {
+      roleSpecificSkills = [
+        { name: "Threat Modeling", category: technicalCategory, description: "Identifying potential security threats and vulnerabilities" },
+        { name: "Security Testing", category: technicalCategory, description: "Performing penetration testing and security assessments" },
+        { name: "Network Security", category: technicalCategory, description: "Securing network infrastructure and traffic" },
+        { name: "Identity & Access Management", category: technicalCategory, description: "Implementing proper authentication and authorization controls" },
+        { name: "Incident Response", category: technicalCategory, description: "Responding to and analyzing security incidents" },
+        { name: "Security Tools", category: toolsCategory, description: "Using tools for vulnerability scanning, packet analysis, etc." },
+        { name: "Cryptography", category: technicalCategory, description: "Implementing and managing encryption solutions" },
+        { name: "Security Compliance", category: domainCategory, description: "Understanding security standards and regulations (GDPR, SOC2, etc.)" },
+        { name: "Secure Coding Practices", category: technicalCategory, description: "Writing code that prevents common security vulnerabilities" },
+        { name: "Cloud Security", category: technicalCategory, description: "Securing applications and infrastructure in cloud environments" }
+      ];
+    }
+    // Add a default case for any other roles
+    else {
+      roleSpecificSkills = [
+        { name: "Industry Knowledge", category: domainCategory, description: `Understanding of ${industry} industry standards and best practices` },
+        { name: "Technical Expertise", category: technicalCategory, description: `Technical proficiency relevant to ${roleTitle} role` },
+        { name: "Professional Development", category: softCategory, description: "Continuous learning and skill development" },
+        { name: "Project Management", category: managementCategory, description: "Planning, executing, and closing projects effectively" },
+        { name: "Analytical Thinking", category: softCategory, description: "Ability to analyze complex problems and develop solutions" },
+        { name: "Industry Tools", category: toolsCategory, description: `Proficiency with tools commonly used in ${roleTitle} role` }
+      ];
+    }
+    
+    // Add some common soft skills to all roles
+    return [...roleSpecificSkills, ...commonSoftSkills];
+  }
+
+  return httpServer;
+}
