@@ -1592,6 +1592,15 @@ export class DatabaseStorage implements IStorage {
   async getCareerGoalsByUserId(userId: number): Promise<CareerGoal[]> {
     return db.select().from(careerGoals).where(eq(careerGoals.userId, userId));
   }
+  
+  async getLatestCareerGoalByUserId(userId: number): Promise<CareerGoal | undefined> {
+    const [latestGoal] = await db.select()
+      .from(careerGoals)
+      .where(eq(careerGoals.userId, userId))
+      .orderBy(desc(careerGoals.id))
+      .limit(1);
+    return latestGoal;
+  }
 
   async createCareerGoal(goal: InsertCareerGoal): Promise<CareerGoal> {
     const [careerGoal] = await db.insert(careerGoals).values(goal).returning();

@@ -829,17 +829,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // For development, use a mock user ID
         const userId = req.user ? (req.user as any).id : 1; // Use actual user ID if logged in
         
-        // Get all goals for the user (usually just one)
-        const goals = await storage.getCareerGoalsByUserId(userId);
+        // Get the latest goal for the user directly from the database
+        const latestGoal = await storage.getLatestCareerGoalByUserId(userId);
         
-        // Return the most recently created goal if any exist
-        if (goals && goals.length > 0) {
-          // Sort by ID (highest/newest first)
-          const sortedGoals = [...goals].sort((a, b) => b.id - a.id);
-          console.log("[DEBUG] Current career goal API - Sorted career goals by ID (descending):", 
-            sortedGoals.map(goal => ({ id: goal.id, title: goal.title }))
+        // Return the goal if it exists
+        if (latestGoal) {
+          console.log("[DEBUG] Current career goal API - Latest career goal:", 
+            { id: latestGoal.id, title: latestGoal.title }
           );
-          return res.json(sortedGoals[0]);
+          return res.json(latestGoal);
         }
         
         // No goals found
@@ -3002,15 +3000,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get user skills
         const userSkills = await storage.getUserSkillsWithDetails(userId);
 
-        // Get career goals
-        const careerGoals = await storage.getCareerGoalsByUserId(userId);
-        // Sort career goals by ID (highest/newest first) to ensure we get the latest one
-        // Higher IDs should correspond to newer goals
-        const sortedCareerGoals = [...careerGoals].sort((a, b) => b.id - a.id);
-        console.log("[DEBUG] Sorted career goals by ID (descending):", 
-          sortedCareerGoals.map(goal => ({ id: goal.id, title: goal.title }))
+        // Get the latest career goal directly from the database
+        const primaryCareerGoal = await storage.getLatestCareerGoalByUserId(userId);
+        console.log("[DEBUG] Dashboard API - Latest career goal:", 
+          primaryCareerGoal ? { id: primaryCareerGoal.id, title: primaryCareerGoal.title } : "No career goal found"
         );
-        const primaryCareerGoal = sortedCareerGoals.length > 0 ? sortedCareerGoals[0] : null;
 
         // Get learning paths
         const learningPaths = await storage.getLearningPathsByUserId(userId);
