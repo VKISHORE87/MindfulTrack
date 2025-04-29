@@ -1,0 +1,171 @@
+Application Developer/Engineer
+DevOps Engineer
+Database Administrator
+Cloud Solutions Architect
+Network Administrator
+Systems Administrator
+IT Security Analyst/Engineer
+Scrum Master
+Product Owner
+Agile Coach
+Agile Project Manager
+Product Manager
+Program Manager
+Release Train Engineer
+Sprint Coordinator
+Kanban Master
+Agile Transformation Lead
+Agile Delivery Manager
+SAFe Program Consultant
+Product Backlog Manager
+Core Banking Systems Specialist
+Mobile Banking Developer
+API Developer/Architect
+Payment Gateway Developer
+Trading Systems Developer
+Risk Management Systems Specialist
+Fraud Detection Engineer
+Blockchain Developer/Engineer
+ATM Network Administrator
+Financial Data Analyst
+Regulatory Compliance IT Specialist
+Wealth Management Systems Developer
+Digital Banking Platform Manager
+Software Developer
+Data Engineer
+IT Project Manager
+Network Engineer
+IT Support Specialist
+Quality Assurance Engineer
+Claims Processing Systems Developer
+Underwriting Systems Specialist
+Insurance Policy Management Developer
+Actuarial Systems Developer
+Insurance Fraud Detection Engineer
+Customer Portal Developer
+Insurance Analytics Specialist
+Policy Administration Systems Manager
+Premium Calculation Systems Developer
+IT Infrastructure Manager
+ERP Systems Administrator
+Network Security Specialist
+Systems Integration Specialist
+Industrial IoT Developer
+Manufacturing Execution Systems (MES) Specialist
+Supply Chain Systems Developer
+Robotics Systems Programmer
+Automated Testing Systems Engineer
+Production Planning Systems Developer
+Quality Management Systems Developer
+SCADA Systems Engineer
+Predictive Maintenance Systems Developer
+Digital Twin Developer
+Clinical Trials Management Systems Developer
+Laboratory Information Management Systems (LIMS) Specialist
+Drug Discovery Software Developer
+Pharmacovigilance Systems Administrator
+Clinical Data Management Systems Developer
+Drug Safety Database Administrator
+Supply Chain Validation Engineer
+Good Manufacturing Practice (GMP) Systems Specialist
+Electronic Batch Record Systems Developer
+Electronic Health Records (EHR) Developer
+Healthcare Interoperability Engineer
+Medical Imaging Systems Administrator
+Telemedicine Platform Developer
+Clinical Decision Support Systems Developer
+Health Information Exchange (HIE) Specialist
+Healthcare Analytics Developer
+Patient Portal Developer
+Healthcare Mobile App Developer
+Healthcare IoT Engineer
+Medical Device Integration Specialist
+Full Stack Developer
+UX/UI Developer
+E-commerce Platform Developer
+Point of Sale (POS) Systems Engineer
+Inventory Management Systems Developer
+Customer Relationship Management (CRM) Specialist
+Payment Processing Systems Developer
+Recommendation Engine Developer
+Product Catalog Systems Developer
+Retail Analytics Engineer
+Supply Chain Visibility Systems Developer
+Omnichannel Systems Integration Engineer
+Help Desk Support
+Web Developer
+Learning Management System (LMS) Developer
+Student Information Systems (SIS) Specialist
+Educational Content Management Systems Developer
+Virtual Classroom Platform Engineer
+Assessment Systems Developer
+Academic Analytics Engineer
+Educational Mobile App Developer
+Library Management Systems Administrator
+Campus Management Systems Developer
+Academic ERP Systems Specialist
+Telecom Network Management Systems Developer
+Billing Systems Developer
+Customer Service Systems Developer
+Network Operations Center (NOC) Engineer
+Subscriber Management Systems Developer
+Voice over IP (VoIP) Engineer
+Radio Access Network (RAN) Systems Developer
+Telecom API Developer
+SDN/NFV Specialist
+5G Systems Developer
+Content Management Systems Developer
+Digital Rights Management (DRM) Specialist
+Streaming Platform Developer
+Media Asset Management Systems Specialist
+Video Processing Systems Engineer
+Animation Software Developer
+Gaming Platform Developer
+VFX Pipeline Developer
+AR/VR Developer
+Media Analytics Specialist
+Data Scientist
+Business Intelligence Developer
+Data Warehouse Specialist
+Big Data Engineer
+Machine Learning Engineer
+Data Analytics Developer
+Data Visualization Specialist
+ETL Developer
+Data Architect
+Security Operations Center (SOC) Analyst
+Penetration Tester
+Security Architect
+Compliance Specialist
+Identity and Access Management Specialist
+Security Engineer
+Incident Response Specialist
+Threat Intelligence Analyst
+Application Security Engineer
+Security Solutions Developer
+Cloud Infrastructure Engineer
+Cloud Security Specialist
+Cloud Operations Engineer
+Multi-cloud Integration Specialist
+IaaS/PaaS/SaaS Specialist
+Cloud Migration Engineer
+Cloud Cost Optimization Specialist
+Containerization Specialist
+Serverless Application Developer
+IoT Solutions Architect
+Artificial Intelligence Engineer
+Robotics Process Automation (RPA) Developer
+Quantum Computing Specialist
+Edge Computing Engineer
+Augmented/Virtual Reality Developer
+3D Printing Systems Specialist
+Computer Vision Engineer
+Agile Delivery Lead
+Product Development Manager
+Digital Product Manager
+Technical Product Manager
+Agile Portfolio Manager
+Enterprise Agile Coach
+Value Stream Manager
+Iteration Manager
+Agile Business Analyst
