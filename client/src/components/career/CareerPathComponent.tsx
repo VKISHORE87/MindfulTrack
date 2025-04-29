@@ -160,12 +160,30 @@ const CareerPathComponent: React.FC<CareerPathComponentProps> = ({ roleId }) => 
 
   return (
     <div className="space-y-4">
-      <h3 className="text-xl font-semibold">Career Progression Path</h3>
-      
       {isLoading ? (
         <SkeletonLoader />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-5">
+          <div className="space-y-2">
+            {careerPath?.roleInfo && (
+              <>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-semibold">{careerPath.roleInfo.title} Timeline</h3>
+                  {careerPath.roleInfo.industry && (
+                    <Badge variant="outline" className="font-normal">
+                      {careerPath.roleInfo.industry}
+                    </Badge>
+                  )}
+                </div>
+                {careerPath.roleInfo.description && (
+                  <p className="text-sm text-muted-foreground">
+                    {careerPath.roleInfo.description}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+          
           {careerPath?.pathSteps && (
             <div className="relative">
               {/* Vertical timeline line */}

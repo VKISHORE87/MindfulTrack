@@ -231,63 +231,45 @@ export default function CareerTransitionsPage() {
                         )}
                       </div>
 
-                      {/* Featured/Filtered roles */}
-                      <div>
-                        <h4 className="text-sm font-medium mb-2 text-muted-foreground">
-                          {roleSearchTerm ? "Matching Roles:" : "Featured Roles:"}
-                        </h4>
-                        <div className="grid gap-3 md:grid-cols-2">
-                          {roles
-                            ?.filter(role => 
-                              roleSearchTerm === '' || 
-                              role.title.toLowerCase().includes(roleSearchTerm.toLowerCase()) ||
-                              (role.industry && role.industry.toLowerCase().includes(roleSearchTerm.toLowerCase()))
-                            )
-                            .slice(0, 6)
-                            .map((role) => (
-                              <Button
-                                key={role.id}
-                                variant={selectedRoleId === role.id ? "default" : "outline"}
-                                className="justify-start h-auto py-3 text-left"
-                                onClick={() => setSelectedRoleId(role.id)}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <div className={`w-2 h-2 rounded-full ${selectedRoleId === role.id ? 'bg-primary-foreground' : 'bg-primary/30'}`}></div>
-                                  <div>
-                                    <div className="font-medium">{role.title}</div>
-                                    <div className="text-xs text-muted-foreground">{role.industry}</div>
-                                  </div>
-                                </div>
-                                {selectedRoleId === role.id && (
-                                  <ArrowRight className="h-4 w-4 ml-auto" />
-                                )}
-                              </Button>
-                            ))}
-                            
-                            {roleSearchTerm && roles?.filter(role => 
-                              role.title.toLowerCase().includes(roleSearchTerm.toLowerCase()) ||
-                              (role.industry && role.industry.toLowerCase().includes(roleSearchTerm.toLowerCase()))
-                            ).length === 0 && (
-                              <div className="col-span-2 text-center py-4">
-                                <p className="text-muted-foreground">No roles match your search criteria.</p>
-                              </div>
-                            )}
+                      {/* Selection guidance */}
+                      {selectedRoleId ? (
+                        <div className="py-2">
+                          <p className="text-sm text-primary font-medium">
+                            Role selected: {roles?.find(r => r.id === selectedRoleId)?.title}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            View the career progression path for this role below.
+                          </p>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="py-2">
+                          <p className="text-sm text-muted-foreground">
+                            Select a role from the dropdown above to view its career progression path.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
 
                 {/* Career path visualization */}
                 {selectedRoleId ? (
-                  <div className="mt-8">
-                    <CareerPathComponent roleId={selectedRoleId} />
+                  <div className="mt-4 border-t pt-6">
+                    <h3 className="text-xl font-semibold mb-4 flex items-center">
+                      <Compass className="h-5 w-5 mr-2 text-primary" />
+                      Career Progression Timeline
+                    </h3>
+                    <div className="bg-background rounded-lg shadow-sm border p-4">
+                      <CareerPathComponent roleId={selectedRoleId} />
+                    </div>
                   </div>
                 ) : (
-                  <div className="text-center py-6 bg-muted/30 rounded-lg">
-                    <Compass className="h-12 w-12 text-primary mx-auto mb-2 opacity-60" />
-                    <p className="text-muted-foreground">
-                      Select a role above to view its career progression path
+                  <div className="text-center py-12 bg-muted/30 rounded-lg mt-4">
+                    <Compass className="h-16 w-16 text-primary mx-auto mb-3 opacity-60" />
+                    <h3 className="text-lg font-medium mb-2">Career Path Explorer</h3>
+                    <p className="text-muted-foreground max-w-md mx-auto">
+                      Select a role from the dropdown above to view its detailed career progression timeline, 
+                      required skills, and recommended next steps.
                     </p>
                   </div>
                 )}
