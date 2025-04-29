@@ -15,7 +15,6 @@ interface MobileNavigationProps {
 export default function MobileNavigation({ currentRoute }: MobileNavigationProps) {
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: <Home className="h-6 w-6" /> },
-    { href: '/assessment-new', label: 'Assessment', icon: <FileText className="h-6 w-6" /> },
     { href: '/practice', label: 'Practice', icon: <Dumbbell className="h-6 w-6" /> },
     { href: '/progress', label: 'Progress', icon: <TrendingUp className="h-6 w-6" /> },
     { href: '/profile', label: 'Profile', icon: <User className="h-6 w-6" /> },
