@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import StatCard from "@/components/dashboard/StatCard";
-import SkillGapAnalysis from "@/components/dashboard/SkillGapAnalysis";
 import CareerGoals from "@/components/dashboard/CareerGoals";
 import LearningPath from "@/components/dashboard/LearningPath";
 import RecentActivity from "@/components/dashboard/RecentActivity";
@@ -164,23 +163,12 @@ export default function Dashboard({ user }: { user: any }) {
             )}
           </div>
           
-          {/* Primary content sections */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            {/* Skill Gap Analysis */}
-            <div className="lg:col-span-3">
-              {/* Debug info */}
-              {process.env.NODE_ENV !== 'production' && (
-                <div className="text-xs text-gray-400 mb-2">
-                  Debug - Target Role ID: {dashboardData?.careerGoal?.targetRoleId || 'not set'} (type: {typeof dashboardData?.careerGoal?.targetRoleId})
-                </div>
-              )}
-              <SkillGapAnalysis 
-                skillGaps={dashboardData?.skillGaps || []} 
-                userId={user.id} 
-                targetRoleId={dashboardData?.careerGoal?.targetRoleId}
-              />
+          {/* Debug info section */}
+          {process.env.NODE_ENV !== 'production' && (
+            <div className="text-xs text-gray-400 mb-4">
+              Debug - Target Role ID: {dashboardData?.careerGoal?.targetRoleId || 'not set'} (type: {typeof dashboardData?.careerGoal?.targetRoleId})
             </div>
-          </div>
+          )}
           
           {/* Learning Path */}
           {dashboardData?.learningPath && (
