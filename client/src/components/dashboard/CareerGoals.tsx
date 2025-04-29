@@ -13,14 +13,24 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+interface KeySkill {
+  name: string;
+  status?: string;
+  currentLevel?: number;
+  targetLevel?: number;
+  percentage?: number;
+  [key: string]: any; // Allow for any other properties
+}
+
 interface CareerGoalProps {
   id: number;
   title: string;
   timeline: string;
   readiness: number;
+  skills?: any[]; // Accept any array type for flexibility
 }
 
-export default function CareerGoals({ id, title, timeline, readiness }: CareerGoalProps) {
+export default function CareerGoals({ id, title, timeline, readiness, skills = [] }: CareerGoalProps) {
   return (
     <Card className="border-primary/20 bg-gradient-to-r from-blue-50/50 to-purple-50/50">
       <CardHeader className="pb-4 border-b">
@@ -116,41 +126,27 @@ export default function CareerGoals({ id, title, timeline, readiness }: CareerGo
                   <h4 className="font-medium">Key Skills to Develop</h4>
                 </div>
                 <ul className="space-y-2 pl-10">
-                  <li className="text-sm text-gray-600">Advanced data analysis</li>
-                  <li className="text-sm text-gray-600">Marketing automation</li>
-                  <li className="text-sm text-gray-600">SEO optimization</li>
-                  <li className="text-sm text-gray-600">Content strategy</li>
+                  {skills && Array.isArray(skills) && skills.length > 0 ? (
+                    // Manually create React elements to avoid rendering issues
+                    skills.map((skill, index) => (
+                      <li key={index} className="text-sm text-gray-600">
+                        {String(typeof skill === 'object' && skill !== null && 'name' in skill ? skill.name : skill)}
+                      </li>
+                    ))
+                  ) : (
+                    // Default skills when none are provided
+                    <>
+                      <li className="text-sm text-gray-600">Technical Knowledge</li>
+                      <li className="text-sm text-gray-600">Solution Design</li>
+                      <li className="text-sm text-gray-600">Product Demonstration</li>
+                      <li className="text-sm text-gray-600">Needs Analysis</li>
+                      <li className="text-sm text-gray-600">Client Communication</li>
+                    </>
+                  )}
                 </ul>
               </div>
               
-              <div className="bg-white p-4 rounded-lg border shadow-sm">
-                <div className="flex items-center mb-3">
-                  <div className="bg-primary/10 p-2 rounded-full mr-3">
-                    <TrendingUp className="h-5 w-5 text-primary" />
-                  </div>
-                  <h4 className="font-medium">Market Outlook</h4>
-                </div>
-                <div className="space-y-3 pl-10">
-                  <div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Job Growth</span>
-                      <span className="text-sm font-medium">15%</span>
-                    </div>
-                    <div className="w-full bg-gray-100 rounded-full h-1.5">
-                      <div className="bg-green-500 h-1.5 rounded-full" style={{ width: '15%' }}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Demand</span>
-                      <span className="text-sm font-medium">High</span>
-                    </div>
-                    <div className="w-full bg-gray-100 rounded-full h-1.5">
-                      <div className="bg-green-500 h-1.5 rounded-full" style={{ width: '85%' }}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/* Market Outlook section removed to focus on skill-based career transition */}
               
               <div className="bg-white p-4 rounded-lg border shadow-sm">
                 <div className="flex items-center mb-3">
@@ -193,7 +189,7 @@ export default function CareerGoals({ id, title, timeline, readiness }: CareerGo
                   <h4 className="font-medium">Skill Gap Analysis</h4>
                 </div>
                 <div className="pl-10">
-                  <Link href="/career-transitions">
+                  <Link href="/assessment?tab=skill-gap">
                     <a className="text-sm font-medium text-primary hover:text-primary-800 flex items-center">
                       View detailed skill gap analysis
                       <ChevronRight className="h-4 w-4 ml-1" />
