@@ -13,6 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 export default function LearningPath({ user }: { user: any }) {
   const { toast } = useToast();
   const [mismatchDetected, setMismatchDetected] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   
   // Fetch learning paths
   const { 
@@ -33,27 +34,6 @@ export default function LearningPath({ user }: { user: any }) {
     queryKey: [`/api/users/${user.id}/career-goals`],
   });
   
-  // Effect to detect and fix mismatches between career goal and learning path
-  useEffect(() => {
-    if (!isLoadingPaths && !isLoadingGoals && learningPaths?.length > 0 && careerGoals?.length > 0) {
-      const currentPath = learningPaths[0];
-      const currentGoal = careerGoals[0];
-      
-      // Check if learning path title contains the current career goal
-      const pathMatchesGoal = currentPath.title.includes(currentGoal.title);
-      
-      console.log("[DEBUG] Learning path sync check:", {
-        pathTitle: currentPath.title,
-        goalTitle: currentGoal.title,
-        matches: pathMatchesGoal
-      });
-      
-      setMismatchDetected(!pathMatchesGoal);
-    }
-  }, [learningPaths, careerGoals, isLoadingPaths, isLoadingGoals]);
-  
-  const isLoading = isLoadingPaths || isLoadingResources || isLoadingGoals;
-  
   const generateNewLearningPath = async () => {
     if (!careerGoals || careerGoals.length === 0) {
       toast({
@@ -63,6 +43,11 @@ export default function LearningPath({ user }: { user: any }) {
       });
       return;
     }
+    
+    // Prevent multiple generations
+    if (isGenerating) return;
+    
+    setIsGenerating(true);
     
     try {
       // Force a dashboard query refresh to ensure we have the latest career goal data
@@ -87,14 +72,46 @@ export default function LearningPath({ user }: { user: any }) {
         title: "Learning path generated",
         description: `New personalized learning path for ${currentGoal.title} has been created.`,
       });
+      
+      // Reset mismatch state since we've generated a new path
+      setMismatchDetected(false);
     } catch (error) {
       toast({
         title: "Generation failed",
         description: "There was a problem generating your learning path.",
         variant: "destructive",
       });
+    } finally {
+      setIsGenerating(false);
     }
   };
+  
+  // Effect to detect and fix mismatches between career goal and learning path
+  useEffect(() => {
+    if (!isLoadingPaths && !isLoadingGoals && learningPaths?.length > 0 && careerGoals?.length > 0 && !isGenerating) {
+      const currentPath = learningPaths[0];
+      const currentGoal = careerGoals[0];
+      
+      // Check if learning path title contains the current career goal
+      const pathMatchesGoal = currentPath.title.includes(currentGoal.title);
+      
+      console.log("[DEBUG] Learning path sync check:", {
+        pathTitle: currentPath.title,
+        goalTitle: currentGoal.title,
+        matches: pathMatchesGoal
+      });
+      
+      setMismatchDetected(!pathMatchesGoal);
+      
+      // Auto-generate new learning path if there's a mismatch
+      if (!pathMatchesGoal) {
+        console.log("[INFO] Auto-generating new learning path for current career goal:", currentGoal.title);
+        generateNewLearningPath();
+      }
+    }
+  }, [learningPaths, careerGoals, isLoadingPaths, isLoadingGoals, isGenerating]);
+  
+  const isLoading = isLoadingPaths || isLoadingResources || isLoadingGoals;
 
   if (isLoading) {
     return (
@@ -168,8 +185,17 @@ export default function LearningPath({ user }: { user: any }) {
             </div>
             
             <div className="flex gap-2">
-              <Button variant="outline" onClick={generateNewLearningPath}>
-                Regenerate Path
+              <Button 
+                variant="outline" 
+                onClick={generateNewLearningPath}
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : "Regenerate Path"}
               </Button>
             </div>
           </div>
@@ -270,9 +296,14 @@ export default function LearningPath({ user }: { user: any }) {
             <Button 
               className="bg-primary hover:bg-primary-700"
               onClick={generateNewLearningPath}
-              disabled={!careerGoals || careerGoals.length === 0}
+              disabled={!careerGoals || careerGoals.length === 0 || isGenerating}
             >
-              Generate Learning Path
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating Learning Path...
+                </>
+              ) : "Generate Learning Path"}
             </Button>
             {(!careerGoals || careerGoals.length === 0) && (
               <p className="text-amber-500 text-sm mt-4">
