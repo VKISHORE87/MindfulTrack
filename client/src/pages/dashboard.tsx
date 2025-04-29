@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StatCard from "@/components/dashboard/StatCard";
 import SkillGapAnalysis from "@/components/dashboard/SkillGapAnalysis";
 import CareerGoals from "@/components/dashboard/CareerGoals";
@@ -16,9 +16,17 @@ export default function Dashboard({ user }: { user: any }) {
   const [showAiFeatures, setShowAiFeatures] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   
-  const { data: dashboardData, isLoading } = useQuery({
+  const { data: dashboardData, isLoading, refetch } = useQuery({
     queryKey: [`/api/users/${user.id}/dashboard`],
+    // Set a shorter staleTime to ensure we refetch data more frequently
+    staleTime: 30000, // 30 seconds
   });
+  
+  // Effect to refetch dashboard data when component mounts
+  // This ensures we have fresh data after saving a career goal
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   const { data: learningResources, isLoading: isLoadingResources } = useQuery({
     queryKey: ['/api/learning-resources'],
