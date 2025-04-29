@@ -229,8 +229,8 @@ export default function LearningPath({ user }: { user: any }) {
                 <div>
                   <p className="text-sm text-gray-500">Target Role</p>
                   <p className="text-base font-medium">
-                    {careerGoals && careerGoals.length > 0 
-                      ? careerGoals[0].title 
+                    {currentCareerGoal 
+                      ? currentCareerGoal.title 
                       : "No goal set"}
                   </p>
                 </div>
@@ -302,7 +302,7 @@ export default function LearningPath({ user }: { user: any }) {
             <Button 
               className="bg-primary hover:bg-primary-700"
               onClick={generateNewLearningPath}
-              disabled={!careerGoals || careerGoals.length === 0 || isGenerating}
+              disabled={!currentCareerGoal || isGenerating}
             >
               {isGenerating ? (
                 <>
@@ -311,7 +311,7 @@ export default function LearningPath({ user }: { user: any }) {
                 </>
               ) : "Generate Learning Path"}
             </Button>
-            {(!careerGoals || careerGoals.length === 0) && (
+            {!currentCareerGoal && (
               <p className="text-amber-500 text-sm mt-4">
                 You need to set a career goal first before generating a learning path.
               </p>
