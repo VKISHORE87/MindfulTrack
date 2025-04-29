@@ -834,9 +834,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Return the most recently created goal if any exist
         if (goals && goals.length > 0) {
-          // Sort by creation date, descending
-          const sortedGoals = [...goals].sort((a, b) => 
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          // Sort by ID (highest/newest first)
+          const sortedGoals = [...goals].sort((a, b) => b.id - a.id);
+          console.log("[DEBUG] Current career goal API - Sorted career goals by ID (descending):", 
+            sortedGoals.map(goal => ({ id: goal.id, title: goal.title }))
           );
           return res.json(sortedGoals[0]);
         }
@@ -882,9 +883,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // If user already has a goal, update the most recent one
         if (existingGoals && existingGoals.length > 0) {
-          // Sort by creation date, descending
-          const sortedGoals = [...existingGoals].sort((a, b) => 
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          // Sort by ID (highest/newest first)
+          const sortedGoals = [...existingGoals].sort((a, b) => b.id - a.id);
+          console.log("[DEBUG] Career goals POST - Sorted career goals by ID (descending):", 
+            sortedGoals.map(goal => ({ id: goal.id, title: goal.title }))
           );
           
           const mostRecentGoal = sortedGoals[0];
@@ -3002,9 +3004,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Get career goals
         const careerGoals = await storage.getCareerGoalsByUserId(userId);
-        // Sort career goals by creation date (newest first) to ensure we get the latest one
-        const sortedCareerGoals = [...careerGoals].sort((a, b) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        // Sort career goals by ID (highest/newest first) to ensure we get the latest one
+        // Higher IDs should correspond to newer goals
+        const sortedCareerGoals = [...careerGoals].sort((a, b) => b.id - a.id);
+        console.log("[DEBUG] Sorted career goals by ID (descending):", 
+          sortedCareerGoals.map(goal => ({ id: goal.id, title: goal.title }))
         );
         const primaryCareerGoal = sortedCareerGoals.length > 0 ? sortedCareerGoals[0] : null;
 
