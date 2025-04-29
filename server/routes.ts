@@ -1413,7 +1413,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const userId = (req.user as any).id;
-        const { careerGoalId } = req.body;
+        const { careerGoalId, targetRoleId, forceRefresh } = req.body;
+
+        console.log("[INFO] Generating skill gap analysis:", { userId, careerGoalId, targetRoleId, forceRefresh });
 
         if (!careerGoalId) {
           return res.status(400).json({ message: "Career goal ID is required" });
@@ -1423,6 +1425,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const careerGoal = await storage.getCareerGoal(parseInt(careerGoalId));
         if (!careerGoal) {
           return res.status(404).json({ message: "Career goal not found" });
+        }
+        
+        // If targetRoleId is provided and different from the career goal's targetRoleId,
+        // we'll use it for this analysis but won't update the stored career goal
+        const effectiveTargetRoleId = targetRoleId || careerGoal.targetRoleId;
+        
+        // If targetRoleId is different, log the override
+        if (targetRoleId && targetRoleId !== careerGoal.targetRoleId) {
+          console.log(`[INFO] Overriding targetRoleId for analysis: ${careerGoal.targetRoleId} -> ${targetRoleId}`);
+        }
+        
+        // Get the target role details if we have a targetRoleId
+        let targetRole = null;
+        if (effectiveTargetRoleId) {
+          const roles = await storage.getRoles();
+          targetRole = roles.find(r => r.id.toString() === effectiveTargetRoleId.toString());
+          
+          if (targetRole) {
+            console.log(`[INFO] Using target role for analysis: ${targetRole.title}`);
+            
+            // Add target role title to career goal for the analysis context
+            careerGoal.targetRoleTitle = targetRole.title;
+          }
         }
 
         // Get user skills
@@ -1434,19 +1459,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Generate skill gap analysis using OpenAI (if the API key is available)
         let gapAnalysis;
         try {
+          // Update the API call with more detailed prompting based on target role
           const response = await openai.chat.completions.create({
             model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
             messages: [
               {
                 role: "system",
-                content: "You are an AI career advisor that specializes in identifying skill gaps based on users' current skills and career goals. Provide a detailed analysis of missing or underdeveloped skills."
+                content: `You are an AI career advisor that specializes in identifying skill gaps based on users' current skills and career goals.
+                
+                Your task is to identify specific skill gaps relevant to the user's target role (${targetRole?.title || careerGoal.title}).
+                
+                For each skill gap, provide:
+                1. The skill name
+                2. Current proficiency level (0-100)
+                3. Required level for the target role (0-100)
+                4. Priority (high, medium, low)
+                5. A brief explanation of why this skill is important for the target role
+                
+                You should focus on both:
+                - Skills the user completely lacks (missing skills)
+                - Skills the user has but needs to improve (underdeveloped skills)
+                
+                Make your analysis specific to the exact target role (${targetRole?.title || careerGoal.title}). 
+                Tailor the required skill levels based on industry standards for this specific role.`
               },
               {
                 role: "user",
                 content: JSON.stringify({
                   careerGoal: careerGoal,
+                  targetRole: targetRole,
                   userSkills: userSkills,
-                  allSkills: allSkills
+                  allSkills: allSkills,
+                  forceRefresh: !!forceRefresh // Boolean indicating if this is a manual refresh request
                 })
               }
             ],

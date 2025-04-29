@@ -123,6 +123,9 @@ export interface IStorage {
   createCareerPath(path: InsertCareerPath): Promise<CareerPath>;
   updateCareerPath(id: number, pathData: Partial<InsertCareerPath>): Promise<CareerPath | undefined>;
   deleteCareerPath(id: number): Promise<boolean>;
+  
+  // Role methods
+  getRoles(): Promise<any[]>;
 }
 
 export class MemStorage implements IStorage {
