@@ -32,6 +32,11 @@ export default function ProgressPage({ user }: { user: any }) {
     queryKey: [`/api/users/${user.id}/learning-paths`],
   });
   
+  // Fetch current career goal
+  const { data: currentCareerGoal, isLoading: isLoadingCurrentGoal } = useQuery({
+    queryKey: ['/api/users/career-goals/current'],
+  });
+  
   // Fetch user skills
   const { data: userSkills, isLoading: isLoadingSkills } = useQuery({
     queryKey: [`/api/users/${user.id}/skills`],
@@ -42,7 +47,7 @@ export default function ProgressPage({ user }: { user: any }) {
     queryKey: [`/api/users/${user.id}/dashboard`],
   });
   
-  const isLoading = isLoadingProgress || isLoadingResources || isLoadingPaths || isLoadingSkills || isLoadingDashboard;
+  const isLoading = isLoadingProgress || isLoadingResources || isLoadingPaths || isLoadingSkills || isLoadingDashboard || isLoadingCurrentGoal;
   
   if (isLoading) {
     return (
@@ -104,9 +109,8 @@ export default function ProgressPage({ user }: { user: any }) {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="resources">Resources</TabsTrigger>
           <TabsTrigger value="skills">Skills</TabsTrigger>
         </TabsList>
         
