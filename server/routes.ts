@@ -2285,9 +2285,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let learningPaths = await storage.getLearningPathsByUserId(userId);
         
         // Check if we need to update learning path titles based on current career goal
-        const careerGoals = await storage.getCareerGoalsByUserId(userId);
-        if (careerGoals && careerGoals.length > 0) {
-          const currentGoal = careerGoals[0]; // Use the first goal (primary goal)
+        const currentGoal = await storage.getLatestCareerGoalByUserId(userId);
+        if (currentGoal) {
           
           console.log("[DEBUG] Checking learning paths for consistency with current goal:", {
             goalTitle: currentGoal.title,
