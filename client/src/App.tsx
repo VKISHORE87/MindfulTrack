@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Assessment from "@/pages/assessment";
+import AssessmentNew from "@/pages/assessment-new";
 import LearningPath from "@/pages/learning-path";
 import CareerPlan from "@/pages/career-plan";
 import Resources from "@/pages/resources";
@@ -96,6 +97,7 @@ function getPageTitle(path: string): string {
   const titles: Record<string, string> = {
     'dashboard': 'Dashboard',
     'assessment': 'Skill Assessment',
+    'assessment-new': 'Target Role Assessment',
     'learning-path': 'Learning Path',
     'career-plan': 'Career Plan',
     'resources': 'Resources',
@@ -140,6 +142,11 @@ function Router() {
       <Route path="/assessment">
         <AppLayout>
           <ProtectedRoute component={Assessment} />
+        </AppLayout>
+      </Route>
+      <Route path="/assessment-new">
+        <AppLayout>
+          <ProtectedRoute component={AssessmentNew} />
         </AppLayout>
       </Route>
       <Route path="/learning-path">
