@@ -29,13 +29,13 @@ export default function LearningPath({ user }: { user: any }) {
     queryKey: ['/api/learning-resources'],
   });
   
-  // Fetch career goals
-  const { data: careerGoals, isLoading: isLoadingGoals } = useQuery({
-    queryKey: [`/api/users/${user.id}/career-goals`],
+  // Fetch current career goal
+  const { data: currentCareerGoal, isLoading: isLoadingGoals } = useQuery({
+    queryKey: ['/api/users/career-goals/current'],
   });
   
   const generateNewLearningPath = async () => {
-    if (!careerGoals || careerGoals.length === 0) {
+    if (!currentCareerGoal) {
       toast({
         title: "No career goal set",
         description: "Please set a career goal first to generate a learning path.",
@@ -53,16 +53,15 @@ export default function LearningPath({ user }: { user: any }) {
       // Force a dashboard query refresh to ensure we have the latest career goal data
       await queryClient.invalidateQueries({ queryKey: [`/api/users/${user.id}/dashboard`] });
       
-      const currentGoal = careerGoals[0];
       console.log("[DEBUG] Learning path - Generating path for career goal:", {
-        id: currentGoal.id,
-        title: currentGoal.title,
-        targetRoleId: currentGoal.targetRoleId
+        id: currentCareerGoal.id,
+        title: currentCareerGoal.title,
+        targetRoleId: currentCareerGoal.targetRoleId
       });
       
       await apiRequest("POST", "/api/ai/generate-learning-path", {
         userId: user.id,
-        careerGoalId: currentGoal.id,
+        careerGoalId: currentCareerGoal.id,
       });
       
       // Invalidate learning paths to refresh data
@@ -70,7 +69,7 @@ export default function LearningPath({ user }: { user: any }) {
       
       toast({
         title: "Learning path generated",
-        description: `New personalized learning path for ${currentGoal.title} has been created.`,
+        description: `New personalized learning path for ${currentCareerGoal.title} has been created.`,
       });
       
       // Reset mismatch state since we've generated a new path
@@ -88,21 +87,20 @@ export default function LearningPath({ user }: { user: any }) {
   
   // Effect to detect and fix mismatches between career goal and learning path
   useEffect(() => {
-    if (!isLoadingPaths && !isLoadingGoals && learningPaths?.length > 0 && careerGoals?.length > 0 && !isGenerating) {
+    if (!isLoadingPaths && !isLoadingGoals && learningPaths?.length > 0 && currentCareerGoal && !isGenerating) {
       const currentPath = learningPaths[0];
-      const currentGoal = careerGoals[0];
       
       // Check if learning path title contains the current career goal or has the same target role ID
-      const titleMatches = currentPath.title.includes(currentGoal.title);
-      const roleIdMatches = currentPath.targetRoleId === currentGoal.targetRoleId;
+      const titleMatches = currentPath.title.includes(currentCareerGoal.title);
+      const roleIdMatches = currentPath.targetRoleId === currentCareerGoal.targetRoleId;
       const pathMatchesGoal = titleMatches || roleIdMatches;
       
       console.log("[DEBUG] Learning path sync check:", {
         pathTitle: currentPath.title,
-        goalTitle: currentGoal.title,
+        goalTitle: currentCareerGoal.title,
         titleMatches,
         pathRoleId: currentPath.targetRoleId,
-        goalRoleId: currentGoal.targetRoleId,
+        goalRoleId: currentCareerGoal.targetRoleId,
         roleIdMatches,
         pathMatchesGoal
       });
@@ -111,11 +109,11 @@ export default function LearningPath({ user }: { user: any }) {
       
       // Auto-generate new learning path if there's a mismatch
       if (!pathMatchesGoal) {
-        console.log("[INFO] Auto-generating new learning path for current career goal:", currentGoal.title);
+        console.log("[INFO] Auto-generating new learning path for current career goal:", currentCareerGoal.title);
         generateNewLearningPath();
       }
     }
-  }, [learningPaths, careerGoals, isLoadingPaths, isLoadingGoals, isGenerating]);
+  }, [learningPaths, currentCareerGoal, isLoadingPaths, isLoadingGoals, isGenerating]);
   
   const isLoading = isLoadingPaths || isLoadingResources || isLoadingGoals;
 
@@ -150,7 +148,7 @@ export default function LearningPath({ user }: { user: any }) {
         <p className="text-gray-600">Your personalized learning journey based on your skills and career goals.</p>
       </div>
       
-      {mismatchDetected && primaryPath && careerGoals?.length > 0 && (
+      {mismatchDetected && primaryPath && currentCareerGoal && (
         <Alert className="mb-6 border-amber-500 bg-amber-50">
           <AlertTriangle className="h-5 w-5 text-amber-500" />
           <AlertTitle className="text-amber-700">Learning Path Mismatch Detected</AlertTitle>
@@ -162,7 +160,7 @@ export default function LearningPath({ user }: { user: any }) {
               <div>
                 <span className="font-medium">Current Path:</span> {primaryPath.title}
                 <br />
-                <span className="font-medium">Current Goal:</span> {careerGoals[0].title}
+                <span className="font-medium">Current Goal:</span> {currentCareerGoal.title}
               </div>
               <Button 
                 variant="outline" 
@@ -201,8 +199,8 @@ export default function LearningPath({ user }: { user: any }) {
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Generating...
                   </>
-                ) : careerGoals && careerGoals.length > 0 ? 
-                     `Generate Path for ${careerGoals[0].title}` : 
+                ) : currentCareerGoal ? 
+                     `Generate Path for ${currentCareerGoal.title}` : 
                      "Regenerate Path"}
               </Button>
             </div>
