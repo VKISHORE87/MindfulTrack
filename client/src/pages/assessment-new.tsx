@@ -187,10 +187,7 @@ const AssessmentNew = () => {
     }
   }, [userSkills, roleSkills]);
 
-  // Additional category for Agile & Product roles
-  const [showAgileOnly, setShowAgileOnly] = useState(false);
-
-  // Filter roles based on search query, industry filter, and special filters
+  // Filter roles based on search query and industry filter
   useEffect(() => {
     let filtered = roles;
     
@@ -205,13 +202,8 @@ const AssessmentNew = () => {
       );
     }
     
-    // Special filter for Agile & Product Management roles
-    if (showAgileOnly) {
-      filtered = filtered.filter(role => isAgileOrProductRole(role));
-    }
-    
     setFilteredRoles(filtered);
-  }, [searchQuery, roles, industry, showAgileOnly]);
+  }, [searchQuery, roles, industry]);
 
   // Handle role selection
   const handleRoleSelect = (role: Role) => {
@@ -332,20 +324,6 @@ const AssessmentNew = () => {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              
-              {/* Quick filters */}
-              <div>
-                <label className="block text-sm font-medium mb-1">Quick Filters</label>
-                <div className="flex flex-wrap gap-2">
-                  <Button 
-                    size="sm"
-                    variant={showAgileOnly ? "default" : "outline"}
-                    onClick={() => setShowAgileOnly(!showAgileOnly)}
-                  >
-                    Agile & Product
-                  </Button>
-                </div>
               </div>
               
               {/* Role search */}
