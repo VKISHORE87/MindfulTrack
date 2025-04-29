@@ -15,7 +15,6 @@ import { Skill } from "@shared/schema";
 export default function Resources({ user }: { user: any }) {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("all");
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
   
   // Fetch all skills
@@ -41,15 +40,11 @@ export default function Resources({ user }: { user: any }) {
     queryKey: [`/api/users/${user.id}/progress`],
   });
   
-  // Filter resources based on search and active tab
+  // Filter resources based on search term only
   const filteredResources = resources?.filter(resource => {
-    const matchesSearch = searchTerm === "" || 
+    return searchTerm === "" || 
       resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       resource.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesTab = activeTab === "all" || resource.resourceType === activeTab;
-    
-    return matchesSearch && matchesTab;
   });
   
   // Start or update progress for a resource
@@ -216,7 +211,7 @@ export default function Resources({ user }: { user: any }) {
       </div>
       
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
-        <div className="relative w-full md:w-64">
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search resources..."
@@ -225,15 +220,6 @@ export default function Resources({ user }: { user: any }) {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full md:w-auto">
-          <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="course">Courses</TabsTrigger>
-            <TabsTrigger value="workshop">Workshops</TabsTrigger>
-            <TabsTrigger value="assessment">Assessments</TabsTrigger>
-          </TabsList>
-        </Tabs>
       </div>
       
       {filteredResources && filteredResources.length > 0 ? (
@@ -385,7 +371,7 @@ export default function Resources({ user }: { user: any }) {
             <p className="text-gray-500">
               {searchTerm 
                 ? `No resources matching "${searchTerm}" were found. Try a different search term.` 
-                : "No resources available for this category."}
+                : "No resources available."}
             </p>
           </CardContent>
         </Card>
