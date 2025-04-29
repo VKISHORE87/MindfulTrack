@@ -1683,6 +1683,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
         skillIds: ["20", "21"],
         duration: 20
       },
+      
+      // Financial & Risk Analysis Resources
+      {
+        title: "Financial Risk Management",
+        description: "Learn the fundamentals of risk modeling and management in financial institutions.",
+        resourceType: "course",
+        url: "https://www.youtube.com/watch?v=GjPMlI4J3F0",
+        provider: "YouTube - Corporate Finance Institute",
+        skillIds: ["21", "22", "23", "24"],
+        duration: 25
+      },
+      {
+        title: "Statistics for Data Science and Business Analysis",
+        description: "Master statistical analysis techniques essential for risk assessment and data analysis.",
+        resourceType: "course",
+        url: "https://www.youtube.com/watch?v=xxpc-HPKN28",
+        provider: "YouTube - freeCodeCamp.org",
+        skillIds: ["25", "26", "27", "28"],
+        duration: 40
+      },
+      
+      // Agile & Scrum Resources 
+      {
+        title: "Scrum: A Breathtakingly Brief and Agile Introduction",
+        description: "A quick and comprehensive introduction to Scrum methodologies and principles.",
+        resourceType: "article",
+        url: "https://www.youtube.com/watch?v=9TycLR0TqFA",
+        provider: "YouTube - Scrum.org",
+        skillIds: ["16"],
+        duration: 15
+      },
+      {
+        title: "Agile Project Management with Scrum",
+        description: "Learn the principles of Agile facilitation and Scrum methodology.",
+        resourceType: "course",
+        url: "https://www.youtube.com/watch?v=9TycLR0TqFA",
+        provider: "YouTube - Development That Pays",
+        skillIds: ["16"],
+        duration: 30
+      },
+      {
+        title: "Sprint Planning Best Practices",
+        description: "Master effective sprint planning techniques for Scrum teams.",
+        resourceType: "video",
+        url: "https://www.youtube.com/watch?v=2A9rkiIcnVI",
+        provider: "YouTube - Atlassian",
+        skillIds: ["16"],
+        duration: 20
+      },
+      {
+        title: "Conflict Resolution for Agile Teams",
+        description: "Learn how to manage and resolve conflicts in Agile and Scrum environments.",
+        resourceType: "course",
+        url: "https://www.youtube.com/watch?v=qDfSYz0PX9g",
+        provider: "YouTube - Scrum.org",
+        skillIds: ["16"],
+        duration: 25
+      },
+      {
+        title: "Servant Leadership in Scrum",
+        description: "Understand the principles of servant leadership as a Scrum Master.",
+        resourceType: "workshop",
+        url: "https://www.youtube.com/watch?v=kJdXjtSnZTI",
+        provider: "YouTube - Scrum.org",
+        skillIds: ["16"],
+        duration: 30
+      },
+      {
+        title: "Continuous Improvement: Kaizen in Scrum",
+        description: "Learn how to implement continuous improvement practices in Scrum teams.",
+        resourceType: "course",
+        url: "https://www.youtube.com/watch?v=VGLjoMPJzXo",
+        provider: "YouTube - Agile for All",
+        skillIds: ["16"],
+        duration: 20
+      },
 
       // Cybersecurity Resources
       {
