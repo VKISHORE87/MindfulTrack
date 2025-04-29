@@ -207,7 +207,7 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
                 <FormItem>
                   <FormLabel>Target Role</FormLabel>
                   <Select 
-                    onValueChange={(value) => {
+                    onValueChange={async (value) => {
                       // First update the form field
                       field.onChange(value);
                       
@@ -219,29 +219,59 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
                           description: "Fetching skills for the selected role...",
                         });
                         
-                        // Immediately refresh skill data for the selected role
-                        Promise.all([
-                          queryClient.refetchQueries({ 
+                        try {
+                          // Step 1: First refresh the skills for the selected role
+                          await queryClient.refetchQueries({ 
                             queryKey: [`/api/skills/role/${value}`],
                             type: 'active'
-                          }),
-                          queryClient.refetchQueries({ 
+                          });
+                          
+                          // Step 2: Try to find existing goals that might already have this target role
+                          const careerGoalsResponse = await fetch(`/api/users/${userId}/career-goals`);
+                          const careerGoals = await careerGoalsResponse.json();
+                          
+                          if (careerGoals && careerGoals.length > 0) {
+                            // If we have an existing goal, use it to generate a fresh skill gap analysis
+                            const careerGoalId = careerGoals[0].id;
+                            
+                            toast({
+                              title: "Generating analysis",
+                              description: "Creating skill gap analysis for selected role...",
+                            });
+                            
+                            // Generate a new analysis
+                            await fetch("/api/ai/skill-gap-analysis", {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify({
+                                userId,
+                                careerGoalId,
+                                targetRoleId: value,
+                                forceRefresh: true
+                              }),
+                            });
+                          }
+                          
+                          // Step 3: Finally refresh the dashboard data
+                          await queryClient.refetchQueries({ 
                             queryKey: [`/api/users/${userId}/dashboard`],
                             type: 'active' 
-                          })
-                        ]).then(() => {
-                          toast({
-                            title: "Data refreshed",
-                            description: "Role skill analysis is now up-to-date",
                           });
-                        }).catch(error => {
+                          
+                          toast({
+                            title: "Role data refreshed",
+                            description: "Skill analysis is now up-to-date for this role",
+                          });
+                        } catch (error) {
                           console.error('Error refreshing data:', error);
                           toast({
                             title: "Error",
                             description: "Failed to refresh role data",
                             variant: "destructive"
                           });
-                        });
+                        }
                       }
                     }}
                     defaultValue={field.value}

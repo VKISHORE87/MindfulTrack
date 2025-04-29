@@ -42,16 +42,51 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
     try {
       if (showToast) {
         toast({
-          title: "Refreshing skill data",
-          description: "Getting the latest skill gap analysis...",
+          title: "Generating new skill gap analysis",
+          description: "This may take a few seconds...",
         });
       }
       
-      // Refresh all relevant data
+      // Get the user's career goals
+      const careerGoalsResponse = await fetch(`/api/users/${userId}/career-goals`);
+      const careerGoals = await careerGoalsResponse.json();
+      
+      if (!careerGoals || careerGoals.length === 0) {
+        toast({
+          title: "No career goal found",
+          description: "Please set a career goal first to generate a skill gap analysis.",
+          variant: "destructive",
+        });
+        setIsRefreshing(false);
+        return;
+      }
+      
+      // Find the career goal with the matching target role ID
+      const careerGoalId = careerGoals[0].id;
+      
+      // Step 1: Generate a new skill gap analysis by calling the API
+      const response = await fetch("/api/ai/skill-gap-analysis", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          careerGoalId,
+          forceRefresh: true
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to generate skill gap analysis");
+      }
+      
+      // Step 2: Refresh all relevant data to reflect the new analysis
       await Promise.all([
         queryClient.refetchQueries({ 
           queryKey: [`/api/users/${userId}/dashboard`],
-          type: 'active' 
+          type: 'active',
+          exact: false
         }),
         targetRoleId ? 
           queryClient.refetchQueries({ 
@@ -63,16 +98,16 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
       
       if (showToast) {
         toast({
-          title: "Data refreshed",
-          description: "Skill gap analysis is now up-to-date"
+          title: "Analysis complete",
+          description: "Your skill gap analysis has been updated for your target role"
         });
       }
     } catch (error) {
-      console.error("Error refreshing data:", error);
+      console.error("Error refreshing skill gap data:", error);
       if (showToast) {
         toast({
           title: "Error",
-          description: "Failed to refresh skill data",
+          description: "Failed to generate new skill gap analysis",
           variant: "destructive"
         });
       }
