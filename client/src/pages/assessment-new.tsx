@@ -72,8 +72,11 @@ type UserSkill = {
 const AssessmentNew = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentRoleSearchQuery, setCurrentRoleSearchQuery] = useState("");
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [selectedCurrentRole, setSelectedCurrentRole] = useState<Role | null>(null);
   const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
+  const [filteredCurrentRoles, setFilteredCurrentRoles] = useState<Role[]>([]);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [skillLevels, setSkillLevels] = useState<Record<number, number>>({});
   const [isAssessmentComplete, setIsAssessmentComplete] = useState(false);
@@ -204,12 +207,31 @@ const AssessmentNew = () => {
     
     setFilteredRoles(filtered);
   }, [searchQuery, roles, industry]);
+  
+  // Filter current roles based on search query
+  useEffect(() => {
+    let filtered = roles;
+    
+    if (currentRoleSearchQuery) {
+      const query = currentRoleSearchQuery.toLowerCase();
+      filtered = filtered.filter(role => 
+        role.title.toLowerCase().includes(query)
+      );
+    }
+    
+    setFilteredCurrentRoles(filtered);
+  }, [currentRoleSearchQuery, roles]);
 
   // Handle role selection
   const handleRoleSelect = (role: Role) => {
     setSelectedRole(role);
     setIsAssessmentComplete(false);
     refetchRoleSkills();
+  };
+  
+  // Handle current role selection
+  const handleCurrentRoleSelect = (role: Role) => {
+    setSelectedCurrentRole(role);
   };
 
   // Handle skill level change
@@ -225,8 +247,12 @@ const AssessmentNew = () => {
     if (!selectedRole) return;
 
     // Create career goal with selected role
+    const goalTitle = selectedCurrentRole 
+      ? `Transition from ${selectedCurrentRole.title} to ${selectedRole.title}`
+      : `Become a ${selectedRole.title}`;
+      
     saveCareerGoalMutation.mutate({
-      title: `Become a ${selectedRole.title}`,
+      title: goalTitle,
       roleId: selectedRole.id,
     });
 
@@ -259,6 +285,7 @@ const AssessmentNew = () => {
   // Clear selected role
   const clearSelectedRole = () => {
     setSelectedRole(null);
+    setSelectedCurrentRole(null);
     setSkillLevels({});
     setIsAssessmentComplete(false);
   };
@@ -404,12 +431,74 @@ const AssessmentNew = () => {
                   </div>
                   <h3 className="text-xl font-semibold mb-2">Assessment Complete!</h3>
                   <p className="text-gray-600 mb-6">
-                    Your skill assessment for {selectedRole.title} has been saved.
+                    {selectedCurrentRole 
+                      ? `Your transition plan from ${selectedCurrentRole.title} to ${selectedRole.title} has been saved.`
+                      : `Your skill assessment for ${selectedRole.title} has been saved.`
+                    }
                   </p>
                   <Button onClick={clearSelectedRole}>Assess Another Role</Button>
                 </div>
               ) : (
                 <>
+                  {/* Current Role Selector */}
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold mb-2">Your Current Role</h3>
+                    <p className="text-gray-600 mb-4">
+                      Select your current role to help us understand your career transition better.
+                    </p>
+                    
+                    <div className="space-y-4">
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                        <Input
+                          type="text"
+                          placeholder="Search current roles..."
+                          className="pl-9"
+                          value={currentRoleSearchQuery}
+                          onChange={(e) => setCurrentRoleSearchQuery(e.target.value)}
+                        />
+                      </div>
+                      
+                      <Select 
+                        value={selectedCurrentRole?.id.toString() || ""} 
+                        onValueChange={(value) => {
+                          const role = roles.find(r => r.id.toString() === value);
+                          if (role) handleCurrentRoleSelect(role);
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your current role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {filteredCurrentRoles.map((role) => (
+                            <SelectItem key={role.id} value={role.id.toString()}>
+                              {role.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      {selectedCurrentRole && (
+                        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-md">
+                          <div>
+                            <div className="font-medium">{selectedCurrentRole.title}</div>
+                            {selectedCurrentRole.industry && (
+                              <div className="text-xs text-gray-500">{selectedCurrentRole.industry}</div>
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedCurrentRole(null)}
+                            className="text-gray-500"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold mb-2">Required Skills</h3>
                     <p className="text-gray-600 mb-4">
