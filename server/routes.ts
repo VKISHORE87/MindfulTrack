@@ -722,6 +722,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // Get skills for a target role
+  app.get(
+    "/api/skills/role/:roleId",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const roleId = parseInt(req.params.roleId);
+        const role = await storage.getInterviewRole(roleId);
+        
+        if (!role) {
+          return res.status(404).json({ message: "Role not found" });
+        }
+        
+        // If the role has required skills
+        if (role.requiredSkills && Array.isArray(role.requiredSkills) && role.requiredSkills.length > 0) {
+          // Get all skills first
+          const allSkills = await storage.getAllSkills();
+          
+          // Filter skills that match the role's required skills (case insensitive)
+          const roleSkills = allSkills.filter(skill => 
+            role.requiredSkills.some((requiredSkill: string) => 
+              requiredSkill.toLowerCase() === skill.name.toLowerCase()
+            )
+          );
+          
+          // If we have matching skills, return them
+          if (roleSkills.length > 0) {
+            return res.json(roleSkills);
+          }
+          
+          // If no matches found in existing skills, create skill objects from the required skills list
+          const generatedSkills = role.requiredSkills.map((skillName: string, index: number) => ({
+            id: -1 * (index + 1), // Use negative IDs for temp skills
+            name: skillName,
+            category: "technical", // Default category
+            description: `Skill required for ${role.title} role`
+          }));
+          
+          return res.json(generatedSkills);
+        }
+        
+        // If no required skills, return empty array
+        res.json([]);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
   // Get skills by category
   app.get(
     "/api/skills/category/:category",

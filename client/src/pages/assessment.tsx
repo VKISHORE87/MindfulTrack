@@ -19,10 +19,49 @@ import {
   Loader2 
 } from "lucide-react";
 
-export default function Assessment({ user }: { user: any }) {
+interface User {
+  id: number;
+  name: string;
+  [key: string]: any;
+}
+
+interface Skill {
+  id: number;
+  name: string;
+  category: string;
+  description: string;
+}
+
+interface UserSkill {
+  skillId: number;
+  currentLevel: number;
+  targetLevel: number;
+}
+
+interface CareerGoal {
+  id: number;
+  title: string;
+  timeline: string;
+  targetRoleId?: string;
+  timelineMonths?: number;
+  readiness: number;
+}
+
+interface DashboardData {
+  user?: User;
+  careerGoal?: CareerGoal;
+  keySkills?: any[];
+  skillGaps?: any[];
+  learningPath?: any;
+  recentActivities?: any[];
+  stats?: any;
+}
+
+export default function Assessment({ user }: { user: User }) {
   const { toast } = useToast();
   const [location] = useLocation();
   const [activeTab, setActiveTab] = useState("assessment");
+  const [isGenerating, setIsGenerating] = useState(false);
   
   // Handle URL query parameters for tab selection
   useEffect(() => {
@@ -32,32 +71,51 @@ export default function Assessment({ user }: { user: any }) {
       setActiveTab('analysis');
     }
   }, [location]);
-  const [isGenerating, setIsGenerating] = useState(false);
 
-  // Fetch all skills
-  const { data: skills, isLoading: isLoadingSkills } = useQuery({
-    queryKey: ['/api/skills'],
+  // Fetch user career goals
+  const { 
+    data: careerGoals = [], 
+    isLoading: isLoadingCareerGoals 
+  } = useQuery<CareerGoal[]>({
+    queryKey: [`/api/users/${user.id}/career-goals`],
+  });
+  
+  // Determine if we have a targetRoleId to fetch skills for
+  const targetRoleId = careerGoals[0]?.targetRoleId;
+  
+  // Fetch role-specific skills if a role is set, otherwise fetch all skills
+  const { 
+    data: skills = [], 
+    isLoading: isLoadingSkills 
+  } = useQuery<Skill[]>({
+    queryKey: [
+      targetRoleId 
+        ? `/api/skills/role/${targetRoleId}` 
+        : '/api/skills'
+    ],
+    enabled: !isLoadingCareerGoals, // Only run after career goals are loaded
   });
 
   // Fetch user skills
-  const { data: userSkills, isLoading: isLoadingUserSkills } = useQuery({
+  const { 
+    data: userSkills = null, 
+    isLoading: isLoadingUserSkills 
+  } = useQuery<UserSkill[] | null>({
     queryKey: [`/api/users/${user.id}/skills`],
   });
 
-  // Fetch user career goals
-  const { data: careerGoals, isLoading: isLoadingCareerGoals } = useQuery({
-    queryKey: [`/api/users/${user.id}/career-goals`],
-  });
-
   // Fetch dashboard data for skill gaps analysis
-  const { data: dashboardData, isLoading: isLoadingDashboard } = useQuery({
+  const { 
+    data: dashboardData = {}, 
+    isLoading: isLoadingDashboard 
+  } = useQuery<DashboardData>({
     queryKey: [`/api/users/${user.id}/dashboard`],
   });
 
   const isLoading = isLoadingSkills || isLoadingUserSkills || isLoadingCareerGoals || isLoadingDashboard;
 
   const generateSkillGapAnalysis = async () => {
-    if (!careerGoals || careerGoals.length === 0) {
+    if (careerGoals.length === 0) {
       toast({
         title: "No career goal set",
         description: "Please set a career goal first to generate a skill gap analysis.",
@@ -128,14 +186,21 @@ export default function Assessment({ user }: { user: any }) {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="mb-6">
-                For each skill, rate your current proficiency level and set a target level you aim to achieve. 
-                This will help us identify your skill gaps and create a personalized learning path.
-              </p>
+              {targetRoleId ? (
+                <p className="mb-6">
+                  These skills are required for your target role. Rate your current proficiency level and set 
+                  a target level you aim to achieve. This will help identify skill gaps for your career goal.
+                </p>
+              ) : (
+                <p className="mb-6">
+                  For each skill, rate your current proficiency level and set a target level you aim to achieve. 
+                  This will help us identify your skill gaps and create a personalized learning path.
+                </p>
+              )}
               
               <SkillAssessmentForm 
-                skills={skills || []} 
-                userSkills={userSkills || null} 
+                skills={skills} 
+                userSkills={userSkills} 
                 userId={user.id} 
               />
             </CardContent>
@@ -144,7 +209,7 @@ export default function Assessment({ user }: { user: any }) {
           <div className="flex justify-end mt-6">
             <Button 
               onClick={generateSkillGapAnalysis} 
-              disabled={isGenerating}
+              disabled={isGenerating || careerGoals.length === 0}
               className="bg-primary hover:bg-primary-700"
             >
               {isGenerating ? (
@@ -176,16 +241,16 @@ export default function Assessment({ user }: { user: any }) {
                 </div>
               </CardHeader>
               <CardContent>
-                {dashboardData?.skillGaps?.map((skill: any) => (
-                  <SkillProgressBar
-                    key={skill.id}
-                    skillName={skill.name}
-                    percentage={skill.percentage}
-                    className="mb-6"
-                  />
-                ))}
-                
-                {(!dashboardData?.skillGaps || dashboardData.skillGaps.length === 0) && (
+                {dashboardData.skillGaps && dashboardData.skillGaps.length > 0 ? (
+                  dashboardData.skillGaps.map((skill) => (
+                    <SkillProgressBar
+                      key={skill.id}
+                      skillName={skill.name}
+                      percentage={skill.percentage}
+                      className="mb-6"
+                    />
+                  ))
+                ) : (
                   <div className="text-center py-8 text-gray-500">
                     <AlertTriangle className="mx-auto h-12 w-12 text-amber-500 mb-4" />
                     <p>No skill gap analysis available. Please complete your skill assessment first.</p>
@@ -204,7 +269,7 @@ export default function Assessment({ user }: { user: any }) {
                 </div>
               </CardHeader>
               <CardContent>
-                {dashboardData?.careerGoal ? (
+                {dashboardData.careerGoal ? (
                   <div>
                     <h4 className="font-medium text-lg mb-2">{dashboardData.careerGoal.title}</h4>
                     <p className="text-sm text-gray-500 mb-4">{dashboardData.careerGoal.timeline}</p>
@@ -229,7 +294,7 @@ export default function Assessment({ user }: { user: any }) {
                           {dashboardData.careerGoal.readiness < 50 && (
                             <li className="flex items-start">
                               <AlertTriangle className="h-5 w-5 text-amber-500 mr-2 flex-shrink-0" />
-                              <p className="text-sm">Focus on improving data analysis skills</p>
+                              <p className="text-sm">Focus on improving key missing skills</p>
                             </li>
                           )}
                           {dashboardData.careerGoal.readiness >= 70 && (
@@ -257,7 +322,7 @@ export default function Assessment({ user }: { user: any }) {
           </div>
           
           {/* Career Plan section */}
-          {dashboardData?.careerGoal && dashboardData?.keySkills && (
+          {dashboardData.careerGoal && dashboardData.keySkills && (
             <div className="mt-8">
               <h3 className="text-lg font-bold mb-4">Create Your Career Plan</h3>
               <CareerPlan 
@@ -280,22 +345,33 @@ export default function Assessment({ user }: { user: any }) {
             </Button>
             <Button 
               className="bg-primary hover:bg-primary-700"
-              onClick={() => apiRequest("POST", "/api/ai/generate-learning-path", {
-                userId: user.id,
-                careerGoalId: careerGoals?.[0]?.id
-              }).then(() => {
-                queryClient.invalidateQueries({ queryKey: [`/api/users/${user.id}/learning-paths`] });
-                toast({
-                  title: "Learning path generated",
-                  description: "Your personalized learning path has been created",
+              onClick={() => {
+                if (careerGoals.length === 0) {
+                  toast({
+                    title: "No career goal set",
+                    description: "Please set a career goal first to generate a learning path.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+                
+                apiRequest("POST", "/api/ai/generate-learning-path", {
+                  userId: user.id,
+                  careerGoalId: careerGoals[0].id
+                }).then(() => {
+                  queryClient.invalidateQueries({ queryKey: [`/api/users/${user.id}/learning-paths`] });
+                  toast({
+                    title: "Learning path generated",
+                    description: "Your personalized learning path has been created",
+                  });
+                }).catch(() => {
+                  toast({
+                    title: "Error generating learning path",
+                    description: "There was an error generating your learning path",
+                    variant: "destructive",
+                  });
                 });
-              }).catch(() => {
-                toast({
-                  title: "Error generating learning path",
-                  description: "There was an error generating your learning path",
-                  variant: "destructive",
-                });
-              })}
+              }}
             >
               Generate Learning Path
             </Button>
