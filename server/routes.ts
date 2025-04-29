@@ -3017,7 +3017,7 @@ Return a JSON response with the following structure:
   // Interview Routes
   // =====================
 
-  // Get all interview roles (filtered to IT industry roles only for MVP 1)
+  // Get all interview roles (now including banking and financial services roles)
   app.get(
     "/api/interview/roles",
     async (req: Request, res: Response, next: NextFunction) => {
@@ -3025,86 +3025,23 @@ Return a JSON response with the following structure:
         // Get all roles
         const allRoles = await storage.getAllInterviewRoles();
         
-        // Define the list of IT industry roles titles to include (from user's provided list)
-        const itRoleTitles = [
-          // Software Development & Engineering
-          "Frontend Developer",
-          "Backend Developer",
-          "Full Stack Developer",
-          "Mobile Application Developer",
-          "Software Quality Assurance (QA) Tester",
-          "Application Support Engineer",
-          "Software Architect",
-          "Agile Scrum Master",
-          
-          // Data & Analytics
-          "Data Scientist",
-          "Business Intelligence (BI) Developer",
-          "Data Engineer",
-          "Machine Learning Engineer",
-          "Data Visualization Specialist",
-          "Big Data Architect",
-          "Statistical Analyst",
-          "Data Governance Consultant",
-          
-          // Artificial Intelligence & Machine Learning
-          "AI Research Scientist",
-          "Natural Language Processing (NLP) Engineer",
-          "Computer Vision Developer",
-          "Deep Learning Specialist",
-          "AI Ethics Consultant",
-          "Reinforcement Learning Engineer",
-          "AI Model Deployment Engineer",
-          "Cognitive Computing Developer",
-          
-          // Cloud Computing & DevOps
-          "Cloud Solutions Architect",
-          "DevOps Engineer",
-          "Site Reliability Engineer (SRE)",
-          "Cloud Infrastructure Administrator",
-          "Continuous Integration/Continuous Deployment (CI/CD) Pipeline Developer",
-          "Containerization Specialist (Docker/Kubernetes)",
-          "Cloud Security Analyst",
-          "Platform as a Service (PaaS) Developer",
-          
-          // Cybersecurity
-          "Security Operations Center (SOC) Analyst",
-          "Penetration Tester (Ethical Hacker)",
-          "Security Information and Event Management (SIEM) Specialist",
-          "Identity and Access Management (IAM) Engineer",
-          "Cloud Security Architect",
-          "Cyber Threat Intelligence Analyst",
-          "Incident Response Coordinator",
-          "Compliance and Risk Management IT Consultant",
-          
-          // IT Support & Administration
-          "IT Support Specialist",
-          "Help Desk Technician",
-          "System Administrator",
-          "Network Administrator",
-          "IT Asset Manager",
-          "Technical Support Engineer",
-          "Desktop Support Analyst",
-          "IT Operations Manager",
-          
-          // Project & Product Management
-          "IT Project Manager",
-          "Technical Program Manager",
-          "Product Owner",
-          "Business Analyst",
-          "Scrum Master",
-          "Agile Coach",
-          "IT Portfolio Manager",
-          "Change Management Consultant"
-        ];
+        // Get the industry filter from query parameters, if provided
+        const industryFilter = req.query.industry as string | undefined;
         
-        // Filter roles to include only IT industry roles
-        const itRoles = allRoles.filter(role => itRoleTitles.includes(role.title));
+        // Apply filter if industry parameter is provided
+        let filteredRoles = allRoles;
+        if (industryFilter) {
+          filteredRoles = allRoles.filter(role => 
+            role.industry.toLowerCase() === industryFilter.toLowerCase()
+          );
+          console.log(`[INFO] Filtered roles by industry '${industryFilter}': ${allRoles.length} total roles -> ${filteredRoles.length} roles`);
+        } else {
+          // If no filter provided, prioritize banking roles but include all roles
+          filteredRoles = allRoles;
+          console.log(`[INFO] Returning all ${allRoles.length} roles`);
+        }
         
-        // Log the filtering result
-        console.log(`[INFO] Filtered roles: ${allRoles.length} total roles -> ${itRoles.length} IT industry roles`);
-        
-        res.json(itRoles);
+        res.json(filteredRoles);
       } catch (error) {
         next(error);
       }
@@ -3123,85 +3060,7 @@ Return a JSON response with the following structure:
           return res.status(404).json({ message: "Interview role not found" });
         }
         
-        // Define the IT industry role titles (same as in the GET all roles endpoint)
-        const itRoleTitles = [
-          // Software Development & Engineering
-          "Frontend Developer",
-          "Backend Developer",
-          "Full Stack Developer",
-          "Mobile Application Developer",
-          "Software Quality Assurance (QA) Tester",
-          "Application Support Engineer",
-          "Software Architect",
-          "Agile Scrum Master",
-          
-          // Data & Analytics
-          "Data Scientist",
-          "Business Intelligence (BI) Developer",
-          "Data Engineer",
-          "Machine Learning Engineer",
-          "Data Visualization Specialist",
-          "Big Data Architect",
-          "Statistical Analyst",
-          "Data Governance Consultant",
-          
-          // Artificial Intelligence & Machine Learning
-          "AI Research Scientist",
-          "Natural Language Processing (NLP) Engineer",
-          "Computer Vision Developer",
-          "Deep Learning Specialist",
-          "AI Ethics Consultant",
-          "Reinforcement Learning Engineer",
-          "AI Model Deployment Engineer",
-          "Cognitive Computing Developer",
-          
-          // Cloud Computing & DevOps
-          "Cloud Solutions Architect",
-          "DevOps Engineer",
-          "Site Reliability Engineer (SRE)",
-          "Cloud Infrastructure Administrator",
-          "Continuous Integration/Continuous Deployment (CI/CD) Pipeline Developer",
-          "Containerization Specialist (Docker/Kubernetes)",
-          "Cloud Security Analyst",
-          "Platform as a Service (PaaS) Developer",
-          
-          // Cybersecurity
-          "Security Operations Center (SOC) Analyst",
-          "Penetration Tester (Ethical Hacker)",
-          "Security Information and Event Management (SIEM) Specialist",
-          "Identity and Access Management (IAM) Engineer",
-          "Cloud Security Architect",
-          "Cyber Threat Intelligence Analyst",
-          "Incident Response Coordinator",
-          "Compliance and Risk Management IT Consultant",
-          
-          // IT Support & Administration
-          "IT Support Specialist",
-          "Help Desk Technician",
-          "System Administrator",
-          "Network Administrator",
-          "IT Asset Manager",
-          "Technical Support Engineer",
-          "Desktop Support Analyst",
-          "IT Operations Manager",
-          
-          // Project & Product Management
-          "IT Project Manager",
-          "Technical Program Manager",
-          "Product Owner",
-          "Business Analyst",
-          "Scrum Master",
-          "Agile Coach",
-          "IT Portfolio Manager",
-          "Change Management Consultant"
-        ];
-        
-        // Check if the role is an IT industry role
-        if (!itRoleTitles.includes(role.title)) {
-          console.log(`[WARN] Non-IT role ${role.title} (ID: ${role.id}) requested but filtered out`);
-          return res.status(404).json({ message: "Interview role not found or not in the IT industry sector" });
-        }
-        
+        // Return any valid role regardless of industry
         res.json(role);
       } catch (error) {
         next(error);
