@@ -116,7 +116,13 @@ export default function SkillAssessmentForm({ skills, userSkills, userId }: Skil
       
       // Invalidate queries that depend on user skills
       queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/skills`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/dashboard`] });
+      
+      // Force immediate refetch of dashboard data to show updated skill gaps
+      await queryClient.refetchQueries({ 
+        queryKey: [`/api/users/${userId}/dashboard`],
+        type: 'active', 
+        exact: false
+      });
       
       toast({
         title: "Skills updated successfully",

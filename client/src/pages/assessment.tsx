@@ -107,11 +107,22 @@ export default function Assessment({ user }: { user: User }) {
   // Fetch dashboard data for skill gaps analysis
   const { 
     data: dashboardData = {}, 
-    isLoading: isLoadingDashboard 
+    isLoading: isLoadingDashboard,
+    refetch: refetchDashboard 
   } = useQuery<DashboardData>({
     queryKey: [`/api/users/${user.id}/dashboard`],
+    // Disable stale time to ensure fresh data
+    staleTime: 0,
   });
 
+  // Refresh dashboard data when switching to analysis tab
+  useEffect(() => {
+    if (activeTab === 'analysis') {
+      // Fetch the latest dashboard data when viewing the skill gap analysis
+      refetchDashboard();
+    }
+  }, [activeTab, refetchDashboard]);
+  
   const isLoading = isLoadingSkills || isLoadingUserSkills || isLoadingCareerGoals || isLoadingDashboard;
 
   const generateSkillGapAnalysis = async () => {
