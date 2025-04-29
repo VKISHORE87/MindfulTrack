@@ -39,6 +39,9 @@ export default function LearningPath({ user }: { user: any }) {
     }
     
     try {
+      // Force a dashboard query refresh to ensure we have the latest career goal data
+      await queryClient.invalidateQueries({ queryKey: [`/api/users/${user.id}/dashboard`] });
+      
       await apiRequest("POST", "/api/ai/generate-learning-path", {
         userId: user.id,
         careerGoalId: careerGoals[0].id,

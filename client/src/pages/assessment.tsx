@@ -49,7 +49,8 @@ export default function Assessment({ user }: { user: User }) {
   });
   
   // Determine if we have a targetRoleId to fetch skills for
-  const targetRoleId = careerGoals[0]?.targetRoleId;
+  // Parse the targetRoleId as a number to ensure consistent type across the application
+  const targetRoleId = careerGoals[0]?.targetRoleId ? parseInt(careerGoals[0].targetRoleId.toString()) : undefined;
   
   // Fetch role-specific skills if a role is set, otherwise fetch all skills
   const { 
