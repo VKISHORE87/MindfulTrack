@@ -267,6 +267,7 @@ export const interviewRoles = pgTable("interview_roles", {
   title: text("title").notNull().unique(),
   description: text("description"),
   requiredSkills: text("required_skills").array(),
+  requiredSkillLevels: json("required_skill_levels").default({}), // Object mapping skill name to required proficiency level (0-100)
   industry: text("industry").notNull(),
   level: text("level").notNull(), // junior, mid, senior
   roleType: text("role_type").notNull(), // technical, business, creative, etc.
