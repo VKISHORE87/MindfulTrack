@@ -60,13 +60,24 @@ export default function PracticePage() {
   // User ID for now is hard-coded
   const userId = 1;
 
-  // Get the user's career goals to find target role ID
+  // Get the user's dashboard data - includes the most recently updated career goal
+  const { data: dashboardData, isLoading: isLoadingDashboard } = useQuery({
+    queryKey: [`/api/users/${userId}/dashboard`],
+    queryFn: () => fetch(`/api/users/${userId}/dashboard`).then(res => res.json()),
+    staleTime: 30000, // 30 seconds - refresh more frequently to stay in sync
+  });
+
+  // Also get career goals as a fallback
   const { data: careerGoals, isLoading: isLoadingGoals } = useQuery({
     queryKey: ["/api/users", userId, "career-goals"],
     queryFn: () => fetch(`/api/users/${userId}/career-goals`).then(res => res.json()),
   });
 
-  const primaryCareerGoal = careerGoals?.length > 0 ? careerGoals[0] : null;
+  // First try to get the career goal from dashboard data (most up-to-date)
+  // Fall back to career goals API if needed
+  const dashboardCareerGoal = dashboardData?.careerGoal;
+  const careerGoalsFromAPI = careerGoals?.length > 0 ? careerGoals[0] : null;
+  const primaryCareerGoal = dashboardCareerGoal || careerGoalsFromAPI;
   
   // Parse the target role ID as a number for consistency with server-side handling
   const targetRoleId = primaryCareerGoal?.targetRoleId 
@@ -152,7 +163,11 @@ export default function PracticePage() {
 
   // Determine if we're showing role-specific practice
   const hasRoleSpecificContent = !!rolePracticeData;
-  const roleName = primaryCareerGoal?.title || (hasRoleSpecificContent ? rolePracticeData.roleTitle : null);
+  
+  // Use the most up-to-date role name, with fallbacks to ensure something meaningful is always displayed
+  const roleName = primaryCareerGoal?.title || 
+                  (hasRoleSpecificContent ? rolePracticeData.roleTitle : null) || 
+                  "your target role";
   
   return (
     <>
