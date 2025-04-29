@@ -2184,8 +2184,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const skillId = parseInt(req.params.skillId);
-        const resources = await storage.getLearningResourcesBySkill(skillId);
-        res.json(resources);
+        if (isNaN(skillId)) {
+          return res.status(400).json({ message: "Invalid skill ID" });
+        }
+
+        // Get resources for this skill
+        let resources = await storage.getLearningResourcesBySkill(skillId);
+        
+        // If no resources found for this skill, generate free resources on demand
+        if (!resources || resources.length === 0) {
+          console.log(`[INFO] No resources found for skill ID ${skillId}, generating resources`);
+          
+          // Get the skill information
+          const skill = await storage.getSkill(skillId);
+          
+          if (skill) {
+            console.log(`[INFO] Found skill: ${skill.name} (${skill.category})`);
+            
+            // Create free resources for this skill
+            const freeResources = [
+              {
+                title: `${skill.name} Fundamentals`,
+                description: `Learn the fundamentals of ${skill.name} with this free course.`,
+                resourceType: "course",
+                url: `https://www.youtube.com/results?search_query=${encodeURIComponent(skill.name)}+tutorial`,
+                provider: "YouTube",
+                skillIds: [skill.id.toString()],
+                duration: 30
+              },
+              {
+                title: `${skill.name} Quick Guide`,
+                description: `A quick overview of ${skill.name} for busy professionals.`,
+                resourceType: "video",
+                url: `https://www.youtube.com/results?search_query=${encodeURIComponent(skill.name)}+quick+guide`,
+                provider: "YouTube",
+                skillIds: [skill.id.toString()],
+                duration: 15
+              }
+            ];
+            
+            // Add special resources for Agile/Scrum skills
+            if (
+              skill.name === "Agile Facilitation" || 
+              skill.name === "Servant Leadership" || 
+              skill.name === "Sprint Planning" || 
+              skill.name === "Conflict Resolution" || 
+              skill.name === "Continuous Improvement" ||
+              skill.name.includes("Agile") ||
+              skill.name.includes("Scrum")
+            ) {
+              freeResources.push({
+                title: `${skill.name} for Scrum Masters`,
+                description: `Learn how to apply ${skill.name} in the Scrum Master role.`,
+                resourceType: "course",
+                url: `https://www.youtube.com/results?search_query=${encodeURIComponent(skill.name)}+scrum+master`,
+                provider: "YouTube",
+                skillIds: [skill.id.toString()],
+                duration: 25
+              });
+            }
+            
+            // Save these resources to the database for future use
+            for (const resource of freeResources) {
+              try {
+                await storage.createLearningResource(resource);
+              } catch (err) {
+                console.error(`Error creating resource for skill ${skill.name}:`, err);
+              }
+            }
+            
+            // Try to get the resources again after creating them
+            resources = await storage.getLearningResourcesBySkill(skillId);
+          }
+        }
+        
+        res.json(resources || []);
       } catch (error) {
         next(error);
       }
