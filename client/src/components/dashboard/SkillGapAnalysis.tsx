@@ -49,7 +49,7 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
       }
       
       // Log to confirm function is being called
-      alert("Debug: Refresh function called. Check console for logs.");
+      console.log("Debug: Refresh function called");
       
       // Get the user's career goals
       const careerGoalsResponse = await fetch(`/api/users/${userId}/career-goals`);
@@ -109,11 +109,12 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
             description: "Successfully called the skill gap analysis API."
           });
         }
-      } catch (apiError) {
+      } catch (error) {
+        const apiError = error as Error;
         console.error("API call error:", apiError);
         toast({
           title: "API call failed",
-          description: apiError.message,
+          description: apiError.message || "Unknown error occurred",
           variant: "destructive",
         });
         throw apiError; // Re-throw to be caught by outer try/catch
@@ -238,12 +239,14 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
         
         <div className="mt-6">
           <div className="flex justify-between items-center">
-            <Link href="/assessment?tab=analysis">
-              <a className="inline-flex items-center text-sm font-medium text-primary hover:text-primary-800">
-                View full skill gap analysis
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </a>
-            </Link>
+            <Button 
+              variant="link" 
+              onClick={() => window.location.href = "/assessment?tab=analysis"}
+              className="p-0 h-auto inline-flex items-center text-sm font-medium text-primary hover:text-primary-800"
+            >
+              View full skill gap analysis
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
             {/* Debug section */}
             {process.env.NODE_ENV !== 'production' && (
               <div className="text-xs text-gray-400">
