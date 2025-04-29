@@ -1710,6 +1710,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // ===========================
+  // Role-Based Practice Content
+  // ===========================
+  
+  app.get(
+    "/api/practice/role/:roleId",
+    isAuthenticated,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const roleId = req.params.roleId;
+        const userId = (req.user as any).id;
+        
+        // Get the target role
+        let targetRole;
+        try {
+          const roles = await storage.getRoles();
+          targetRole = roles.find((r: any) => r.id.toString() === roleId.toString());
+          
+          if (!targetRole) {
+            return res.status(404).json({ message: "Target role not found" });
+          }
+        } catch (error) {
+          console.error("Error fetching role:", error);
+          return res.status(500).json({ message: "Failed to fetch role information" });
+        }
+        
+        // Generate role-specific practice content
+        try {
+          // First check if OpenAI API is available
+          let practiceData;
+          
+          try {
+            const response = await openai.chat.completions.create({
+              model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+              messages: [
+                {
+                  role: "system",
+                  content: `You are an expert skills assessment system. Generate practice content for the role of ${targetRole.title}.
+                  
+                  You should create a set of skills relevant to this role, along with assessment questions to test proficiency.
+                  Create content that would help someone prepare for this exact role.`
+                },
+                {
+                  role: "user",
+                  content: JSON.stringify({
+                    role: targetRole.title,
+                    requiredSkills: targetRole.requiredSkills || []
+                  })
+                }
+              ],
+              response_format: { type: "json_object" }
+            });
+            
+            const openAIResponse = JSON.parse(response.choices[0].message.content);
+            practiceData = openAIResponse;
+          } catch (error) {
+            console.error("OpenAI API error:", error);
+            
+            // Fall back to predefined role-specific skills and questions
+            const roleSkills = targetRole.requiredSkills || [];
+            
+            // Create practice content using the role's required skills
+            practiceData = {
+              roleTitle: targetRole.title,
+              skills: roleSkills.slice(0, 5).map((skillName: string, index: number) => ({
+                id: 1000 + index,
+                name: skillName,
+                description: `Master the key aspects of ${skillName} for success as a ${targetRole.title}`,
+                category: index % 2 === 0 ? "technical" : "analytical",
+                proficiency: 0,
+                questionCount: 3 + index % 3,
+                difficulty: index % 3 === 0 ? "beginner" : index % 3 === 1 ? "intermediate" : "advanced",
+                forTargetRole: targetRole.title,
+                questions: [
+                  {
+                    id: (1000 + index) * 10 + 1,
+                    question: `What is a key aspect of ${skillName} in the context of ${targetRole.title}?`,
+                    options: [
+                      { id: "a", text: `Understanding the fundamentals of ${skillName}` },
+                      { id: "b", text: `Advanced application of ${skillName} in complex scenarios` },
+                      { id: "c", text: `Teaching others about ${skillName}` },
+                      { id: "d", text: `None of the above` }
+                    ],
+                    correctAnswer: "b",
+                    explanation: `In the role of ${targetRole.title}, you need to be able to apply ${skillName} in complex, real-world scenarios.`,
+                    skillId: 1000 + index,
+                    difficulty: "intermediate"
+                  },
+                  {
+                    id: (1000 + index) * 10 + 2,
+                    question: `Which of the following best demonstrates proficiency in ${skillName}?`,
+                    options: [
+                      { id: "a", text: `Being able to define what ${skillName} is` },
+                      { id: "b", text: `Having a certification in ${skillName}` },
+                      { id: "c", text: `Successfully applying ${skillName} to solve relevant problems` },
+                      { id: "d", text: `Reading books about ${skillName}` }
+                    ],
+                    correctAnswer: "c",
+                    explanation: `True proficiency in ${skillName} is demonstrated through the successful application of knowledge to solve real problems in the context of ${targetRole.title}.`,
+                    skillId: 1000 + index,
+                    difficulty: "beginner"
+                  },
+                  {
+                    id: (1000 + index) * 10 + 3,
+                    question: `How does ${skillName} relate to other skills required for a ${targetRole.title}?`,
+                    options: [
+                      { id: "a", text: "It operates in isolation from other skills" },
+                      { id: "b", text: "It is the only skill that matters for this role" },
+                      { id: "c", text: `It complements other skills to create a comprehensive skill set` },
+                      { id: "d", text: "It's less important than other skills" }
+                    ],
+                    correctAnswer: "c",
+                    explanation: `In the role of ${targetRole.title}, ${skillName} works together with other skills to form a comprehensive professional skill set.`,
+                    skillId: 1000 + index,
+                    difficulty: "advanced"
+                  }
+                ]
+              }))
+            };
+          }
+          
+          res.json(practiceData);
+        } catch (error) {
+          console.error("Error generating practice content:", error);
+          return res.status(500).json({ message: "Failed to generate practice content" });
+        }
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+  
   // =====================
   // Dashboard Data Route
   // =====================

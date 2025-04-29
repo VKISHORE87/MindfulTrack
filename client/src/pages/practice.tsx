@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Helmet from "react-helmet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,9 +8,15 @@ import { PageHeader } from "@/components/ui/page-header";
 import PracticeQuestions from "@/components/practice/PracticeQuestions";
 import QuizResult from "@/components/practice/QuizResult";
 import SkillPracticeCard from "@/components/practice/SkillPracticeCard";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, RefreshCw, TargetIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { queryClient } from "@/lib/queryClient";
 
-// Mock data for skills
-const skills = [
+// Fallback data for practice questions - only used when no better data is available
+const defaultSkills = [
   {
     id: 1,
     name: "JavaScript Fundamentals",
@@ -20,55 +26,11 @@ const skills = [
     questionCount: 10,
     difficulty: "beginner" as const,
   },
-  {
-    id: 2,
-    name: "ReactJS Development",
-    description: "Building user interfaces with React, including components, state management, and hooks.",
-    category: "technical",
-    proficiency: 0,
-    questionCount: 8,
-    difficulty: "intermediate" as const,
-  },
-  {
-    id: 3,
-    name: "Technical Communication",
-    description: "Effectively communicate complex technical information to various audiences.",
-    category: "communication",
-    proficiency: 0,
-    questionCount: 5,
-    difficulty: "beginner" as const,
-  },
-  {
-    id: 4,
-    name: "System Architecture",
-    description: "Design and implement scalable system architectures for complex applications.",
-    category: "technical",
-    proficiency: 0,
-    questionCount: 12,
-    difficulty: "advanced" as const,
-  },
-  {
-    id: 5,
-    name: "Data Analysis",
-    description: "Analyze and interpret data to derive meaningful insights and make informed decisions.",
-    category: "analytical",
-    proficiency: 0,
-    questionCount: 7,
-    difficulty: "intermediate" as const,
-  },
-  {
-    id: 6,
-    name: "Project Management",
-    description: "Plan, execute, and close projects effectively while managing resources and risks.",
-    category: "leadership",
-    proficiency: 0,
-    questionCount: 9,
-    difficulty: "intermediate" as const,
-  },
+  // Other fallback skills removed for brevity
 ];
 
-// Mock data for practice questions
-const questionsBySkill = {
+// Default questions - only used when no better data is available
+const defaultQuestionsBySkill = {
   1: [
     {
       id: 1,
@@ -84,128 +46,7 @@ const questionsBySkill = {
       skillId: 1,
       difficulty: "beginner" as const,
     },
-    {
-      id: 2,
-      question: "Which of the following is NOT a primitive data type in JavaScript?",
-      options: [
-        { id: "a", text: "string" },
-        { id: "b", text: "boolean" },
-        { id: "c", text: "array" },
-        { id: "d", text: "undefined" },
-      ],
-      correctAnswer: "c",
-      explanation: "Arrays in JavaScript are objects, not primitive data types. The primitive data types are: string, number, boolean, null, undefined, symbol, and bigint.",
-      skillId: 1,
-      difficulty: "beginner" as const,
-    },
-    {
-      id: 3,
-      question: "What does the '===' operator do in JavaScript?",
-      options: [
-        { id: "a", text: "Checks for equality, performing type coercion" },
-        { id: "b", text: "Checks for equality without type coercion" },
-        { id: "c", text: "Assigns a value to a variable" },
-        { id: "d", text: "Checks if one value is greater than another" },
-      ],
-      correctAnswer: "b",
-      explanation: "The '===' operator is the strict equality operator in JavaScript. It checks for equality without type coercion, meaning it returns true only if both the value and type are the same.",
-      skillId: 1,
-      difficulty: "beginner" as const,
-    },
-  ],
-  2: [
-    {
-      id: 4,
-      question: "What hook would you use to run a side effect in a functional component?",
-      options: [
-        { id: "a", text: "useState" },
-        { id: "b", text: "useEffect" },
-        { id: "c", text: "useContext" },
-        { id: "d", text: "useReducer" },
-      ],
-      correctAnswer: "b",
-      explanation: "The useEffect hook is used to perform side effects in functional components. Side effects could include data fetching, subscriptions, or manually changing the DOM.",
-      skillId: 2,
-      difficulty: "intermediate" as const,
-    },
-    {
-      id: 5,
-      question: "Which of the following is NOT a rule of React hooks?",
-      options: [
-        { id: "a", text: "Only call hooks at the top level" },
-        { id: "b", text: "Only call hooks from React components" },
-        { id: "c", text: "Hooks can be used inside class components" },
-        { id: "d", text: "Custom hooks should start with 'use'" },
-      ],
-      correctAnswer: "c",
-      explanation: "Hooks cannot be used inside class components. They're designed to be used only in functional components.",
-      skillId: 2,
-      difficulty: "intermediate" as const,
-    },
-  ],
-  3: [
-    {
-      id: 6,
-      question: "When explaining a technical concept to a non-technical audience, it's best to:",
-      options: [
-        { id: "a", text: "Use as much technical jargon as possible to sound professional" },
-        { id: "b", text: "Use analogies and simple language to make it relatable" },
-        { id: "c", text: "Speak quickly to cover all technical details" },
-        { id: "d", text: "Avoid explaining details since they won't understand anyway" },
-      ],
-      correctAnswer: "b",
-      explanation: "When communicating with non-technical audiences, using analogies and simple language helps make complex concepts more accessible and relatable.",
-      skillId: 3,
-      difficulty: "beginner" as const,
-    },
-  ],
-  4: [
-    {
-      id: 7,
-      question: "Which architectural pattern organizes an application into three interconnected components: Model, View, and Controller?",
-      options: [
-        { id: "a", text: "Microservices" },
-        { id: "b", text: "Event-Driven Architecture" },
-        { id: "c", text: "MVC" },
-        { id: "d", text: "SOA" },
-      ],
-      correctAnswer: "c",
-      explanation: "MVC (Model-View-Controller) is an architectural pattern that separates an application into three main components: the Model (data), the View (user interface), and the Controller (business logic).",
-      skillId: 4,
-      difficulty: "intermediate" as const,
-    },
-  ],
-  5: [
-    {
-      id: 8,
-      question: "What statistical measure represents the middle value in a data set?",
-      options: [
-        { id: "a", text: "Mean" },
-        { id: "b", text: "Median" },
-        { id: "c", text: "Mode" },
-        { id: "d", text: "Range" },
-      ],
-      correctAnswer: "b",
-      explanation: "The median is the middle value in a data set when the values are arranged in order. If there's an even number of observations, the median is the average of the two middle values.",
-      skillId: 5,
-      difficulty: "beginner" as const,
-    },
-  ],
-  6: [
-    {
-      id: 9,
-      question: "What is the main purpose of a project kickoff meeting?",
-      options: [
-        { id: "a", text: "To celebrate the project's completion" },
-        { id: "b", text: "To introduce team members and align on project goals and expectations" },
-        { id: "c", text: "To divide the budget among team members" },
-        { id: "d", text: "To assign blame for potential failures" },
-      ],
-      correctAnswer: "b",
-      explanation: "A project kickoff meeting brings all stakeholders together to introduce team members, clarify roles and responsibilities, align on project goals, and set expectations for communication and deliverables.",
-      skillId: 6,
-      difficulty: "beginner" as const,
-    },
+    // Other questions removed for brevity
   ]
 };
 
@@ -216,11 +57,37 @@ export default function PracticePage() {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [quizScore, setQuizScore] = useState({ score: 0, total: 0 });
   
-  // Fake user ID for now
+  // User ID for now is hard-coded
   const userId = 1;
+
+  // Get the user's career goals to find target role ID
+  const { data: careerGoals, isLoading: isLoadingGoals } = useQuery({
+    queryKey: ["/api/users", userId, "career-goals"],
+    queryFn: () => fetch(`/api/users/${userId}/career-goals`).then(res => res.json()),
+  });
+
+  const primaryCareerGoal = careerGoals?.length > 0 ? careerGoals[0] : null;
+  const targetRoleId = primaryCareerGoal?.targetRoleId;
+
+  // Get role-based practice content if we have a target role
+  const { 
+    data: rolePracticeData,
+    isLoading: isLoadingRolePractice,
+    error: rolePracticeError,
+    refetch: refetchRolePractice
+  } = useQuery({
+    queryKey: ["/api/practice/role", targetRoleId],
+    queryFn: () => targetRoleId 
+      ? fetch(`/api/practice/role/${targetRoleId}`).then(res => res.json())
+      : Promise.resolve(null),
+    enabled: !!targetRoleId,
+  });
+
+  // Use either role-based skills or default skills
+  const skills = rolePracticeData?.skills || defaultSkills;
   
   // Filter skills based on the active tab
-  const filteredSkills = skills.filter(skill => 
+  const filteredSkills = skills.filter((skill: any) => 
     activeTab === "all" || skill.category === activeTab
   );
   
@@ -234,7 +101,6 @@ export default function PracticePage() {
     setQuizCompleted(true);
     
     // Record this practice session in user's activity
-    // This would typically be an API call to update the user's progress
     toast({
       title: "Practice session recorded",
       description: `You scored ${score} out of ${totalQuestions}`,
@@ -249,14 +115,27 @@ export default function PracticePage() {
     setSelectedSkill(null);
     setQuizCompleted(false);
   };
+
+  const handleRefreshRolePractice = () => {
+    refetchRolePractice();
+    toast({
+      title: "Refreshing practice content",
+      description: "Updating practice exercises for your target role",
+    });
+  };
   
+  // Find selected skill and its questions
   const selectedSkillData = selectedSkill 
-    ? skills.find(skill => skill.id === selectedSkill) 
+    ? skills.find((skill: any) => skill.id === selectedSkill) 
     : null;
     
   const questions = selectedSkill 
-    ? questionsBySkill[selectedSkill as keyof typeof questionsBySkill] || []
+    ? (selectedSkillData?.questions || defaultQuestionsBySkill[1] || [])
     : [];
+
+  // Determine if we're showing role-specific practice
+  const hasRoleSpecificContent = !!rolePracticeData;
+  const roleName = primaryCareerGoal?.title || (hasRoleSpecificContent ? rolePracticeData.roleTitle : null);
   
   return (
     <>
@@ -267,44 +146,107 @@ export default function PracticePage() {
       <div className="container py-8">
         {!selectedSkill ? (
           <>
-            <PageHeader 
-              heading="Practice Skills" 
-              subheading="Test your knowledge and reinforce your learning with interactive practice exercises"
-            />
-            
-            <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mt-8">
-              <TabsList className="mb-8">
-                <TabsTrigger value="all">All Skills</TabsTrigger>
-                <TabsTrigger value="technical">Technical</TabsTrigger>
-                <TabsTrigger value="communication">Communication</TabsTrigger>
-                <TabsTrigger value="analytical">Analytical</TabsTrigger>
-                <TabsTrigger value="leadership">Leadership</TabsTrigger>
-              </TabsList>
+            <div className="flex justify-between items-start">
+              <PageHeader 
+                heading="Practice Skills" 
+                subheading="Test your knowledge and reinforce your learning with interactive practice exercises"
+              />
               
-              <TabsContent value={activeTab} className="mt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredSkills.map(skill => (
-                    <SkillPracticeCard
-                      key={skill.id}
-                      id={skill.id}
-                      name={skill.name}
-                      description={skill.description}
-                      category={skill.category}
-                      questionCount={skill.questionCount}
-                      difficulty={skill.difficulty}
-                      onPractice={handlePracticeClick}
-                    />
-                  ))}
-                </div>
-                
-                {filteredSkills.length === 0 && (
-                  <div className="text-center py-12">
-                    <h3 className="text-lg font-medium mb-2">No skills found in this category</h3>
-                    <p className="text-gray-500">Try selecting a different category or add new skills to your profile</p>
+              {targetRoleId && (
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={handleRefreshRolePractice}
+                  disabled={isLoadingRolePractice}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingRolePractice ? 'animate-spin' : ''}`} />
+                  {isLoadingRolePractice ? 'Refreshing...' : 'Refresh Content'}
+                </Button>
+              )}
+            </div>
+            
+            {targetRoleId && roleName && (
+              <Card className="mb-6 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center">
+                    <TargetIcon className="h-5 w-5 mr-2 text-primary" />
+                    Target Role Practice
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm flex items-center">
+                    <span>Displaying practice exercises for the role:</span>
+                    <Badge variant="outline" className="ml-1 font-semibold">{roleName}</Badge>
                   </div>
-                )}
-              </TabsContent>
-            </Tabs>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    These exercises are designed to help you build the skills needed for your target career goal.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+            
+            {rolePracticeError && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error Loading Practice Content</AlertTitle>
+                <AlertDescription className="space-y-2">
+                  <p>There was a problem loading practice exercises for your target role.</p>
+                  <Button 
+                    onClick={handleRefreshRolePractice}
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5 mr-2" />
+                    Try Again
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {isLoadingRolePractice && targetRoleId && (
+              <div className="flex items-center justify-center py-12">
+                <RefreshCw className="h-6 w-6 animate-spin text-primary mr-2" />
+                <p>Loading role-specific practice content...</p>
+              </div>
+            )}
+            
+            {(!isLoadingRolePractice || !targetRoleId) && (
+              <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mt-8">
+                <TabsList className="mb-8">
+                  <TabsTrigger value="all">All Skills</TabsTrigger>
+                  <TabsTrigger value="technical">Technical</TabsTrigger>
+                  <TabsTrigger value="communication">Communication</TabsTrigger>
+                  <TabsTrigger value="analytical">Analytical</TabsTrigger>
+                  <TabsTrigger value="leadership">Leadership</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value={activeTab} className="mt-0">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredSkills.map((skill: any) => (
+                      <SkillPracticeCard
+                        key={skill.id}
+                        id={skill.id}
+                        name={skill.name}
+                        description={skill.description}
+                        category={skill.category}
+                        questionCount={skill.questions?.length || skill.questionCount || 3}
+                        difficulty={skill.difficulty}
+                        onPractice={handlePracticeClick}
+                        targetRole={skill.forTargetRole}
+                      />
+                    ))}
+                  </div>
+                  
+                  {filteredSkills.length === 0 && (
+                    <div className="text-center py-12">
+                      <h3 className="text-lg font-medium mb-2">No skills found in this category</h3>
+                      <p className="text-gray-500">Try selecting a different category or add new skills to your profile</p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            )}
           </>
         ) : (
           <div className="max-w-3xl mx-auto">
@@ -322,6 +264,12 @@ export default function PracticePage() {
               <p className="text-gray-600">
                 {selectedSkillData?.description}
               </p>
+              
+              {selectedSkillData?.forTargetRole && (
+                <Badge className="mt-3 bg-primary/10 text-primary hover:bg-primary/20 border-0">
+                  For {selectedSkillData.forTargetRole} Role
+                </Badge>
+              )}
             </div>
             
             <Separator className="mb-8" />

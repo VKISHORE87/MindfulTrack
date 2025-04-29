@@ -1,7 +1,7 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, BookOpen, CheckSquare, Target } from "lucide-react";
+import { ArrowRight, BookOpen, CheckSquare, Target, Briefcase } from "lucide-react";
 
 interface SkillPracticeCardProps {
   id: number;
@@ -11,6 +11,7 @@ interface SkillPracticeCardProps {
   questionCount: number;
   difficulty: "beginner" | "intermediate" | "advanced";
   onPractice: (skillId: number) => void;
+  targetRole?: string; // New prop for target role
 }
 
 export default function SkillPracticeCard({
@@ -20,10 +21,13 @@ export default function SkillPracticeCard({
   category,
   questionCount,
   difficulty,
-  onPractice
+  onPractice,
+  targetRole
 }: SkillPracticeCardProps) {
+  const isTargetRoleSkill = !!targetRole;
+  
   return (
-    <Card className="overflow-hidden h-full flex flex-col">
+    <Card className={`overflow-hidden h-full flex flex-col ${isTargetRoleSkill ? 'border-primary/30 shadow-sm' : ''}`}>
       <CardHeader className="pb-4">
         <div className="flex justify-between mb-2">
           <Badge
@@ -50,6 +54,16 @@ export default function SkillPracticeCard({
           </Badge>
         </div>
         <h3 className="text-lg font-semibold">{name}</h3>
+        
+        {/* Display target role badge if it exists */}
+        {isTargetRoleSkill && (
+          <div className="mt-1">
+            <Badge variant="secondary" className="bg-primary/10 text-primary border-0 gap-1 font-normal">
+              <Briefcase className="h-3 w-3" />
+              {targetRole}
+            </Badge>
+          </div>
+        )}
       </CardHeader>
       
       <CardContent className="pb-4 flex-grow">
@@ -60,10 +74,19 @@ export default function SkillPracticeCard({
             <CheckSquare className="h-4 w-4 text-gray-500 mr-2" />
             <span className="text-sm">{questionCount} practice questions</span>
           </div>
-          <div className="flex items-center">
-            <Target className="h-4 w-4 text-gray-500 mr-2" />
-            <span className="text-sm">Tests key knowledge areas</span>
-          </div>
+          
+          {isTargetRoleSkill ? (
+            <div className="flex items-center">
+              <Target className="h-4 w-4 text-primary mr-2" />
+              <span className="text-sm">Role-specific content</span>
+            </div>
+          ) : (
+            <div className="flex items-center">
+              <Target className="h-4 w-4 text-gray-500 mr-2" />
+              <span className="text-sm">Tests key knowledge areas</span>
+            </div>
+          )}
+          
           <div className="flex items-center">
             <BookOpen className="h-4 w-4 text-gray-500 mr-2" />
             <span className="text-sm">Includes detailed explanations</span>
@@ -73,7 +96,7 @@ export default function SkillPracticeCard({
       
       <CardFooter className="pt-2 border-t">
         <Button
-          className="w-full bg-primary hover:bg-primary-700"
+          className={`w-full ${isTargetRoleSkill ? 'bg-primary' : 'bg-secondary'} hover:bg-primary-700`}
           onClick={() => onPractice(id)}
         >
           Practice Now
