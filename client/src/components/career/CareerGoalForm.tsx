@@ -133,7 +133,7 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
       
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       toast({
         title: existingGoal ? 'Career goal updated' : 'Career goal created',
         description: existingGoal 
@@ -141,18 +141,40 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
           : 'Your career goal has been successfully created',
       });
       
-      // Invalidate relevant queries with a forced refetch to get fresh data
-      queryClient.invalidateQueries({ queryKey: ['/api/users/career-goals'] });
-      
-      // Force a hard refresh of the dashboard data
-      queryClient.refetchQueries({ 
-        queryKey: ['/api/users/1/dashboard'],
-        type: 'active', 
-        exact: false
-      });
-      
-      // Also invalidate any related skills data
-      queryClient.invalidateQueries({ queryKey: ['/api/skills'] });
+      // Invalidate and immediately refresh all relevant data
+      try {
+        // Step 1: Refresh the user's career goals
+        await queryClient.refetchQueries({ 
+          queryKey: [`/api/users/${user.id}/career-goals`],
+          type: 'active',
+          exact: false
+        });
+        
+        // Step 2: If we have a target role, refresh the role-specific skills
+        const targetRoleId = form.getValues().targetRoleId;
+        if (targetRoleId) {
+          await queryClient.refetchQueries({ 
+            queryKey: [`/api/skills/role/${targetRoleId}`],
+            type: 'active',
+            exact: false
+          });
+        } else {
+          // Otherwise refresh all skills
+          await queryClient.refetchQueries({ 
+            queryKey: ['/api/skills'],
+            type: 'active'
+          });
+        }
+        
+        // Step 3: Force a hard refresh of the dashboard data to reflect skill gaps
+        await queryClient.refetchQueries({ 
+          queryKey: [`/api/users/${user.id}/dashboard`],
+          type: 'active',
+          exact: false
+        });
+      } catch (error) {
+        console.error('Error refreshing data:', error);
+      }
       
       // Navigate to dashboard after successful save
       setTimeout(() => {

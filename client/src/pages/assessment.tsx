@@ -137,13 +137,26 @@ export default function Assessment({ user }: { user: User }) {
 
     setIsGenerating(true);
     try {
+      // Get the latest career goal data first
       await apiRequest("POST", "/api/ai/skill-gap-analysis", {
         userId: user.id,
         careerGoalId: careerGoals[0].id,
       });
       
-      // Invalidate dashboard data to refresh skill gap analysis
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${user.id}/dashboard`] });
+      // Force immediate refetch of dashboard data to show updated skill gaps
+      await queryClient.refetchQueries({ 
+        queryKey: [`/api/users/${user.id}/dashboard`],
+        type: 'active', 
+        exact: false
+      });
+      
+      // Also refetch role-specific skills to ensure we have the latest data
+      if (targetRoleId) {
+        await queryClient.refetchQueries({ 
+          queryKey: [`/api/skills/role/${targetRoleId}`],
+          type: 'active'
+        });
+      }
       
       toast({
         title: "Skill gap analysis generated",
@@ -241,14 +254,30 @@ export default function Assessment({ user }: { user: User }) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="md:col-span-2">
               <CardHeader>
-                <div className="flex items-center gap-4">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <TrendingUp className="h-6 w-6 text-primary" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-primary/10 p-3 rounded-full">
+                      <TrendingUp className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">Skill Gap Analysis</h3>
+                      <p className="text-sm text-gray-500">Current skill levels compared to target role requirements</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">Skill Gap Analysis</h3>
-                    <p className="text-sm text-gray-500">Current skill levels compared to target role requirements</p>
-                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => refetchDashboard()}
+                    className="flex items-center gap-1"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+                      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                      <path d="M21 3v5h-5"></path>
+                      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                      <path d="M8 16H3v5"></path>
+                    </svg>
+                    Refresh Analysis
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
