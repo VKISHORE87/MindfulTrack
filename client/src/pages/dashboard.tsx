@@ -152,7 +152,11 @@ export default function Dashboard({ user }: { user: any }) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Skill Gap Analysis */}
             <div className="lg:col-span-3">
-              <SkillGapAnalysis skillGaps={dashboardData?.skillGaps || []} />
+              <SkillGapAnalysis 
+                skillGaps={dashboardData?.skillGaps || []} 
+                userId={user.id} 
+                targetRoleId={dashboardData?.careerGoal?.targetRoleId}
+              />
             </div>
           </div>
           

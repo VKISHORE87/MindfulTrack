@@ -207,7 +207,43 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
                 <FormItem>
                   <FormLabel>Target Role</FormLabel>
                   <Select 
-                    onValueChange={field.onChange} 
+                    onValueChange={(value) => {
+                      // First update the form field
+                      field.onChange(value);
+                      
+                      // Then immediately refresh the role-specific skills data
+                      if (value) {
+                        // Show loading toast
+                        toast({
+                          title: "Loading role skills",
+                          description: "Fetching skills for the selected role...",
+                        });
+                        
+                        // Immediately refresh skill data for the selected role
+                        Promise.all([
+                          queryClient.refetchQueries({ 
+                            queryKey: [`/api/skills/role/${value}`],
+                            type: 'active'
+                          }),
+                          queryClient.refetchQueries({ 
+                            queryKey: [`/api/users/${userId}/dashboard`],
+                            type: 'active' 
+                          })
+                        ]).then(() => {
+                          toast({
+                            title: "Data refreshed",
+                            description: "Role skill analysis is now up-to-date",
+                          });
+                        }).catch(error => {
+                          console.error('Error refreshing data:', error);
+                          toast({
+                            title: "Error",
+                            description: "Failed to refresh role data",
+                            variant: "destructive"
+                          });
+                        });
+                      }
+                    }}
                     defaultValue={field.value}
                   >
                     <FormControl>
