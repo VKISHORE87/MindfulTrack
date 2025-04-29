@@ -5,7 +5,8 @@ import {
   BarChart2,
   TrendingUp,
   User,
-  Dumbbell
+  Dumbbell,
+  Briefcase
 } from "lucide-react";
 
 interface MobileNavigationProps {
@@ -15,8 +16,8 @@ interface MobileNavigationProps {
 export default function MobileNavigation({ currentRoute }: MobileNavigationProps) {
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: <Home className="h-6 w-6" /> },
+    { href: '/career-transitions', label: 'Careers', icon: <Briefcase className="h-6 w-6" /> },
     { href: '/practice', label: 'Practice', icon: <Dumbbell className="h-6 w-6" /> },
-    { href: '/progress', label: 'Progress', icon: <TrendingUp className="h-6 w-6" /> },
     { href: '/profile', label: 'Profile', icon: <User className="h-6 w-6" /> },
   ];
 

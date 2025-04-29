@@ -10,7 +10,7 @@ import SmartSkillGraph from "@/components/dashboard/SmartSkillGraph";
 import LearningPatternAnalysis from "@/components/dashboard/LearningPatternAnalysis";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Sparkles, PanelLeft, Eye, EyeOff, BarChart2, Route } from "lucide-react";
+import { Sparkles, PanelLeft, Eye, EyeOff, BarChart2, Route, Briefcase } from "lucide-react";
 
 export default function Dashboard({ user }: { user: any }) {
   const [showAiFeatures, setShowAiFeatures] = useState(true);
@@ -50,6 +50,16 @@ export default function Dashboard({ user }: { user: any }) {
         </div>
         
         <div className="mt-4 md:mt-0 flex items-center gap-3">
+          <Button 
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => window.location.href = "/career-transitions"}
+          >
+            <Briefcase className="h-4 w-4" />
+            Explore Career Options
+          </Button>
+          
           {dashboardData?.careerGoal && (
             <Button 
               variant="outline"

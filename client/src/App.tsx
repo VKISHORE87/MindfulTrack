@@ -102,7 +102,7 @@ function getPageTitle(path: string): string {
     'progress': 'Progress',
     'validation': 'Skill Validation',
     'practice': 'Practice Skills',
-    'career-transitions': 'Career Transitions',
+    'career-transitions': 'Career Options',
     'profile': 'My Profile'
   };
   
