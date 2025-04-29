@@ -137,19 +137,18 @@ export default function CareerRoleComparison() {
       })
     : [];
     
+  // For target roles, include ALL roles without filtering by industry
+  // This ensures the target role dropdown has the same comprehensive options as in the Assessment page
   const filteredTargetRoles = roles 
     ? roles.filter((role: InterviewRole) => {
-        // Apply industry filter if set
-        const industryMatch = !industryFilter || industryFilter === "all_industries" || role.industry === industryFilter;
-        
-        // Apply search filter if provided
+        // Only apply search filter if provided, no industry filter
         const searchMatch = !targetRoleSearch || 
           role.title.toLowerCase().includes(targetRoleSearch.toLowerCase()) || 
           (role.description && role.description.toLowerCase().includes(targetRoleSearch.toLowerCase())) ||
           role.industry.toLowerCase().includes(targetRoleSearch.toLowerCase()) ||
           (role.roleType && role.roleType.toLowerCase().includes(targetRoleSearch.toLowerCase()));
         
-        return industryMatch && searchMatch;
+        return searchMatch;
       })
     : [];
 
@@ -420,7 +419,7 @@ export default function CareerRoleComparison() {
                 </div>
                 
                 <div>
-                  <Label htmlFor="target-role-select">Target Role</Label>
+                  <Label htmlFor="target-role-select">Target Role <span className="text-xs text-green-600 ml-1">(includes all 188 roles)</span></Label>
                   <div className="space-y-2">
                     <div className="relative" ref={targetSearchRef}>
                       <Input
