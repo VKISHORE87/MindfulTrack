@@ -2952,6 +2952,227 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // =======================
+  // Skill Assessment API
+  // =======================
+  
+  app.get(
+    "/api/assessment/skill/:skillId",
+    isAuthenticated,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const skillId = parseInt(req.params.skillId);
+        
+        if (isNaN(skillId)) {
+          return res.status(400).json({ message: "Invalid skill ID" });
+        }
+        
+        // Get the skill details
+        const skill = await storage.getSkill(skillId);
+        if (!skill) {
+          return res.status(404).json({ message: "Skill not found" });
+        }
+        
+        // Generate assessment questions for this skill using OpenAI
+        try {
+          const skillName = skill.name;
+          const category = skill.category;
+          
+          // Try to use OpenAI to generate questions
+          let assessmentData;
+          
+          try {
+            const response = await openai.chat.completions.create({
+              model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+              messages: [
+                {
+                  role: "system",
+                  content: `You are an expert skills assessment system. Generate a comprehensive assessment exam for the skill: ${skillName} (category: ${category}).
+                  
+                  Create 10 multiple-choice questions to thoroughly assess a user's proficiency in this skill.
+                  Each question should have 4 options (labeled a, b, c, d) with one correct answer.
+                  Include a brief explanation for each correct answer for learning purposes.
+                  Create questions with varying difficulty levels (beginner, intermediate, advanced).`
+                },
+                {
+                  role: "user",
+                  content: `Create a skill assessment for: ${skillName}`
+                }
+              ],
+              response_format: { type: "json_object" }
+            });
+            
+            const openAIResponse = JSON.parse(response.choices[0].message.content);
+            assessmentData = {
+              skillId,
+              skillName,
+              category,
+              questions: openAIResponse.questions || []
+            };
+          } catch (error) {
+            console.error("OpenAI API error:", error);
+            
+            // Fall back to predefined assessment questions
+            assessmentData = {
+              skillId,
+              skillName,
+              category,
+              questions: [
+                {
+                  id: 1001,
+                  question: `What is a key aspect of ${skillName}?`,
+                  options: [
+                    { id: "a", text: `Basic understanding of ${skillName} concepts` },
+                    { id: "b", text: `Advanced application of ${skillName} principles` },
+                    { id: "c", text: `Teaching others about ${skillName}` },
+                    { id: "d", text: `None of the above` }
+                  ],
+                  correctAnswer: "b",
+                  explanation: `Advanced application demonstrates true proficiency in ${skillName}.`,
+                  skillId,
+                  difficulty: "intermediate"
+                },
+                {
+                  id: 1002,
+                  question: `Which best describes a fundamental principle of ${skillName}?`,
+                  options: [
+                    { id: "a", text: "It requires minimal planning" },
+                    { id: "b", text: "It's only needed in certain industries" },
+                    { id: "c", text: `It involves systematic approach to problem-solving` },
+                    { id: "d", text: "It's a temporary trend in the industry" }
+                  ],
+                  correctAnswer: "c",
+                  explanation: `${skillName} fundamentally involves a systematic approach to addressing challenges.`,
+                  skillId,
+                  difficulty: "beginner"
+                },
+                {
+                  id: 1003,
+                  question: `How do professionals typically improve their ${skillName} abilities?`,
+                  options: [
+                    { id: "a", text: "By avoiding difficult challenges" },
+                    { id: "b", text: "Through consistent practice and application" },
+                    { id: "c", text: "By focusing only on theory" },
+                    { id: "d", text: "It's an innate ability that cannot be improved" }
+                  ],
+                  correctAnswer: "b",
+                  explanation: `Like most skills, ${skillName} improves through deliberate practice and real-world application.`,
+                  skillId,
+                  difficulty: "beginner"
+                },
+                {
+                  id: 1004,
+                  question: `What distinguishes experts in ${skillName} from beginners?`,
+                  options: [
+                    { id: "a", text: "Experts rely solely on intuition" },
+                    { id: "b", text: "Experts never make mistakes" },
+                    { id: "c", text: "Experts consider multiple perspectives and approaches" },
+                    { id: "d", text: "Experts work faster but with less attention to detail" }
+                  ],
+                  correctAnswer: "c",
+                  explanation: `Expertise in ${skillName} involves nuanced understanding of various approaches and perspectives.`,
+                  skillId,
+                  difficulty: "intermediate"
+                },
+                {
+                  id: 1005,
+                  question: `In a complex project requiring ${skillName}, what's most important?`,
+                  options: [
+                    { id: "a", text: "Sticking rigidly to the initial plan" },
+                    { id: "b", text: "Working alone to maintain focus" },
+                    { id: "c", text: "Adapting to changing requirements and feedback" },
+                    { id: "d", text: "Minimizing communication to save time" }
+                  ],
+                  correctAnswer: "c",
+                  explanation: `Adaptability and responsiveness to feedback are crucial aspects of applying ${skillName} effectively.`,
+                  skillId,
+                  difficulty: "advanced"
+                },
+                {
+                  id: 1006,
+                  question: `What's a best practice when applying ${skillName} to new situations?`,
+                  options: [
+                    { id: "a", text: "Apply exactly the same approach every time" },
+                    { id: "b", text: "Analyze context before choosing an approach" },
+                    { id: "c", text: "Avoid research and rely on instinct" },
+                    { id: "d", text: "Skip planning and move directly to implementation" }
+                  ],
+                  correctAnswer: "b",
+                  explanation: `Contextual analysis is essential when applying ${skillName} principles to new situations.`,
+                  skillId,
+                  difficulty: "intermediate"
+                },
+                {
+                  id: 1007,
+                  question: `What mindset supports ongoing growth in ${skillName}?`,
+                  options: [
+                    { id: "a", text: "Growth mindset with openness to learning" },
+                    { id: "b", text: "Belief that skill levels are fixed and unchangeable" },
+                    { id: "c", text: "Avoiding challenges to prevent failure" },
+                    { id: "d", text: "Focusing only on your strongest abilities" }
+                  ],
+                  correctAnswer: "a",
+                  explanation: `A growth mindset with consistent learning orientation supports long-term development in ${skillName}.`,
+                  skillId,
+                  difficulty: "beginner"
+                },
+                {
+                  id: 1008,
+                  question: `When facing a roadblock while applying ${skillName}, what's most effective?`,
+                  options: [
+                    { id: "a", text: "Immediately asking others for solutions" },
+                    { id: "b", text: "Giving up and trying a completely different approach" },
+                    { id: "c", text: "Systematic troubleshooting and analysis" },
+                    { id: "d", text: "Taking a long break from the problem" }
+                  ],
+                  correctAnswer: "c",
+                  explanation: `Methodical troubleshooting is the most effective approach to overcoming challenges in ${skillName}.`,
+                  skillId,
+                  difficulty: "advanced"
+                },
+                {
+                  id: 1009,
+                  question: `How does ${skillName} typically evolve over a professional's career?`,
+                  options: [
+                    { id: "a", text: "It becomes less important as other skills develop" },
+                    { id: "b", text: "It becomes more specialized and nuanced" },
+                    { id: "c", text: "It stays exactly the same over time" },
+                    { id: "d", text: "It's only relevant during the early career stages" }
+                  ],
+                  correctAnswer: "b",
+                  explanation: `As professionals progress, their application of ${skillName} typically becomes more specialized and nuanced.`,
+                  skillId,
+                  difficulty: "advanced"
+                },
+                {
+                  id: 1010,
+                  question: `What's the relationship between ${skillName} and other professional capabilities?`,
+                  options: [
+                    { id: "a", text: "They compete for importance in professional settings" },
+                    { id: "b", text: "They function independently with no overlap" },
+                    { id: "c", text: "They complement each other in an integrated skill set" },
+                    { id: "d", text: `${skillName} is the only skill that truly matters` }
+                  ],
+                  correctAnswer: "c",
+                  explanation: `${skillName} works in concert with other professional capabilities to form an integrated skill set.`,
+                  skillId,
+                  difficulty: "intermediate"
+                }
+              ]
+            };
+          }
+          
+          res.json(assessmentData);
+        } catch (error) {
+          console.error("Error generating assessment:", error);
+          return res.status(500).json({ message: "Failed to generate assessment" });
+        }
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+  
   // ===========================
   // Role-Based Practice Content
   // ===========================

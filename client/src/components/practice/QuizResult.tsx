@@ -1,6 +1,7 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Award, BarChart2, ArrowRight } from "lucide-react";
+import { Award, RotateCcw, CheckCircle, HomeIcon } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 interface QuizResultProps {
   score: number;
@@ -10,73 +11,82 @@ interface QuizResultProps {
   onFinish: () => void;
 }
 
-export default function QuizResult({ 
-  score, 
-  totalQuestions, 
-  skillName, 
-  onRetry, 
-  onFinish 
-}: QuizResultProps) {
-  const percentage = Math.round((score / totalQuestions) * 100);
-  const isPassing = percentage >= 70;
+export default function QuizResult({ score, totalQuestions, skillName, onRetry, onFinish }: QuizResultProps) {
+  const percentage = (score / totalQuestions) * 100;
+  
+  // Determine quiz result type based on score percentage
+  const resultType = 
+    percentage >= 90 ? "excellent" :
+    percentage >= 70 ? "good" :
+    percentage >= 50 ? "average" :
+    "needsImprovement";
+  
+  // Get feedback based on result type
+  const resultData = {
+    excellent: {
+      title: "Excellent Work!",
+      message: `You have a strong mastery of ${skillName}. Keep up the great work!`,
+      className: "bg-green-50 border-green-100",
+      progressClass: "bg-green-500",
+      icon: <Award className="h-12 w-12 text-green-500" />
+    },
+    good: {
+      title: "Good Job!",
+      message: `You have a solid understanding of ${skillName}. A bit more practice will make you an expert.`,
+      className: "bg-blue-50 border-blue-100",
+      progressClass: "bg-blue-500",
+      icon: <CheckCircle className="h-12 w-12 text-blue-500" />
+    },
+    average: {
+      title: "You're Making Progress",
+      message: `You have a basic understanding of ${skillName}. Continue practicing to improve your skills.`,
+      className: "bg-amber-50 border-amber-100",
+      progressClass: "bg-amber-500",
+      icon: <CheckCircle className="h-12 w-12 text-amber-500" />
+    },
+    needsImprovement: {
+      title: "Keep Practicing",
+      message: `${skillName} might be challenging, but don't give up! Review the material and try again.`,
+      className: "bg-rose-50 border-rose-100",
+      progressClass: "bg-rose-500", 
+      icon: <RotateCcw className="h-12 w-12 text-rose-500" />
+    }
+  };
+  
+  const result = resultData[resultType];
   
   return (
-    <Card className="border-2 overflow-hidden">
-      <CardHeader className={`${isPassing ? "bg-green-50" : "bg-amber-50"} text-center border-b`}>
-        <div className="flex justify-center mb-4">
-          <div className={`p-4 rounded-full ${isPassing ? "bg-green-100" : "bg-amber-100"}`}>
-            {isPassing ? (
-              <Award className="h-8 w-8 text-green-600" />
-            ) : (
-              <BarChart2 className="h-8 w-8 text-amber-600" />
-            )}
-          </div>
-        </div>
-        <h2 className="text-2xl font-bold">{isPassing ? "Congratulations!" : "Nice Try!"}</h2>
-        <p className="text-gray-600">
-          {isPassing 
-            ? "You've demonstrated a good understanding of this skill." 
-            : "You're on your way to mastering this skill. Keep practicing!"}
-        </p>
+    <Card className={`overflow-hidden border ${result.className}`}>
+      <CardHeader className="flex flex-col items-center text-center pb-2">
+        {result.icon}
+        <h3 className="text-2xl font-bold mt-4">{result.title}</h3>
       </CardHeader>
       
-      <CardContent className="p-6 space-y-6">
-        <div className="text-center">
-          <div className="text-4xl font-bold mb-2">
-            {score} / {totalQuestions}
-          </div>
-          <p className="text-gray-500">
-            You scored {percentage}% on {skillName}
-          </p>
+      <CardContent className="text-center space-y-4">
+        <div className="text-4xl font-bold">
+          {score} <span className="text-gray-500 text-lg">/ {totalQuestions}</span>
         </div>
         
-        <div className="p-4 rounded-lg bg-gray-50 text-center">
-          <h3 className="font-medium mb-2">What's Next?</h3>
-          <ul className="text-sm text-gray-600 space-y-2">
-            {isPassing ? (
-              <>
-                <li>• Try more advanced practice questions</li>
-                <li>• Apply this knowledge in practical exercises</li>
-                <li>• Validate your skill with a certification</li>
-              </>
-            ) : (
-              <>
-                <li>• Review the learning resources for this skill</li>
-                <li>• Try again after studying the material</li>
-                <li>• Focus on the questions you missed</li>
-              </>
-            )}
-          </ul>
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span>Your score</span>
+            <span>{Math.round(percentage)}%</span>
+          </div>
+          <Progress value={percentage} className={`h-3 ${result.progressClass}`} />
         </div>
+        
+        <p className="text-gray-600">{result.message}</p>
       </CardContent>
       
-      <CardFooter className="flex justify-between gap-4 border-t p-6">
+      <CardFooter className="flex justify-between pt-4 border-t">
         <Button variant="outline" onClick={onRetry}>
+          <RotateCcw className="h-4 w-4 mr-2" />
           Try Again
         </Button>
-        <Button className="bg-primary hover:bg-primary-700" onClick={onFinish}>
-          <span>Back to Skill Development</span>
-          <ArrowRight className="ml-2 h-4 w-4" />
+        
+        <Button onClick={onFinish}>
+          <HomeIcon className="h-4 w-4 mr-2" />
+          Back to Skills
         </Button>
       </CardFooter>
     </Card>
