@@ -202,12 +202,12 @@ export default function ProgressPage({ user }: { user: any }) {
             
             <Card>
               <CardHeader>
-                <h3 className="text-lg font-semibold">Path Completion</h3>
+                <h3 className="text-lg font-semibold">Path Completion for {currentCareerGoal?.title || 'Current Goal'}</h3>
               </CardHeader>
               <CardContent>
-                {learningPaths && learningPaths.length > 0 ? (
+                {learningPaths && learningPaths.length > 0 && currentCareerGoal ? (
                   <div className="space-y-6">
-                    {learningPaths.map((path) => {
+                    {learningPaths.filter(path => path.title.includes(currentCareerGoal.title)).map((path) => {
                       // Calculate path completion
                       const totalPathResources = path.modules.reduce(
                         (total, module) => total + module.resources.length, 
@@ -253,80 +253,10 @@ export default function ProgressPage({ user }: { user: any }) {
           </div>
         </TabsContent>
         
-        <TabsContent value="resources">
-          <Card>
-            <CardHeader>
-              <h3 className="text-lg font-semibold">Resource Progress</h3>
-            </CardHeader>
-            <CardContent>
-              {resourcesStarted.length > 0 ? (
-                <div className="space-y-6">
-                  {resourcesStarted.map((progress) => {
-                    const resource = resources?.find(r => r.id === progress.resourceId);
-                    if (!resource) return null;
-                    
-                    return (
-                      <div key={progress.id} className="border-b pb-4 last:border-0 last:pb-0">
-                        <div className="flex gap-4 mb-2">
-                          <div className={`h-10 w-10 rounded flex items-center justify-center flex-shrink-0
-                            ${resource.resourceType === 'course' || resource.resourceType === 'video' ? 'bg-blue-100' : ''}
-                            ${resource.resourceType === 'workshop' ? 'bg-purple-100' : ''}
-                            ${resource.resourceType === 'assessment' ? 'bg-green-100' : ''}
-                            ${resource.resourceType !== 'course' && resource.resourceType !== 'video' && 
-                              resource.resourceType !== 'workshop' && resource.resourceType !== 'assessment' ? 'bg-gray-100' : ''}
-                          `}>
-                            <BookOpen className={`h-5 w-5
-                              ${resource.resourceType === 'course' || resource.resourceType === 'video' ? 'text-blue-600' : ''}
-                              ${resource.resourceType === 'workshop' ? 'text-purple-600' : ''}
-                              ${resource.resourceType === 'assessment' ? 'text-green-600' : ''}
-                              ${resource.resourceType !== 'course' && resource.resourceType !== 'video' && 
-                                resource.resourceType !== 'workshop' && resource.resourceType !== 'assessment' ? 'text-gray-600' : ''}
-                            `} />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex justify-between">
-                              <h4 className="font-medium">{resource.title}</h4>
-                              <span className="text-sm font-medium">{progress.progress}%</span>
-                            </div>
-                            <div className="flex justify-between items-center mt-1">
-                              <span className="text-xs text-gray-500">{resource.resourceType}</span>
-                              {progress.completed && (
-                                <span className="text-xs flex items-center text-green-600">
-                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                  Completed
-                                </span>
-                              )}
-                            </div>
-                            <Progress value={progress.progress} className="h-2 mt-2" />
-                            <div className="flex justify-between text-xs text-gray-500 mt-1">
-                              <span>Started: {new Date(progress.startedAt).toLocaleDateString()}</span>
-                              {progress.completedAt && (
-                                <span>Completed: {new Date(progress.completedAt).toLocaleDateString()}</span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="py-12 text-center">
-                  <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <BookOpen className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-medium mb-2">No resources started yet</h3>
-                  <p className="text-gray-500">Start learning resources to track your progress here.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
         <TabsContent value="skills">
           <Card>
             <CardHeader>
-              <h3 className="text-lg font-semibold">Skill Progress</h3>
+              <h3 className="text-lg font-semibold">Skill Progress for {currentCareerGoal?.title || 'Current Goal'}</h3>
             </CardHeader>
             <CardContent>
               {userSkills && userSkills.length > 0 ? (
@@ -348,28 +278,17 @@ export default function ProgressPage({ user }: { user: any }) {
                             </div>
                           </div>
                           <div className="flex items-center">
-                            {skill.currentLevel > skill.currentLevel - 10 && (
-                              <span className="text-xs flex items-center text-emerald-600 mr-2">
-                                <ArrowUpRight className="h-3 w-3 mr-1" />
-                                Improving
-                              </span>
-                            )}
+                            <span className="text-xs flex items-center text-emerald-600 mr-2">
+                              <ArrowUpRight className="h-3 w-3 mr-1" />
+                              Improving {Math.floor(percentage * skill.currentLevel / 100)}%
+                            </span>
                             <span className="text-sm font-medium">{percentage}%</span>
                           </div>
                         </div>
                         <Progress 
                           value={percentage} 
-                          className={`h-2 ${
-                            percentage < 40 ? 'bg-red-100' : 
-                            percentage < 70 ? 'bg-amber-100' : 
-                            'bg-emerald-100'
-                          }`}
+                          className="h-2"
                         />
-                        <div className={`h-full w-[${percentage}%] ${
-                          percentage < 40 ? 'bg-red-500' : 
-                          percentage < 70 ? 'bg-amber-500' : 
-                          'bg-emerald-500'
-                        }`} />
                       </div>
                     );
                   })}
