@@ -11,10 +11,14 @@ import LearningPatternAnalysis from "@/components/dashboard/LearningPatternAnaly
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Sparkles, PanelLeft, Eye, EyeOff, BarChart2, Route, Briefcase } from "lucide-react";
+import { useCareerGoal } from "@/contexts/CareerGoalContext";
 
 export default function Dashboard({ user }: { user: any }) {
   const [showAiFeatures, setShowAiFeatures] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
+  
+  // Use our centralized career goal context
+  const { currentGoal, targetRoleSkills, isLoading: isLoadingGoal } = useCareerGoal();
   
   const { data: dashboardData, isLoading, refetch } = useQuery({
     queryKey: [`/api/users/${user.id}/dashboard`],
@@ -22,17 +26,17 @@ export default function Dashboard({ user }: { user: any }) {
     staleTime: 30000, // 30 seconds
   });
   
-  // Effect to refetch dashboard data when component mounts
+  // Effect to refetch dashboard data when component mounts or when currentGoal changes
   // This ensures we have fresh data after saving a career goal
   useEffect(() => {
     refetch();
-  }, [refetch]);
+  }, [refetch, currentGoal]);
 
   const { data: learningResources, isLoading: isLoadingResources } = useQuery({
     queryKey: ['/api/learning-resources'],
   });
 
-  if (isLoading || isLoadingResources) {
+  if (isLoading || isLoadingResources || isLoadingGoal) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>

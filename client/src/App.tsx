@@ -24,6 +24,7 @@ import Header from "@/components/ui/Header";
 import { useQuery } from "@tanstack/react-query";
 import React, { useState, useEffect, ReactNode } from "react";
 import { useLocation } from "wouter";
+import { CareerGoalProvider } from "@/contexts/CareerGoalContext";
 
 // Create a simple Redirect component for redirecting routes
 function Redirect({ to }: { to: string }) {
@@ -192,8 +193,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <CareerGoalProvider>
+        <Router />
+        <Toaster />
+      </CareerGoalProvider>
     </QueryClientProvider>
   );
 }
