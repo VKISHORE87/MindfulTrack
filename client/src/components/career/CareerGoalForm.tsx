@@ -31,7 +31,6 @@ import { InterviewRole } from '@shared/schema';
 
 // Validation schema
 const formSchema = z.object({
-  title: z.string().min(2, { message: 'Title must be at least 2 characters' }),
   timeline: z.string().min(1, { message: 'Please select a timeline' }),
   targetRoleId: z.string().min(1, { message: 'Please select a target role' }),
   description: z.string().optional(),
@@ -84,7 +83,6 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: existingGoal?.title || '',
       timeline: timelineDisplay,
       targetRoleId: existingGoal?.targetRoleId || '',
       description: existingGoal?.description || '',
@@ -112,9 +110,14 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
       
       const method = existingGoal ? 'PATCH' : 'POST';
       
+      // Find the selected role to use its title
+      const selectedRole = roles?.find(role => role.id.toString() === data.targetRoleId);
+      
       // Convert timeline string to months for API
       const processedData = {
         ...data,
+        // Use the selected role title as the career goal title
+        title: selectedRole?.title || 'Career Goal',
         timelineMonths: convertTimelineToMonths(data.timeline)
       };
       
@@ -172,23 +175,6 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Career Goal Title</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., Senior Software Engineer" {...field} />
-                </FormControl>
-                <FormDescription>
-                  Give your career goal a clear title
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
