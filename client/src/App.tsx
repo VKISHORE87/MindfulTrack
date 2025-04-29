@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Assessment from "@/pages/assessment";
 import LearningPath from "@/pages/learning-path";
+import CareerPlan from "@/pages/career-plan";
 import Resources from "@/pages/resources";
 import Progress from "@/pages/progress";
 import Validation from "@/pages/validation";
@@ -96,6 +97,7 @@ function getPageTitle(path: string): string {
     'dashboard': 'Dashboard',
     'assessment': 'Skill Assessment',
     'learning-path': 'Learning Path',
+    'career-plan': 'Career Plan',
     'resources': 'Resources',
     'progress': 'Progress',
     'validation': 'Skill Validation',
@@ -173,6 +175,11 @@ function Router() {
       <Route path="/career-transitions">
         <AppLayout>
           <ProtectedRoute component={CareerTransitions} />
+        </AppLayout>
+      </Route>
+      <Route path="/career-plan">
+        <AppLayout>
+          <ProtectedRoute component={CareerPlan} />
         </AppLayout>
       </Route>
       <Route>
