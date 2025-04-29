@@ -152,11 +152,7 @@ export default function CareerTransitionsPage() {
                         title: "Success",
                         description: "Your career goal has been saved successfully",
                       });
-                      
-                      // Force a reload of the page to ensure all components reflect the updated career goal
-                      setTimeout(() => {
-                        window.location.reload();
-                      }, 1000);
+                      // Navigation is now handled in the CareerGoalForm component
                     }}
                   />
                 )}

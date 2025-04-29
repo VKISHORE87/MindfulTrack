@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { useLocation } from 'wouter';
 
 import {
   Form,
@@ -102,6 +103,9 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
   };
 
   // Create or update career goal
+  // Add location hook to handle navigation
+  const [, navigate] = useLocation();
+  
   const mutation = useMutation({
     mutationFn: async (data: FormData) => {
       const endpoint = existingGoal 
@@ -149,6 +153,11 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
       
       // Also invalidate any related skills data
       queryClient.invalidateQueries({ queryKey: ['/api/skills'] });
+      
+      // Navigate to dashboard after successful save
+      setTimeout(() => {
+        navigate('/');
+      }, 1000);
       
       if (onSuccess) {
         onSuccess();
