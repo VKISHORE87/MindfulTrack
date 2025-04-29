@@ -1330,6 +1330,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(404).json({ message: "Career goal not found" });
         }
 
+        console.log(`[DEBUG] Generate Learning Path - Using career goal:`, {
+          id: careerGoal.id,
+          title: careerGoal.title,
+          targetRoleId: careerGoal.targetRoleId,
+          targetRoleIdType: typeof careerGoal.targetRoleId
+        });
+
         // Get user skills
         const userSkills = await storage.getUserSkillsWithDetails(userId);
         
