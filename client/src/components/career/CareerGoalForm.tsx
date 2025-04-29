@@ -24,7 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Save } from 'lucide-react';
@@ -56,6 +55,10 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [, navigate] = useLocation();
+  
+  // Mock user ID for the demo - in a real app, this would come from auth context
+  const userId = 1;
 
   // Fetch all roles for the select input
   const { data: roles, isLoading: rolesLoading } = useQuery<InterviewRole[]>({
@@ -102,10 +105,7 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
     return 12;
   };
 
-  // Create or update career goal
-  // Add location hook to handle navigation
-  const [, navigate] = useLocation();
-  
+  // Create mutation for saving the career goal
   const mutation = useMutation({
     mutationFn: async (data: FormData) => {
       const endpoint = existingGoal 
@@ -141,48 +141,41 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
           : 'Your career goal has been successfully created',
       });
       
-      // Invalidate and immediately refresh all relevant data
       try {
-        // Step 1: Refresh the user's career goals
+        // Get the target role ID from the form
+        const targetRoleId = form.getValues().targetRoleId;
+        
+        // Step 1: Refresh career goals data
         await queryClient.refetchQueries({ 
-          queryKey: [`/api/users/${user.id}/career-goals`],
-          type: 'active',
-          exact: false
+          queryKey: [`/api/users/${userId}/career-goals`],
+          type: 'active'
         });
         
-        // Step 2: If we have a target role, refresh the role-specific skills
-        const targetRoleId = form.getValues().targetRoleId;
+        // Step 2: Refresh role-specific skills if we have a target role ID
         if (targetRoleId) {
           await queryClient.refetchQueries({ 
             queryKey: [`/api/skills/role/${targetRoleId}`],
-            type: 'active',
-            exact: false
-          });
-        } else {
-          // Otherwise refresh all skills
-          await queryClient.refetchQueries({ 
-            queryKey: ['/api/skills'],
             type: 'active'
           });
         }
         
-        // Step 3: Force a hard refresh of the dashboard data to reflect skill gaps
+        // Step 3: Refresh the dashboard data to get updated skill gaps
         await queryClient.refetchQueries({ 
-          queryKey: [`/api/users/${user.id}/dashboard`],
-          type: 'active',
-          exact: false
+          queryKey: [`/api/users/${userId}/dashboard`],
+          type: 'active' 
         });
+        
+        // Call the onSuccess callback if provided
+        if (onSuccess) {
+          onSuccess();
+        }
+        
+        // Navigate to the dashboard after a short delay
+        setTimeout(() => {
+          navigate('/');
+        }, 1000);
       } catch (error) {
         console.error('Error refreshing data:', error);
-      }
-      
-      // Navigate to dashboard after successful save
-      setTimeout(() => {
-        navigate('/');
-      }, 1000);
-      
-      if (onSuccess) {
-        onSuccess();
       }
     },
     onError: (error: any) => {
