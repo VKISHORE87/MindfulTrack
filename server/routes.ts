@@ -3017,13 +3017,94 @@ Return a JSON response with the following structure:
   // Interview Routes
   // =====================
 
-  // Get all interview roles
+  // Get all interview roles (filtered to IT industry roles only for MVP 1)
   app.get(
     "/api/interview/roles",
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const roles = await storage.getAllInterviewRoles();
-        res.json(roles);
+        // Get all roles
+        const allRoles = await storage.getAllInterviewRoles();
+        
+        // Define the list of IT industry roles titles to include (from user's provided list)
+        const itRoleTitles = [
+          // Software Development & Engineering
+          "Frontend Developer",
+          "Backend Developer",
+          "Full Stack Developer",
+          "Mobile Application Developer",
+          "Software Quality Assurance (QA) Tester",
+          "Application Support Engineer",
+          "Software Architect",
+          "Agile Scrum Master",
+          
+          // Data & Analytics
+          "Data Scientist",
+          "Business Intelligence (BI) Developer",
+          "Data Engineer",
+          "Machine Learning Engineer",
+          "Data Visualization Specialist",
+          "Big Data Architect",
+          "Statistical Analyst",
+          "Data Governance Consultant",
+          
+          // Artificial Intelligence & Machine Learning
+          "AI Research Scientist",
+          "Natural Language Processing (NLP) Engineer",
+          "Computer Vision Developer",
+          "Deep Learning Specialist",
+          "AI Ethics Consultant",
+          "Reinforcement Learning Engineer",
+          "AI Model Deployment Engineer",
+          "Cognitive Computing Developer",
+          
+          // Cloud Computing & DevOps
+          "Cloud Solutions Architect",
+          "DevOps Engineer",
+          "Site Reliability Engineer (SRE)",
+          "Cloud Infrastructure Administrator",
+          "Continuous Integration/Continuous Deployment (CI/CD) Pipeline Developer",
+          "Containerization Specialist (Docker/Kubernetes)",
+          "Cloud Security Analyst",
+          "Platform as a Service (PaaS) Developer",
+          
+          // Cybersecurity
+          "Security Operations Center (SOC) Analyst",
+          "Penetration Tester (Ethical Hacker)",
+          "Security Information and Event Management (SIEM) Specialist",
+          "Identity and Access Management (IAM) Engineer",
+          "Cloud Security Architect",
+          "Cyber Threat Intelligence Analyst",
+          "Incident Response Coordinator",
+          "Compliance and Risk Management IT Consultant",
+          
+          // IT Support & Administration
+          "IT Support Specialist",
+          "Help Desk Technician",
+          "System Administrator",
+          "Network Administrator",
+          "IT Asset Manager",
+          "Technical Support Engineer",
+          "Desktop Support Analyst",
+          "IT Operations Manager",
+          
+          // Project & Product Management
+          "IT Project Manager",
+          "Technical Program Manager",
+          "Product Owner",
+          "Business Analyst",
+          "Scrum Master",
+          "Agile Coach",
+          "IT Portfolio Manager",
+          "Change Management Consultant"
+        ];
+        
+        // Filter roles to include only IT industry roles
+        const itRoles = allRoles.filter(role => itRoleTitles.includes(role.title));
+        
+        // Log the filtering result
+        console.log(`[INFO] Filtered roles: ${allRoles.length} total roles -> ${itRoles.length} IT industry roles`);
+        
+        res.json(itRoles);
       } catch (error) {
         next(error);
       }
@@ -3042,6 +3123,85 @@ Return a JSON response with the following structure:
           return res.status(404).json({ message: "Interview role not found" });
         }
         
+        // Define the IT industry role titles (same as in the GET all roles endpoint)
+        const itRoleTitles = [
+          // Software Development & Engineering
+          "Frontend Developer",
+          "Backend Developer",
+          "Full Stack Developer",
+          "Mobile Application Developer",
+          "Software Quality Assurance (QA) Tester",
+          "Application Support Engineer",
+          "Software Architect",
+          "Agile Scrum Master",
+          
+          // Data & Analytics
+          "Data Scientist",
+          "Business Intelligence (BI) Developer",
+          "Data Engineer",
+          "Machine Learning Engineer",
+          "Data Visualization Specialist",
+          "Big Data Architect",
+          "Statistical Analyst",
+          "Data Governance Consultant",
+          
+          // Artificial Intelligence & Machine Learning
+          "AI Research Scientist",
+          "Natural Language Processing (NLP) Engineer",
+          "Computer Vision Developer",
+          "Deep Learning Specialist",
+          "AI Ethics Consultant",
+          "Reinforcement Learning Engineer",
+          "AI Model Deployment Engineer",
+          "Cognitive Computing Developer",
+          
+          // Cloud Computing & DevOps
+          "Cloud Solutions Architect",
+          "DevOps Engineer",
+          "Site Reliability Engineer (SRE)",
+          "Cloud Infrastructure Administrator",
+          "Continuous Integration/Continuous Deployment (CI/CD) Pipeline Developer",
+          "Containerization Specialist (Docker/Kubernetes)",
+          "Cloud Security Analyst",
+          "Platform as a Service (PaaS) Developer",
+          
+          // Cybersecurity
+          "Security Operations Center (SOC) Analyst",
+          "Penetration Tester (Ethical Hacker)",
+          "Security Information and Event Management (SIEM) Specialist",
+          "Identity and Access Management (IAM) Engineer",
+          "Cloud Security Architect",
+          "Cyber Threat Intelligence Analyst",
+          "Incident Response Coordinator",
+          "Compliance and Risk Management IT Consultant",
+          
+          // IT Support & Administration
+          "IT Support Specialist",
+          "Help Desk Technician",
+          "System Administrator",
+          "Network Administrator",
+          "IT Asset Manager",
+          "Technical Support Engineer",
+          "Desktop Support Analyst",
+          "IT Operations Manager",
+          
+          // Project & Product Management
+          "IT Project Manager",
+          "Technical Program Manager",
+          "Product Owner",
+          "Business Analyst",
+          "Scrum Master",
+          "Agile Coach",
+          "IT Portfolio Manager",
+          "Change Management Consultant"
+        ];
+        
+        // Check if the role is an IT industry role
+        if (!itRoleTitles.includes(role.title)) {
+          console.log(`[WARN] Non-IT role ${role.title} (ID: ${role.id}) requested but filtered out`);
+          return res.status(404).json({ message: "Interview role not found or not in the IT industry sector" });
+        }
+        
         res.json(role);
       } catch (error) {
         next(error);
@@ -3053,13 +3213,105 @@ Return a JSON response with the following structure:
   // Career Path Routes
   // =====================
   
+  // Define the IT industry role titles list as a constant for reuse
+  const itRoleTitles = [
+    // Software Development & Engineering
+    "Frontend Developer",
+    "Backend Developer",
+    "Full Stack Developer",
+    "Mobile Application Developer",
+    "Software Quality Assurance (QA) Tester",
+    "Application Support Engineer",
+    "Software Architect",
+    "Agile Scrum Master",
+    
+    // Data & Analytics
+    "Data Scientist",
+    "Business Intelligence (BI) Developer",
+    "Data Engineer",
+    "Machine Learning Engineer",
+    "Data Visualization Specialist",
+    "Big Data Architect",
+    "Statistical Analyst",
+    "Data Governance Consultant",
+    
+    // Artificial Intelligence & Machine Learning
+    "AI Research Scientist",
+    "Natural Language Processing (NLP) Engineer",
+    "Computer Vision Developer",
+    "Deep Learning Specialist",
+    "AI Ethics Consultant",
+    "Reinforcement Learning Engineer",
+    "AI Model Deployment Engineer",
+    "Cognitive Computing Developer",
+    
+    // Cloud Computing & DevOps
+    "Cloud Solutions Architect",
+    "DevOps Engineer",
+    "Site Reliability Engineer (SRE)",
+    "Cloud Infrastructure Administrator",
+    "Continuous Integration/Continuous Deployment (CI/CD) Pipeline Developer",
+    "Containerization Specialist (Docker/Kubernetes)",
+    "Cloud Security Analyst",
+    "Platform as a Service (PaaS) Developer",
+    
+    // Cybersecurity
+    "Security Operations Center (SOC) Analyst",
+    "Penetration Tester (Ethical Hacker)",
+    "Security Information and Event Management (SIEM) Specialist",
+    "Identity and Access Management (IAM) Engineer",
+    "Cloud Security Architect",
+    "Cyber Threat Intelligence Analyst",
+    "Incident Response Coordinator",
+    "Compliance and Risk Management IT Consultant",
+    
+    // IT Support & Administration
+    "IT Support Specialist",
+    "Help Desk Technician",
+    "System Administrator",
+    "Network Administrator",
+    "IT Asset Manager",
+    "Technical Support Engineer",
+    "Desktop Support Analyst",
+    "IT Operations Manager",
+    
+    // Project & Product Management
+    "IT Project Manager",
+    "Technical Program Manager",
+    "Product Owner",
+    "Business Analyst",
+    "Scrum Master",
+    "Agile Coach",
+    "IT Portfolio Manager",
+    "Change Management Consultant"
+  ];
+
   // Get all career paths
   app.get(
     "/api/career/paths",
     async (_req: Request, res: Response, next: NextFunction) => {
       try {
-        const paths = await storage.getAllCareerPaths();
-        res.json(paths);
+        // Get all career paths
+        const allPaths = await storage.getAllCareerPaths();
+        
+        // Filter to only include paths for IT industry roles
+        const filteredPaths = [];
+        
+        for (const path of allPaths) {
+          // Get the role for this path
+          const role = await storage.getInterviewRole(path.roleId);
+          
+          // If the role exists and is in the IT roles list, include the path
+          if (role && itRoleTitles.includes(role.title)) {
+            filteredPaths.push({
+              ...path,
+              roleName: role.title // Add the role name for convenience
+            });
+          }
+        }
+        
+        console.log(`[INFO] Filtered career paths: ${allPaths.length} total paths -> ${filteredPaths.length} IT industry paths`);
+        res.json(filteredPaths);
       } catch (error) {
         next(error);
       }
@@ -3072,6 +3324,16 @@ Return a JSON response with the following structure:
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const roleId = parseInt(req.params.roleId);
+        
+        // Get the role to check if it's an IT industry role
+        const role = await storage.getInterviewRole(roleId);
+        
+        // If role doesn't exist or is not an IT industry role, return 404
+        if (!role || !itRoleTitles.includes(role.title)) {
+          console.log(`[WARN] Career path requested for non-IT role ID: ${roleId}, role: ${role?.title || 'not found'}`);
+          return res.status(404).json({ message: "Career path not found for this role or role is not in the IT industry" });
+        }
+        
         const careerPath = await storage.getCareerPathByRoleId(roleId);
         
         if (!careerPath) {
@@ -3104,20 +3366,28 @@ Return a JSON response with the following structure:
     }
   );
   
+  // NOTE: This endpoint is redundant and should be consolidated. It's an older duplicate of the endpoint above.
   // Get career path by role ID
   app.get(
     "/api/career/paths/role/:roleId",
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const roleId = parseInt(req.params.roleId);
+        
+        // Get the role to check if it's an IT industry role
+        const role = await storage.getInterviewRole(roleId);
+        
+        // If role doesn't exist or is not an IT industry role, return 404
+        if (!role || !itRoleTitles.includes(role.title)) {
+          console.log(`[WARN] Career path requested for non-IT role ID: ${roleId}, role: ${role?.title || 'not found'}`);
+          return res.status(404).json({ message: "Career path not found for this role or role is not in the IT industry" });
+        }
+        
         const path = await storage.getCareerPathByRoleId(roleId);
         
         if (!path) {
           return res.status(404).json({ message: "Career path not found for this role" });
         }
-        
-        // Get the role information to include in the response
-        const role = await storage.getInterviewRole(roleId);
         
         // Create a combined response with both path and role information
         const enhancedPath = {
