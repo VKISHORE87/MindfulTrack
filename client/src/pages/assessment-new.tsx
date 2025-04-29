@@ -187,7 +187,10 @@ const AssessmentNew = () => {
     }
   }, [userSkills, roleSkills]);
 
-  // Filter roles based on search query and industry filter
+  // Additional category for Agile & Product roles
+  const [showAgileOnly, setShowAgileOnly] = useState(false);
+
+  // Filter roles based on search query, industry filter, and special filters
   useEffect(() => {
     let filtered = roles;
     
@@ -202,8 +205,13 @@ const AssessmentNew = () => {
       );
     }
     
+    // Special filter for Agile & Product Management roles
+    if (showAgileOnly) {
+      filtered = filtered.filter(role => isAgileOrProductRole(role));
+    }
+    
     setFilteredRoles(filtered);
-  }, [searchQuery, roles, industry]);
+  }, [searchQuery, roles, industry, showAgileOnly]);
 
   // Handle role selection
   const handleRoleSelect = (role: Role) => {
@@ -265,6 +273,32 @@ const AssessmentNew = () => {
 
   // Get industry options from roles
   const industries = Array.from(new Set(roles.map(role => role.industry).filter(Boolean))) as string[];
+  
+  // Add "Agile and Product Management" category by checking for relevant terms in titles
+  const isAgileOrProductRole = (role: Role) => {
+    const agileKeywords = [
+      "agile", "scrum", "product", "kanban", "sprint", "program", "portfolio", 
+      "coach", "master", "owner", "delivery", "transformation", "safe", "backlog",
+      "release train", "iteration", "manager"
+    ];
+    
+    // Check exact matches for specific roles from the list
+    const exactAgileRoles = [
+      "Scrum Master", "Product Owner", "Agile Coach", "Agile Project Manager",
+      "Product Manager", "Program Manager", "Release Train Engineer", 
+      "Sprint Coordinator", "Kanban Master", "Agile Transformation Lead",
+      "Agile Delivery Manager", "SAFe Program Consultant", "Product Backlog Manager",
+      "Agile Delivery Lead", "Product Development Manager", "Digital Product Manager",
+      "Technical Product Manager", "Agile Portfolio Manager", "Enterprise Agile Coach",
+      "Value Stream Manager", "Iteration Manager", "Agile Business Analyst"
+    ];
+    
+    return agileKeywords.some(keyword => 
+      role.title.toLowerCase().includes(keyword.toLowerCase())
+    ) || exactAgileRoles.some(exactRole =>
+      role.title === exactRole
+    );
+  };
 
   return (
     <div className="container px-4 py-8 mx-auto max-w-7xl">
@@ -285,12 +319,12 @@ const AssessmentNew = () => {
               {/* Industry filter */}
               <div>
                 <label className="block text-sm font-medium mb-1">Industry Filter</label>
-                <Select value={industry || ""} onValueChange={(value) => setIndustry(value || null)}>
+                <Select value={industry || "all"} onValueChange={(value) => setIndustry(value === "all" ? null : value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="All Industries" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Industries</SelectItem>
+                    <SelectItem value="all">All Industries</SelectItem>
                     {industries.map((ind) => (
                       <SelectItem key={ind} value={ind}>
                         {ind}
@@ -298,6 +332,20 @@ const AssessmentNew = () => {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              
+              {/* Quick filters */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Quick Filters</label>
+                <div className="flex flex-wrap gap-2">
+                  <Button 
+                    size="sm"
+                    variant={showAgileOnly ? "default" : "outline"}
+                    onClick={() => setShowAgileOnly(!showAgileOnly)}
+                  >
+                    Agile & Product
+                  </Button>
+                </div>
               </div>
               
               {/* Role search */}
