@@ -67,7 +67,13 @@ export default function PracticePage() {
   });
 
   const primaryCareerGoal = careerGoals?.length > 0 ? careerGoals[0] : null;
-  const targetRoleId = primaryCareerGoal?.targetRoleId;
+  
+  // Parse the target role ID as a number for consistency with server-side handling
+  const targetRoleId = primaryCareerGoal?.targetRoleId 
+    ? parseInt(primaryCareerGoal.targetRoleId.toString()) 
+    : null;
+    
+  console.log("[DEBUG] Practice page - Using target role ID:", targetRoleId, typeof targetRoleId);
 
   // Get role-based practice content if we have a target role
   const { 
@@ -81,7 +87,18 @@ export default function PracticePage() {
       ? fetch(`/api/practice/role/${targetRoleId}`).then(res => res.json())
       : Promise.resolve(null),
     enabled: !!targetRoleId,
+    staleTime: 60 * 1000, // 1 minute - refresh more frequently 
+    refetchOnMount: true, // Always refresh when component mounts
+    refetchOnWindowFocus: true, // Refresh when window regains focus
   });
+  
+  // Effect to auto-refresh practice content when target role changes
+  useEffect(() => {
+    if (targetRoleId) {
+      console.log("[DEBUG] Practice page - Target role changed, refreshing content");
+      refetchRolePractice();
+    }
+  }, [targetRoleId, refetchRolePractice]);
 
   // Use either role-based skills or default skills
   const skills = rolePracticeData?.skills || defaultSkills;
