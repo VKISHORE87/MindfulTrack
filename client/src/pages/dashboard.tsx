@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import StatCard from "@/components/dashboard/StatCard";
 import SkillGapAnalysis from "@/components/dashboard/SkillGapAnalysis";
 import CareerGoals from "@/components/dashboard/CareerGoals";
@@ -10,7 +11,7 @@ import SmartSkillGraph from "@/components/dashboard/SmartSkillGraph";
 import LearningPatternAnalysis from "@/components/dashboard/LearningPatternAnalysis";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Sparkles, PanelLeft, Eye, EyeOff } from "lucide-react";
+import { Sparkles, PanelLeft, Eye, EyeOff, BarChart2, Route } from "lucide-react";
 
 export default function Dashboard({ user }: { user: any }) {
   const [showAiFeatures, setShowAiFeatures] = useState(true);
@@ -50,6 +51,18 @@ export default function Dashboard({ user }: { user: any }) {
         </div>
         
         <div className="mt-4 md:mt-0 flex items-center gap-3">
+          {dashboardData?.careerGoal && (
+            <Button 
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => window.location.href = "/career-plan"}
+            >
+              <Route className="h-4 w-4" />
+              View Career Plan
+            </Button>
+          )}
+          
           <Button 
             variant={showAiFeatures ? "default" : "outline"} 
             size="sm" 
@@ -141,9 +154,12 @@ export default function Dashboard({ user }: { user: any }) {
                     <p className="text-sm text-gray-500">Get a personalized roadmap to achieve your goal</p>
                   </div>
                 </div>
-                <a href="/assessment" className="bg-primary text-white px-6 py-3 rounded-full font-medium hover:bg-primary-600 transition-colors">
+                <Button 
+                  onClick={() => window.location.href = "/assessment"} 
+                  className="px-6 py-6 rounded-full"
+                >
                   Get Started Now →
-                </a>
+                </Button>
               </div>
             )}
           </div>
