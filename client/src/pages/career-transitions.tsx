@@ -32,6 +32,7 @@ import { InterviewRole } from "@shared/schema";
 export default function CareerTransitionsPage() {
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [selectedTab, setSelectedTab] = useState<string>('career-goals');
+  const [roleSearchTerm, setRoleSearchTerm] = useState<string>('');
   const { toast } = useToast();
   const [location] = useLocation();
   
@@ -173,33 +174,106 @@ export default function CareerTransitionsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Role selection */}
+                {/* Role selection dropdown */}
                 <div className="w-full md:max-w-lg">
                   <h3 className="text-base font-medium mb-2">Select a role to view its career progression path:</h3>
                   
                   {rolesLoading ? (
                     <div className="animate-pulse h-10 w-full bg-secondary rounded"></div>
                   ) : (
-                    <div className="grid gap-3 md:grid-cols-2">
-                      {roles?.slice(0, 6).map((role) => (
-                        <Button
-                          key={role.id}
-                          variant={selectedRoleId === role.id ? "default" : "outline"}
-                          className="justify-start h-auto py-3 text-left"
-                          onClick={() => setSelectedRoleId(role.id)}
+                    <div className="space-y-4">
+                      {/* Search and dropdown */}
+                      {/* Search input */}
+                      <div className="relative mb-2">
+                        <label htmlFor="roleSearch" className="text-sm font-medium text-muted-foreground mb-1 block">
+                          Search roles by title or industry:
+                        </label>
+                        <input
+                          id="roleSearch"
+                          type="text"
+                          className="w-full h-10 px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="Type to search..."
+                          value={roleSearchTerm}
+                          onChange={(e) => setRoleSearchTerm(e.target.value)}
+                        />
+                      </div>
+
+                      {/* Role selector */}
+                      <div className="relative">
+                        <label htmlFor="roleSelect" className="text-sm font-medium text-muted-foreground mb-1 block">
+                          Select a role:
+                        </label>
+                        <select 
+                          id="roleSelect"
+                          className="w-full h-10 px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                          value={selectedRoleId || ''}
+                          onChange={(e) => setSelectedRoleId(e.target.value ? parseInt(e.target.value) : null)}
                         >
-                          <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${selectedRoleId === role.id ? 'bg-primary-foreground' : 'bg-primary/30'}`}></div>
-                            <div>
-                              <div className="font-medium">{role.title}</div>
-                              <div className="text-xs text-muted-foreground">{role.industry}</div>
-                            </div>
-                          </div>
-                          {selectedRoleId === role.id && (
-                            <ArrowRight className="h-4 w-4 ml-auto" />
-                          )}
-                        </Button>
-                      ))}
+                          <option value="">-- Select a role --</option>
+                          {roles
+                            ?.filter(role => 
+                              roleSearchTerm === '' || 
+                              role.title.toLowerCase().includes(roleSearchTerm.toLowerCase()) ||
+                              (role.industry && role.industry.toLowerCase().includes(roleSearchTerm.toLowerCase()))
+                            )
+                            .map((role) => (
+                              <option key={role.id} value={role.id}>
+                                {role.title} ({role.industry})
+                              </option>
+                            ))
+                          }
+                        </select>
+                        {roleSearchTerm && roles?.filter(role => 
+                          role.title.toLowerCase().includes(roleSearchTerm.toLowerCase()) ||
+                          (role.industry && role.industry.toLowerCase().includes(roleSearchTerm.toLowerCase()))
+                        ).length === 0 && (
+                          <p className="text-xs text-muted-foreground mt-1">No roles match your search.</p>
+                        )}
+                      </div>
+
+                      {/* Featured/Filtered roles */}
+                      <div>
+                        <h4 className="text-sm font-medium mb-2 text-muted-foreground">
+                          {roleSearchTerm ? "Matching Roles:" : "Featured Roles:"}
+                        </h4>
+                        <div className="grid gap-3 md:grid-cols-2">
+                          {roles
+                            ?.filter(role => 
+                              roleSearchTerm === '' || 
+                              role.title.toLowerCase().includes(roleSearchTerm.toLowerCase()) ||
+                              (role.industry && role.industry.toLowerCase().includes(roleSearchTerm.toLowerCase()))
+                            )
+                            .slice(0, 6)
+                            .map((role) => (
+                              <Button
+                                key={role.id}
+                                variant={selectedRoleId === role.id ? "default" : "outline"}
+                                className="justify-start h-auto py-3 text-left"
+                                onClick={() => setSelectedRoleId(role.id)}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-2 h-2 rounded-full ${selectedRoleId === role.id ? 'bg-primary-foreground' : 'bg-primary/30'}`}></div>
+                                  <div>
+                                    <div className="font-medium">{role.title}</div>
+                                    <div className="text-xs text-muted-foreground">{role.industry}</div>
+                                  </div>
+                                </div>
+                                {selectedRoleId === role.id && (
+                                  <ArrowRight className="h-4 w-4 ml-auto" />
+                                )}
+                              </Button>
+                            ))}
+                            
+                            {roleSearchTerm && roles?.filter(role => 
+                              role.title.toLowerCase().includes(roleSearchTerm.toLowerCase()) ||
+                              (role.industry && role.industry.toLowerCase().includes(roleSearchTerm.toLowerCase()))
+                            ).length === 0 && (
+                              <div className="col-span-2 text-center py-4">
+                                <p className="text-muted-foreground">No roles match your search criteria.</p>
+                              </div>
+                            )}
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
