@@ -1,0 +1,360 @@
+🏦 Banking & Financial Services
+Core Banking Application Developer
+
+Fintech Solutions Architect
+
+Risk & Compliance IT Analyst
+
+Blockchain Developer
+
+Cybersecurity Analyst (Banking)
+
+Financial Systems Analyst
+
+Payment Gateway Integration Specialist
+
+Treasury Management Systems (TMS) Engineer
+
+Quantitative Systems Developer
+
+RegTech Implementation Consultant
+
+🛡️ Insurance
+Insurance Software Developer
+
+Claims Processing Systems Analyst
+
+Underwriting Automation Engineer
+
+Policy Administration System (PAS) Specialist
+
+Insurance Data Analyst
+
+InsurTech Product Manager
+
+Risk Modeling IT Consultant
+
+Customer Relationship Management (CRM) Systems Developer
+
+🏭 Manufacturing
+Industrial Automation Engineer
+
+Manufacturing Execution Systems (MES) Developer
+
+Product Lifecycle Management (PLM) IT Specialist
+
+Supply Chain IT Analyst
+
+Computer-Aided Design (CAD) Systems Developer
+
+Enterprise Resource Planning (ERP) Implementation Consultant
+
+Predictive Maintenance Systems Engineer
+
+Smart Factory Solutions Architect
+
+💊 Pharmaceuticals
+Clinical Data Management IT Specialist
+
+Laboratory Information Management Systems (LIMS) Developer
+
+Pharmacovigilance IT Analyst
+
+Regulatory Compliance Systems Consultant
+
+Drug Discovery Informatics Engineer
+
+Electronic Trial Master File (eTMF) Systems Administrator
+
+Healthcare Data Integration Specialist
+
+Quality Assurance (QA) IT Auditor
+
+🏥 Healthcare & Medical
+Electronic Health Record (EHR) Systems Developer
+
+Health Information Exchange (HIE) Analyst
+
+Telemedicine Platform Engineer
+
+Medical Imaging IT Specialist
+
+Clinical Decision Support Systems (CDSS) Developer
+
+Health Informatics Analyst
+
+Patient Portal Developer
+
+Healthcare Cybersecurity Specialist
+
+🛒 Retail & E-commerce
+E-commerce Platform Developer
+
+Point of Sale (POS) Systems Analyst
+
+Inventory Management IT Specialist
+
+Customer Experience (CX) Technology Consultant
+
+Digital Payment Systems Engineer
+
+Supply Chain IT Coordinator
+
+Retail Analytics Developer
+
+Omnichannel Solutions Architect
+
+🚚 Logistics & Supply Chain
+Transportation Management Systems (TMS) Developer
+
+Warehouse Management Systems (WMS) Analyst
+
+Fleet Management IT Specialist
+
+Route Optimization Software Engineer
+
+Logistics Data Analyst
+
+Supply Chain Visibility Solutions Architect
+
+Inventory Tracking Systems Developer
+
+Logistics Automation Engineer
+
+🏗️ Construction & Infrastructure
+Building Information Modeling (BIM) IT Specialist
+
+Construction Project Management Software Developer
+
+Smart Building Systems Engineer
+
+Infrastructure Monitoring IT Analyst
+
+Construction ERP Consultant
+
+Site Safety Technology Coordinator
+
+Asset Management Systems Developer
+
+Geographic Information Systems (GIS) Analyst
+
+🧪 Research & Development
+Scientific Computing Specialist
+
+Laboratory Automation Engineer
+
+Data Science Research Analyst
+
+High-Performance Computing (HPC) Systems Administrator
+
+Research Data Management Consultant
+
+Bioinformatics IT Specialist
+
+Simulation Software Developer
+
+R&D IT Project Manager
+
+🏛️ Government & Public Sector
+Public Sector IT Consultant
+
+E-Governance Solutions Developer
+
+Citizen Services Platform Engineer
+
+Government Data Analyst
+
+Cybersecurity Policy Advisor
+
+Digital Identity Systems Specialist
+
+Smart City Infrastructure IT Coordinator
+
+Public Health Informatics Analyst
+
+🎓 Education & EdTech
+Learning Management Systems (LMS) Administrator
+
+Educational Technology Developer
+
+Virtual Classroom Solutions Engineer
+
+Student Information Systems (SIS) Analyst
+
+E-learning Content Developer
+
+Academic Data Analyst
+
+EdTech Product Manager
+
+Online Assessment Platform Developer
+
+🎮 Gaming & Entertainment
+Game Engine Developer
+
+Virtual Reality (VR) Systems Engineer
+
+Augmented Reality (AR) Developer
+
+Game Analytics Specialist
+
+Multimedia Systems Developer
+
+Streaming Platform IT Coordinator
+
+Interactive Media Developer
+
+Esports Technology Manager
+
+🌐 Telecommunications
+Network Infrastructure Engineer
+
+Telecom Systems Analyst
+
+VoIP Solutions Developer
+
+5G Network Architect
+
+Telecom Billing Systems Specialist
+
+Customer Relationship Management (CRM) Systems Developer
+
+Telecom Security Analyst
+
+Radio Frequency (RF) Planning Engineer
+
+🏠 Real Estate & PropTech
+Property Management Systems Developer
+
+Real Estate Analytics Specialist
+
+Smart Home Technology Engineer
+
+Virtual Tour Platform Developer
+
+Real Estate CRM Consultant
+
+PropTech Solutions Architect
+
+Building Automation Systems IT Specialist
+
+Tenant Experience Platform Developer
+
+🛡️ Cybersecurity (Cross-Industry)
+Security Operations Center (SOC) Analyst
+
+Penetration Tester (Ethical Hacker)
+
+Security Information and Event Management (SIEM) Specialist
+
+Identity and Access Management (IAM) Engineer
+
+Cloud Security Architect
+
+Cyber Threat Intelligence Analyst
+
+Incident Response Coordinator
+
+Compliance and Risk Management IT Consultant
+
+☁️ Cloud Computing & DevOps
+Cloud Solutions Architect
+
+DevOps Engineer
+
+Site Reliability Engineer (SRE)
+
+Cloud Infrastructure Administrator
+
+Continuous Integration/Continuous Deployment (CI/CD) Pipeline Developer
+
+Containerization Specialist (Docker/Kubernetes)
+
+Cloud Security Analyst
+
+Platform as a Service (PaaS) Developer
+
+📊 Data & Analytics
+Data Scientist
+
+Business Intelligence (BI) Developer
+
+Data Engineer
+
+Machine Learning Engineer
+
+Data Visualization Specialist
+
+Big Data Architect
+
+Statistical Analyst
+
+Data Governance Consultant
+
+🧠 Artificial Intelligence & Machine Learning
+AI Research Scientist
+
+Natural Language Processing (NLP) Engineer
+
+Computer Vision Developer
+
+Deep Learning Specialist
+
+AI Ethics Consultant
+
+Reinforcement Learning Engineer
+
+AI Model Deployment Engineer
+
+Cognitive Computing Developer
+
+🛠️ Software Development & Engineering
+Frontend Developer
+
+Backend Developer
+
+Full Stack Developer
+
+Mobile Application Developer
+
+Software Quality Assurance (QA) Tester
+
+Application Support Engineer
+
+Software Architect
+
+Agile Scrum Master
+
+🖥️ IT Support & Administration
+IT Support Specialist
+
+Help Desk Technician
+
+System Administrator
+
+Network Administrator
+
+IT Asset Manager
+
+Technical Support Engineer
+
+Desktop Support Analyst
+
+IT Operations Manager
+
+🧑‍💼 Project & Product Management
+IT Project Manager
+
+Technical Program Manager
+
+Product Owner
+
+Business Analyst
+
+Scrum Master
+
+Agile Coach
+
+IT Portfolio Manager
+
+Change Management Consultant

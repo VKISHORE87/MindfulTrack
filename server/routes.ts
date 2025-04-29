@@ -1109,51 +1109,140 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Helper function to generate predefined learning resources
   function generatePredefinedLearningResources() {
     return [
-      // General resources
+      // Software Development Resources
       {
-        title: "Introduction to Programming",
-        description: "Learn the fundamentals of programming with this comprehensive course.",
+        title: "Modern JavaScript for Full-Stack Web Development",
+        description: "Master JavaScript for building full-stack web applications with Node.js and React.",
         resourceType: "course",
-        url: "https://www.coursera.org/learn/introduction-to-programming",
-        provider: "Coursera",
+        url: "https://javascript.info/",
+        provider: "JavaScript.info",
         skillIds: ["1", "2", "3"],
-        duration: 20
+        duration: 30
       },
       {
-        title: "Project Management Fundamentals",
-        description: "Master the basics of project management with this practical guide.",
+        title: "Web Development Bootcamp",
+        description: "Comprehensive course covering HTML, CSS, JavaScript, React, Node.js, and more.",
         resourceType: "course",
-        url: "https://www.udemy.com/course/project-management-fundamentals/",
+        url: "https://www.udemy.com/course/the-web-developer-bootcamp/",
         provider: "Udemy",
         skillIds: ["4", "5"],
-        duration: 15
+        duration: 40
       },
       {
-        title: "Data Analysis with Python",
-        description: "Learn how to analyze data effectively using Python.",
+        title: "Data Structures and Algorithms in Python",
+        description: "Master essential computer science concepts for technical interviews and real-world problem solving.",
         resourceType: "course",
-        url: "https://www.datacamp.com/courses/data-analysis-with-python",
-        provider: "DataCamp",
+        url: "https://www.educative.io/courses/data-structures-algorithms-python",
+        provider: "Educative",
         skillIds: ["6", "7"],
         duration: 25
       },
       {
-        title: "UX Design Principles",
-        description: "Understand the key principles of effective user experience design.",
-        resourceType: "article",
-        url: "https://www.interaction-design.org/literature/topics/ux-design",
-        provider: "Interaction Design Foundation",
+        title: "System Design for Software Engineers",
+        description: "Learn how to design scalable systems and prepare for system design interviews.",
+        resourceType: "course",
+        url: "https://www.educative.io/courses/grokking-modern-system-design-interview-for-engineers-managers",
+        provider: "Educative",
         skillIds: ["8", "9"],
-        duration: 5
+        duration: 20
+      },
+
+      // Data & AI Resources
+      {
+        title: "Deep Learning Specialization",
+        description: "Master deep learning fundamentals and build real-world AI applications.",
+        resourceType: "course",
+        url: "https://www.deeplearning.ai/courses/deep-learning-specialization/",
+        provider: "DeepLearning.AI",
+        skillIds: ["10", "11"],
+        duration: 40
       },
       {
-        title: "Introduction to Machine Learning",
-        description: "Get started with machine learning concepts and applications.",
+        title: "Machine Learning Engineering for Production (MLOps)",
+        description: "Learn to design and implement production ML systems and workflows.",
         resourceType: "course",
-        url: "https://www.edx.org/learn/machine-learning",
-        provider: "edX",
-        skillIds: ["10", "11"],
+        url: "https://www.deeplearning.ai/courses/machine-learning-engineering-for-production-mlops/",
+        provider: "DeepLearning.AI",
+        skillIds: ["12", "13"],
         duration: 30
+      },
+      {
+        title: "SQL for Data Analysis",
+        description: "Master SQL for efficient data extraction, transformation, and analysis.",
+        resourceType: "workshop",
+        url: "https://www.datacamp.com/courses/sql-for-data-science",
+        provider: "DataCamp",
+        skillIds: ["14", "15"],
+        duration: 15
+      },
+
+      // Cloud & DevOps Resources
+      {
+        title: "AWS Certified Solutions Architect",
+        description: "Prepare for the AWS Solutions Architect certification with hands-on training.",
+        resourceType: "course",
+        url: "https://acloud.guru/learn/aws-certified-solutions-architect-associate",
+        provider: "A Cloud Guru",
+        skillIds: ["16", "17"],
+        duration: 35
+      },
+      {
+        title: "Docker and Kubernetes: The Complete Guide",
+        description: "Master containerization and orchestration for modern application deployment.",
+        resourceType: "course",
+        url: "https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/",
+        provider: "Udemy",
+        skillIds: ["18", "19"],
+        duration: 30
+      },
+      {
+        title: "Infrastructure as Code with Terraform",
+        description: "Learn to automate infrastructure provisioning with Terraform.",
+        resourceType: "workshop",
+        url: "https://learn.hashicorp.com/terraform",
+        provider: "HashiCorp",
+        skillIds: ["20", "21"],
+        duration: 20
+      },
+
+      // Cybersecurity Resources
+      {
+        title: "Practical Ethical Hacking",
+        description: "Comprehensive course on ethical hacking methodologies and tools.",
+        resourceType: "course",
+        url: "https://www.udemy.com/course/practical-ethical-hacking/",
+        provider: "Udemy",
+        skillIds: ["22", "23"],
+        duration: 35
+      },
+      {
+        title: "CompTIA Security+ Certification",
+        description: "Prepare for the Security+ certification with comprehensive coverage of security fundamentals.",
+        resourceType: "course",
+        url: "https://www.comptia.org/training/by-certification/security",
+        provider: "CompTIA",
+        skillIds: ["24", "25"],
+        duration: 30
+      },
+
+      // Project Management Resources
+      {
+        title: "Agile Project Management with Scrum",
+        description: "Master Scrum methodology and become an effective Agile project manager.",
+        resourceType: "course",
+        url: "https://www.coursera.org/learn/agile-project-management",
+        provider: "Coursera",
+        skillIds: ["26", "27"],
+        duration: 20
+      },
+      {
+        title: "Project Management Professional (PMP) Certification",
+        description: "Comprehensive preparation for the PMP certification exam.",
+        resourceType: "course",
+        url: "https://www.pmi.org/certifications/project-management-pmp",
+        provider: "PMI",
+        skillIds: ["28", "29"],
+        duration: 35
       }
     ];
   }
@@ -1209,8 +1298,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
     
-    // Add role-specific custom resources based on common roles
-    if (roleTitle === "NLP Engineer") {
+    // Add role-specific custom resources based on IT industry roles
+    // Software Development & Engineering roles
+    if (roleTitle === "Frontend Developer") {
+      resources.push(
+        {
+          title: "Advanced React Patterns",
+          description: "Master advanced React patterns and performance optimization techniques.",
+          resourceType: "course",
+          url: "https://frontendmasters.com/courses/advanced-react-patterns/",
+          provider: "Frontend Masters",
+          skillIds: ["100"],
+          duration: 25
+        },
+        {
+          title: "Modern CSS Techniques",
+          description: "Learn cutting-edge CSS techniques including Grid, Flexbox, and CSS variables.",
+          resourceType: "course",
+          url: "https://css-tricks.com/guides/",
+          provider: "CSS-Tricks",
+          skillIds: ["101"],
+          duration: 20
+        }
+      );
+    } else if (roleTitle === "Backend Developer") {
+      resources.push(
+        {
+          title: "Microservices Architecture Patterns",
+          description: "Learn how to design, implement, and deploy microservices at scale.",
+          resourceType: "course",
+          url: "https://www.pluralsight.com/courses/microservices-architecture",
+          provider: "Pluralsight",
+          skillIds: ["102"],
+          duration: 30
+        },
+        {
+          title: "Database Performance Optimization",
+          description: "Master techniques for optimizing database performance in high-scale applications.",
+          resourceType: "workshop",
+          url: "https://www.linkedin.com/learning/database-performance-optimization",
+          provider: "LinkedIn Learning",
+          skillIds: ["103"],
+          duration: 20
+        }
+      );
+    } else if (roleTitle === "Full Stack Developer") {
+      resources.push(
+        {
+          title: "Modern Web Application Architecture",
+          description: "Comprehensive course on building scalable full-stack web applications.",
+          resourceType: "course",
+          url: "https://www.udemy.com/course/full-stack-web-development/",
+          provider: "Udemy",
+          skillIds: ["104"],
+          duration: 35
+        },
+        {
+          title: "API Design Best Practices",
+          description: "Learn how to design robust and scalable APIs using REST and GraphQL.",
+          resourceType: "workshop",
+          url: "https://www.apollographql.com/tutorials/",
+          provider: "Apollo GraphQL",
+          skillIds: ["105"],
+          duration: 15
+        }
+      );
+    } 
+    // Artificial Intelligence & Machine Learning roles
+    else if (roleTitle === "AI Research Scientist") {
+      resources.push(
+        {
+          title: "Advanced Deep Learning Techniques",
+          description: "Explore cutting-edge deep learning research and implementation.",
+          resourceType: "course",
+          url: "https://www.deeplearning.ai/courses/advanced-techniques/",
+          provider: "DeepLearning.AI",
+          skillIds: ["106"],
+          duration: 40
+        },
+        {
+          title: "Research Paper Implementation Workshop",
+          description: "Learn how to implement and reproduce AI research papers from scratch.",
+          resourceType: "workshop",
+          url: "https://paperswithcode.com/",
+          provider: "Papers With Code",
+          skillIds: ["107"],
+          duration: 25
+        }
+      );
+    } else if (roleTitle === "Natural Language Processing (NLP) Engineer") {
       resources.push(
         {
           title: "Deep Learning for Natural Language Processing",
@@ -1231,7 +1407,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
           duration: 25
         }
       );
-    } else if (roleTitle === "Agile Coach") {
+    } else if (roleTitle === "Computer Vision Developer") {
+      resources.push(
+        {
+          title: "Advanced Computer Vision with Deep Learning",
+          description: "Master computer vision techniques using convolutional neural networks and transformers.",
+          resourceType: "course",
+          url: "https://www.coursera.org/specializations/deep-learning",
+          provider: "Coursera",
+          skillIds: ["108"],
+          duration: 30
+        },
+        {
+          title: "Real-time Computer Vision Applications",
+          description: "Build real-time computer vision applications for various platforms.",
+          resourceType: "workshop",
+          url: "https://opencv.org/courses/",
+          provider: "OpenCV",
+          skillIds: ["109"],
+          duration: 20
+        }
+      );
+    }
+    // Data & Analytics roles
+    else if (roleTitle === "Data Scientist") {
+      resources.push(
+        {
+          title: "Advanced Statistical Methods for Data Science",
+          description: "Learn advanced statistical techniques for complex data analysis.",
+          resourceType: "course",
+          url: "https://www.statsmodels.org/stable/examples/",
+          provider: "StatsModels",
+          skillIds: ["110"],
+          duration: 30
+        },
+        {
+          title: "Causal Inference in Data Science",
+          description: "Master causal inference techniques to move beyond correlations in data.",
+          resourceType: "course",
+          url: "https://www.datacamp.com/courses/causal-inference",
+          provider: "DataCamp",
+          skillIds: ["111"],
+          duration: 25
+        }
+      );
+    } else if (roleTitle === "Business Intelligence (BI) Developer") {
+      resources.push(
+        {
+          title: "Advanced Data Visualization Techniques",
+          description: "Create compelling and interactive data visualizations for business insights.",
+          resourceType: "course",
+          url: "https://www.tableau.com/learn/training",
+          provider: "Tableau",
+          skillIds: ["112"],
+          duration: 20
+        },
+        {
+          title: "Building Enterprise BI Solutions",
+          description: "Learn how to design and implement enterprise-scale BI solutions.",
+          resourceType: "workshop",
+          url: "https://powerbi.microsoft.com/en-us/learning/",
+          provider: "Microsoft Power BI",
+          skillIds: ["113"],
+          duration: 25
+        }
+      );
+    }
+    // Project & Product Management roles
+    else if (roleTitle === "Agile Coach") {
       resources.push(
         {
           title: "Professional Agile Coaching",
@@ -1252,24 +1495,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
           duration: 20
         }
       );
-    } else if (roleTitle === "Pharmaceutical Sales Representative") {
+    } else if (roleTitle === "IT Project Manager") {
       resources.push(
         {
-          title: "Medical Terminology for Pharmaceutical Professionals",
-          description: "Essential medical terminology course for pharmaceutical sales representatives.",
+          title: "Advanced Project Management Methodologies",
+          description: "Master various project management approaches for complex IT projects.",
           resourceType: "course",
-          url: "https://www.pharmaceudemy.com/medical-terminology",
-          provider: "Pharmaceudemy",
-          skillIds: ["28"],
-          duration: 25
+          url: "https://www.pmi.org/learning/courses",
+          provider: "Project Management Institute",
+          skillIds: ["114"],
+          duration: 35
         },
         {
-          title: "Consultative Selling in Pharmaceutical Industry",
-          description: "Advanced sales techniques specifically for pharmaceutical representatives.",
+          title: "Stakeholder Management in IT Projects",
+          description: "Learn effective strategies for managing stakeholders in IT projects.",
+          resourceType: "workshop",
+          url: "https://www.coursera.org/learn/project-management-skills",
+          provider: "Coursera",
+          skillIds: ["115"],
+          duration: 15
+        }
+      );
+    }
+    // Cloud Computing & DevOps roles
+    else if (roleTitle === "DevOps Engineer") {
+      resources.push(
+        {
+          title: "CI/CD Pipeline Mastery",
+          description: "Build advanced continuous integration and delivery pipelines.",
           resourceType: "course",
-          url: "https://www.cnpr.org/pharmaceutical-sales-courses",
-          provider: "CNPR",
-          skillIds: ["28"],
+          url: "https://www.pluralsight.com/courses/devops-engineering",
+          provider: "Pluralsight",
+          skillIds: ["116"],
+          duration: 30
+        },
+        {
+          title: "Infrastructure as Code with Terraform",
+          description: "Learn how to manage cloud infrastructure using code with Terraform.",
+          resourceType: "workshop",
+          url: "https://learn.hashicorp.com/terraform",
+          provider: "HashiCorp",
+          skillIds: ["117"],
+          duration: 25
+        }
+      );
+    } else if (roleTitle === "Cloud Solutions Architect") {
+      resources.push(
+        {
+          title: "Multi-Cloud Architecture Design",
+          description: "Design resilient and scalable applications across multiple cloud providers.",
+          resourceType: "course",
+          url: "https://acloud.guru/learn/aws-certified-solutions-architect-professional",
+          provider: "A Cloud Guru",
+          skillIds: ["118"],
+          duration: 40
+        },
+        {
+          title: "Cloud Security Architecture",
+          description: "Learn best practices for securing applications in the cloud.",
+          resourceType: "workshop",
+          url: "https://www.sans.org/cloud-security",
+          provider: "SANS Institute",
+          skillIds: ["119"],
+          duration: 25
+        }
+      );
+    }
+    // Cybersecurity roles
+    else if (roleTitle === "Security Operations Center (SOC) Analyst") {
+      resources.push(
+        {
+          title: "Threat Hunting Techniques",
+          description: "Learn advanced threat hunting methodologies for SOC analysts.",
+          resourceType: "course",
+          url: "https://www.sans.org/course/advanced-incident-response-threat-hunting-training",
+          provider: "SANS Institute",
+          skillIds: ["120"],
+          duration: 35
+        },
+        {
+          title: "SIEM Implementation and Management",
+          description: "Master the implementation and management of Security Information and Event Management systems.",
+          resourceType: "workshop",
+          url: "https://www.splunk.com/en_us/training/courses/splunk-security-essentials",
+          provider: "Splunk",
+          skillIds: ["121"],
+          duration: 25
+        }
+      );
+    } else if (roleTitle === "Penetration Tester (Ethical Hacker)") {
+      resources.push(
+        {
+          title: "Advanced Penetration Testing",
+          description: "Learn advanced techniques for ethical hacking and penetration testing.",
+          resourceType: "course",
+          url: "https://www.offensive-security.com/pwk-oscp/",
+          provider: "Offensive Security",
+          skillIds: ["122"],
+          duration: 40
+        },
+        {
+          title: "Web Application Security Testing",
+          description: "Master techniques for finding and exploiting web application vulnerabilities.",
+          resourceType: "workshop",
+          url: "https://portswigger.net/web-security",
+          provider: "PortSwigger",
+          skillIds: ["123"],
           duration: 30
         }
       );
