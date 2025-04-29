@@ -4,8 +4,9 @@ import { Link } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useCallback, useEffect, useState } from "react";
-import { ChevronRight, RefreshCw } from "lucide-react";
+import { ChevronRight, RefreshCw, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface SkillGap {
   id: number;
@@ -14,6 +15,7 @@ interface SkillGap {
   currentLevel: number;
   targetLevel: number;
   percentage: number;
+  targetRole?: string;
 }
 
 interface SkillGapAnalysisProps {
@@ -31,6 +33,10 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
   
   // Keep track of previous target role ID to detect changes
   const [prevTargetRoleId, setPrevTargetRoleId] = useState<number | string | undefined>(undefined);
+  
+  // Check if there's a mismatch between displayed skills and target role
+  const [roleDataMismatch, setRoleDataMismatch] = useState<boolean>(false);
+  const [displayedRole, setDisplayedRole] = useState<string | undefined>(undefined);
   
   // Define refreshData as a useCallback to prevent recreation on each render
   const refreshData = useCallback(async (showToast = true) => {
@@ -183,6 +189,30 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
       refreshData(false);
     }
   }, [targetRoleId, prevTargetRoleId, refreshData]);
+  
+  // Check for mismatch between target role ID and actual displayed skills
+  useEffect(() => {
+    if (skillGaps.length > 0 && skillGaps[0]?.targetRole) {
+      // Get the role name from the skills data
+      const actualRole = skillGaps[0].targetRole;
+      setDisplayedRole(actualRole);
+      
+      // If targetRoleId is a string that contains a role name, compare directly
+      if (typeof targetRoleId === 'string' && !Number.isInteger(Number(targetRoleId))) {
+        setRoleDataMismatch(targetRoleId !== actualRole);
+      } 
+      // If targetRoleId is numeric, we can't directly compare, so check if data changed
+      else if (prevTargetRoleId && prevTargetRoleId !== targetRoleId) {
+        // Delay the mismatch check to allow for the data to refresh
+        const timer = setTimeout(() => {
+          // If the role data hasn't updated after a change in targetRoleId, there might be a mismatch
+          setRoleDataMismatch(true);
+        }, 2000);
+        
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [skillGaps, targetRoleId, prevTargetRoleId]);
 
   return (
     <Card className="h-full">
@@ -209,6 +239,17 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
       </CardHeader>
       
       <CardContent>
+        {roleDataMismatch && displayedRole && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Data Inconsistency Detected</AlertTitle>
+            <AlertDescription>
+              The skills displayed below are for the role "{displayedRole}" but you selected a different target role. 
+              Click the "Refresh Analysis" button above to update the data.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {skillGaps.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <p>No skill gap analysis available.</p>
@@ -218,11 +259,13 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
           <>
             <div className="mb-4 text-sm bg-secondary/20 p-2 rounded border">
               <strong>Current Target Role:</strong> {
-                targetRoleId 
-                  ? `${typeof targetRoleId === 'object' 
-                      ? JSON.stringify(targetRoleId) 
-                      : targetRoleId}`
-                  : 'Default role'
+                skillGaps.length > 0 && skillGaps[0]?.targetRole
+                  ? skillGaps[0].targetRole
+                  : (targetRoleId 
+                      ? `${typeof targetRoleId === 'object' 
+                          ? JSON.stringify(targetRoleId) 
+                          : targetRoleId}`
+                      : 'Loading...')
               }
             </div>
             <div className="space-y-3">

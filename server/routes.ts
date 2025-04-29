@@ -1525,7 +1525,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           gapAnalysis = {
             careerGoal: careerGoal.title,
             overallReadiness: Math.floor(Math.random() * 50) + 20, // Random number between 20-70%
-            skillGaps,
+            targetRole: targetRole?.title || careerGoal.title, // Include the target role
+            skillGaps: skillGaps.map(sg => ({
+              ...sg,
+              targetRole: targetRole?.title || careerGoal.title // Add target role to each skill gap
+            })),
             recommendations: [
               "Focus on building technical skills first",
               "Consider taking courses in data analysis",
