@@ -136,15 +136,15 @@ export default function Dashboard({ user }: { user: any }) {
         </TabsList>
         
         <TabsContent value="overview" className="pt-6">
-          {/* Career Goals - Now full width and prominent */}
+          {/* Career Goals - Now full width and prominent, using CareerGoalContext */}
           <div className="mb-8">
-            {dashboardData?.careerGoal ? (
+            {currentGoal ? (
               <CareerGoals 
-                id={dashboardData.careerGoal.id}
-                title={dashboardData.careerGoal.title}
-                timeline={dashboardData.careerGoal.timeline}
-                readiness={dashboardData.careerGoal.readiness}
-                skills={dashboardData.keySkills}
+                id={currentGoal.id}
+                title={currentGoal.title}
+                timeline={`${currentGoal.timelineMonths} months`}
+                readiness={dashboardData?.careerGoal?.readiness || 40}
+                skills={dashboardData?.keySkills || targetRoleSkills.map(skill => ({ name: skill }))}
               />
             ) : (
               <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-primary/10 rounded-xl shadow-md p-8 flex flex-col items-center justify-center text-center">
@@ -180,7 +180,10 @@ export default function Dashboard({ user }: { user: any }) {
           {/* Debug info section */}
           {process.env.NODE_ENV !== 'production' && (
             <div className="text-xs text-gray-400 mb-4">
-              Debug - Target Role ID: {dashboardData?.careerGoal?.targetRoleId || 'not set'} (type: {typeof dashboardData?.careerGoal?.targetRoleId})
+              <div>Debug - Context Goal: {currentGoal?.title || 'not set'} (ID: {currentGoal?.id || 'none'})</div>
+              <div>Debug - Context Target Role ID: {currentGoal?.targetRoleId || 'not set'} (type: {typeof currentGoal?.targetRoleId})</div>
+              <div>Debug - Context Skills: {targetRoleSkills.join(', ') || 'none'}</div>
+              <div>Debug - API Goal: {dashboardData?.careerGoal?.title || 'not set'} (ID: {dashboardData?.careerGoal?.id || 'none'})</div>
             </div>
           )}
           
