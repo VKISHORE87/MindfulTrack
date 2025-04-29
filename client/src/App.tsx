@@ -96,7 +96,6 @@ function getPageTitle(path: string): string {
   const pathSegment = path.split('/')[1] || 'dashboard';
   const titles: Record<string, string> = {
     'dashboard': 'Dashboard',
-    'learning-path': 'Learning Path',
     'career-plan': 'Career Plan',
     'resources': 'Resources',
     'progress': 'Progress',
@@ -144,9 +143,7 @@ function Router() {
         <Redirect to="/dashboard" />
       </Route>
       <Route path="/learning-path">
-        <AppLayout>
-          <ProtectedRoute component={LearningPath} />
-        </AppLayout>
+        <Redirect to="/dashboard" />
       </Route>
       <Route path="/resources">
         <AppLayout>

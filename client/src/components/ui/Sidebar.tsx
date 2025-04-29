@@ -20,7 +20,6 @@ interface SidebarProps {
 export default function Sidebar({ user, currentRoute }: SidebarProps) {
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: <Home className="h-5 w-5 mr-3" /> },
-    { href: '/learning-path', label: 'Learning Path', icon: <BarChart2 className="h-5 w-5 mr-3" /> },
     { href: '/career-transitions', label: 'Career Options', icon: <Briefcase className="h-5 w-5 mr-3" /> },
     { href: '/resources', label: 'Resources', icon: <BookOpen className="h-5 w-5 mr-3" /> },
     { href: '/practice', label: 'Practice', icon: <Dumbbell className="h-5 w-5 mr-3" /> },
