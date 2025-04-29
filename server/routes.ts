@@ -1439,14 +1439,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get the target role details if we have a targetRoleId
         let targetRole = null;
         if (effectiveTargetRoleId) {
-          const roles = await storage.getRoles();
-          targetRole = roles.find(r => r.id.toString() === effectiveTargetRoleId.toString());
-          
-          if (targetRole) {
-            console.log(`[INFO] Using target role for analysis: ${targetRole.title}`);
+          try {
+            const roles = await storage.getRoles();
+            targetRole = roles.find((r: any) => r.id.toString() === effectiveTargetRoleId.toString());
             
-            // Add target role title to career goal for the analysis context
-            careerGoal.targetRoleTitle = targetRole.title;
+            if (targetRole) {
+              console.log(`[INFO] Using target role for analysis: ${targetRole.title}`);
+              
+              // Use target role info for the analysis context
+              const targetRoleInfo = {
+                title: targetRole.title,
+                id: targetRole.id
+              };
+              // Add in a type-safe way
+              (careerGoal as any).targetRoleTitle = targetRoleInfo.title;
+            }
+          } catch (error) {
+            console.error("Error fetching roles:", error);
           }
         }
 

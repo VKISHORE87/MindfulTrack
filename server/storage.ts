@@ -1339,6 +1339,73 @@ export class MemStorage implements IStorage {
   async deleteCareerPath(id: number): Promise<boolean> {
     return this.careerPathsMap.delete(id);
   }
+  
+  // Implementation of Role methods
+  async getRoles(): Promise<any[]> {
+    // Predefined roles with required skills
+    return [
+      {
+        id: 100,
+        title: "Marketing Manager",
+        description: "Oversees marketing initiatives and campaigns",
+        requiredSkills: ["Market Research", "Brand Strategy", "Digital Marketing", "Team Leadership", "Content Strategy", "Marketing Analytics", "Budget Management", "Social Media Marketing"]
+      },
+      {
+        id: 101,
+        title: "Brand Manager",
+        description: "Develops and maintains brand identity and strategy",
+        requiredSkills: ["Brand Strategy", "Market Research", "Brand Guidelines", "Product Positioning", "Consumer Insights", "Brand Analytics", "Campaign Management", "Competitor Analysis"]
+      },
+      {
+        id: 102,
+        title: "Digital Marketing Specialist",
+        description: "Implements digital marketing campaigns across platforms",
+        requiredSkills: ["SEO", "SEM", "Social Media Marketing", "Content Creation", "Email Marketing", "Analytics", "PPC Advertising", "CRM Systems"]
+      },
+      {
+        id: 103,
+        title: "Social Media Manager",
+        description: "Manages social media presence and engagement",
+        requiredSkills: ["Social Media Platforms", "Content Creation", "Community Management", "Social Media Analytics", "Visual Design", "Copywriting", "Trend Analysis", "Crisis Management"]
+      },
+      {
+        id: 104,
+        title: "Content Marketing Manager",
+        description: "Creates and distributes valuable content",
+        requiredSkills: ["Content Strategy", "SEO", "Editorial Planning", "Storytelling", "Analytics", "Audience Development", "Content Distribution", "Brand Voice"]
+      },
+      {
+        id: 200,
+        title: "Software Engineer",
+        description: "Develops software applications and systems",
+        requiredSkills: ["Programming Languages", "Data Structures", "Algorithms", "Software Design", "Version Control", "Testing", "Problem Solving", "Debugging"]
+      },
+      {
+        id: 201,
+        title: "Data Scientist",
+        description: "Extracts insights from complex data",
+        requiredSkills: ["Statistics", "Machine Learning", "Python", "R", "Data Visualization", "SQL", "Feature Engineering", "Data Cleaning"]
+      },
+      {
+        id: 202,
+        title: "Product Manager",
+        description: "Guides product development and strategy",
+        requiredSkills: ["Product Strategy", "User Research", "Market Analysis", "Roadmapping", "Cross-functional Collaboration", "Prototyping", "Agile Methodologies", "Stakeholder Management"]
+      },
+      {
+        id: 300,
+        title: "Financial Analyst",
+        description: "Analyzes financial data and makes recommendations",
+        requiredSkills: ["Financial Modeling", "Excel", "Financial Statement Analysis", "Forecasting", "Valuation", "Industry Research", "Data Analysis", "Presentation Skills"]
+      },
+      {
+        id: 301,
+        title: "Risk Analyst",
+        description: "Identifies and assesses financial risks",
+        requiredSkills: ["Risk Assessment", "Statistical Modeling", "Financial Analysis", "Regulatory Compliance", "Credit Analysis", "Market Analysis", "Scenario Planning", "Reporting"]
+      }
+    ];
+  }
 }
 
 // Database implementation of the storage interface
@@ -1826,6 +1893,73 @@ export class DatabaseStorage implements IStorage {
   async deleteCareerPath(id: number): Promise<boolean> {
     const result = await db.delete(careerPaths).where(eq(careerPaths.id, id));
     return result.rowCount > 0;
+  }
+  
+  // Role methods - same implementation as MemStorage for consistency
+  async getRoles(): Promise<any[]> {
+    // Predefined roles with required skills
+    return [
+      {
+        id: 100,
+        title: "Marketing Manager",
+        description: "Oversees marketing initiatives and campaigns",
+        requiredSkills: ["Market Research", "Brand Strategy", "Digital Marketing", "Team Leadership", "Content Strategy", "Marketing Analytics", "Budget Management", "Social Media Marketing"]
+      },
+      {
+        id: 101,
+        title: "Brand Manager",
+        description: "Develops and maintains brand identity and strategy",
+        requiredSkills: ["Brand Strategy", "Market Research", "Brand Guidelines", "Product Positioning", "Consumer Insights", "Brand Analytics", "Campaign Management", "Competitor Analysis"]
+      },
+      {
+        id: 102,
+        title: "Digital Marketing Specialist",
+        description: "Implements digital marketing campaigns across platforms",
+        requiredSkills: ["SEO", "SEM", "Social Media Marketing", "Content Creation", "Email Marketing", "Analytics", "PPC Advertising", "CRM Systems"]
+      },
+      {
+        id: 103,
+        title: "Social Media Manager",
+        description: "Manages social media presence and engagement",
+        requiredSkills: ["Social Media Platforms", "Content Creation", "Community Management", "Social Media Analytics", "Visual Design", "Copywriting", "Trend Analysis", "Crisis Management"]
+      },
+      {
+        id: 104,
+        title: "Content Marketing Manager",
+        description: "Creates and distributes valuable content",
+        requiredSkills: ["Content Strategy", "SEO", "Editorial Planning", "Storytelling", "Analytics", "Audience Development", "Content Distribution", "Brand Voice"]
+      },
+      {
+        id: 200,
+        title: "Software Engineer",
+        description: "Develops software applications and systems",
+        requiredSkills: ["Programming Languages", "Data Structures", "Algorithms", "Software Design", "Version Control", "Testing", "Problem Solving", "Debugging"]
+      },
+      {
+        id: 201,
+        title: "Data Scientist",
+        description: "Extracts insights from complex data",
+        requiredSkills: ["Statistics", "Machine Learning", "Python", "R", "Data Visualization", "SQL", "Feature Engineering", "Data Cleaning"]
+      },
+      {
+        id: 202,
+        title: "Product Manager",
+        description: "Guides product development and strategy",
+        requiredSkills: ["Product Strategy", "User Research", "Market Analysis", "Roadmapping", "Cross-functional Collaboration", "Prototyping", "Agile Methodologies", "Stakeholder Management"]
+      },
+      {
+        id: 300,
+        title: "Financial Analyst",
+        description: "Analyzes financial data and makes recommendations",
+        requiredSkills: ["Financial Modeling", "Excel", "Financial Statement Analysis", "Forecasting", "Valuation", "Industry Research", "Data Analysis", "Presentation Skills"]
+      },
+      {
+        id: 301,
+        title: "Risk Analyst",
+        description: "Identifies and assesses financial risks",
+        requiredSkills: ["Risk Assessment", "Statistical Modeling", "Financial Analysis", "Regulatory Compliance", "Credit Analysis", "Market Analysis", "Scenario Planning", "Reporting"]
+      }
+    ];
   }
 }
 

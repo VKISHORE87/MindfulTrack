@@ -27,12 +27,18 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
   const { toast } = useToast();
   const [isRefreshing, setIsRefreshing] = useState(false);
   
+  // Keep track of previous target role ID to detect changes
+  const [prevTargetRoleId, setPrevTargetRoleId] = useState<number | string | undefined>(undefined);
+  
   // Auto-refresh skill gaps when targetRoleId changes
   useEffect(() => {
-    if (targetRoleId) {
+    // Check if targetRoleId exists and has changed
+    if (targetRoleId && targetRoleId !== prevTargetRoleId) {
+      console.log(`SkillGapAnalysis: Target role changed to ${targetRoleId}, triggering refresh`);
+      setPrevTargetRoleId(targetRoleId);
       refreshData(false);
     }
-  }, [targetRoleId]);
+  }, [targetRoleId, prevTargetRoleId]);
 
   const refreshData = async (showToast = true) => {
     if (isRefreshing) return;
@@ -73,6 +79,7 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
         body: JSON.stringify({
           userId,
           careerGoalId,
+          targetRoleId: targetRoleId || undefined,
           forceRefresh: true
         }),
       });
