@@ -25,19 +25,19 @@ export default function MobileNavigation({ currentRoute }: MobileNavigationProps
     <nav className="md:hidden bg-white border-t border-gray-200 fixed bottom-0 w-full">
       <div className="flex justify-around">
         {navItems.map((item) => (
-          <Link key={item.href} href={item.href}>
-            <a 
-              className={`flex flex-col items-center py-2 px-3 ${
-                currentRoute === item.href || 
-                (item.href === '/dashboard' && currentRoute === '/') 
-                  ? 'text-primary' 
-                  : 'text-gray-500'
-              }`}
-            >
-              {item.icon}
-              <span className="text-xs mt-1">{item.label}</span>
-            </a>
-          </Link>
+          <div 
+            key={item.href}
+            onClick={() => window.location.href = item.href}
+            className={`flex flex-col items-center py-2 px-3 cursor-pointer ${
+              currentRoute === item.href || 
+              (item.href === '/dashboard' && currentRoute === '/') 
+                ? 'text-primary' 
+                : 'text-gray-500'
+            }`}
+          >
+            {item.icon}
+            <span className="text-xs mt-1">{item.label}</span>
+          </div>
         ))}
       </div>
     </nav>

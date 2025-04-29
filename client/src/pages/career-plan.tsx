@@ -443,14 +443,13 @@ export default function CareerPlan({ userId = 1, targetRoleId }: CareerPlanProps
                             {module.resources?.map((resource: any, resIdx: number) => (
                               <li key={resIdx} className="text-sm flex items-center">
                                 <ChevronRight className="h-3 w-3 text-primary mr-1" />
-                                <a 
-                                  href={resource.url || "#"} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-primary hover:underline"
+                                <Button 
+                                  variant="link" 
+                                  onClick={() => window.open(resource.url || "#", "_blank", "noopener,noreferrer")}
+                                  className="text-primary p-0 h-auto"
                                 >
                                   {resource.title}
-                                </a>
+                                </Button>
                               </li>
                             ))}
                           </ul>
