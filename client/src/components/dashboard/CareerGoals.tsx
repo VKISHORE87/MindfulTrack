@@ -242,11 +242,9 @@ export default function CareerGoals({ id, title, timeline, readiness, skills = [
       <CardFooter className="border-t pt-4 flex justify-between">
         <div className="text-sm text-gray-500">Updated 3 days ago</div>
         <div>
-          <Link href="/career-transitions">
-            <a className="text-sm font-medium text-primary hover:text-primary-800 flex items-center">
-              Explore alternative career paths
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </a>
+          <Link href="/career-transitions" className="text-sm font-medium text-primary hover:text-primary-800 flex items-center">
+            Explore alternative career paths
+            <ChevronRight className="h-4 w-4 ml-1" />
           </Link>
         </div>
       </CardFooter>
