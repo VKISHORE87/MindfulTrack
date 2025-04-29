@@ -127,20 +127,59 @@ export default function CareerGoals({ id, title, timeline, readiness, skills = [
                 </div>
                 <ul className="space-y-2 pl-10">
                   {skills && Array.isArray(skills) && skills.length > 0 ? (
-                    // Manually create React elements to avoid rendering issues
-                    skills.map((skill, index) => (
-                      <li key={index} className="text-sm text-gray-600">
-                        {String(typeof skill === 'object' && skill !== null && 'name' in skill ? skill.name : skill)}
-                      </li>
-                    ))
+                    // Properly display skills with their status
+                    skills.map((skill, index) => {
+                      // Safely access the skill name and status
+                      const skillName = typeof skill === 'object' && skill ? skill.name : String(skill);
+                      const status = typeof skill === 'object' && skill && skill.status ? skill.status : 'unknown';
+                      
+                      // Pick icon based on status
+                      let StatusIcon = skill.status === 'missing' ? AlertTriangle : 
+                                       skill.status === 'improvement' ? TrendingUp : 
+                                       CheckCircle;
+                      
+                      // Pick color based on status
+                      let statusColor = skill.status === 'missing' ? 'text-red-500' :
+                                        skill.status === 'improvement' ? 'text-amber-500' :
+                                        'text-green-500';
+                                       
+                      return (
+                        <li key={index} className="text-sm text-gray-600 flex items-center gap-2 mb-2">
+                          <StatusIcon className={`h-4 w-4 ${statusColor} flex-shrink-0`} />
+                          <span>
+                            {skillName}
+                            {skill.percentage && (
+                              <span className="ml-1 text-xs text-gray-500">
+                                ({skill.percentage}%)
+                              </span>
+                            )}
+                          </span>
+                        </li>
+                      );
+                    })
                   ) : (
                     // Default skills when none are provided
                     <>
-                      <li className="text-sm text-gray-600">Technical Knowledge</li>
-                      <li className="text-sm text-gray-600">Solution Design</li>
-                      <li className="text-sm text-gray-600">Product Demonstration</li>
-                      <li className="text-sm text-gray-600">Needs Analysis</li>
-                      <li className="text-sm text-gray-600">Client Communication</li>
+                      <li className="text-sm text-gray-600 flex items-center gap-2 mb-2">
+                        <TrendingUp className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                        <span>Technical Knowledge</span>
+                      </li>
+                      <li className="text-sm text-gray-600 flex items-center gap-2 mb-2">
+                        <TrendingUp className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                        <span>Solution Design</span>
+                      </li>
+                      <li className="text-sm text-gray-600 flex items-center gap-2 mb-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        <span>Product Demonstration</span>
+                      </li>
+                      <li className="text-sm text-gray-600 flex items-center gap-2 mb-2">
+                        <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
+                        <span>Needs Analysis</span>
+                      </li>
+                      <li className="text-sm text-gray-600 flex items-center gap-2 mb-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        <span>Client Communication</span>
+                      </li>
                     </>
                   )}
                 </ul>

@@ -134,9 +134,18 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
           : 'Your career goal has been successfully created',
       });
       
-      // Invalidate relevant queries
+      // Invalidate relevant queries with a forced refetch to get fresh data
       queryClient.invalidateQueries({ queryKey: ['/api/users/career-goals'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/users/1/dashboard'] });
+      
+      // Force a hard refresh of the dashboard data
+      queryClient.refetchQueries({ 
+        queryKey: ['/api/users/1/dashboard'],
+        type: 'active', 
+        exact: false
+      });
+      
+      // Also invalidate any related skills data
+      queryClient.invalidateQueries({ queryKey: ['/api/skills'] });
       
       if (onSuccess) {
         onSuccess();
