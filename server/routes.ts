@@ -1030,15 +1030,253 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all learning resources
   app.get(
     "/api/learning-resources",
-    async (_req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const resources = await storage.getAllLearningResources();
+        // Get resources from database
+        let resources = await storage.getAllLearningResources();
+        
+        // Check if we have resources - if not, generate predefined ones
+        if (!resources || resources.length === 0) {
+          console.log("[INFO] No learning resources found in database, generating predefined resources");
+          
+          // Create predefined resources for common roles
+          const predefinedResources = generatePredefinedLearningResources();
+          
+          // Save these resources to the database for future use
+          for (const resource of predefinedResources) {
+            try {
+              await storage.createLearningResource(resource);
+            } catch (err) {
+              console.error("Error creating predefined resource:", err);
+            }
+          }
+          
+          // Try to get the resources again after creating them
+          resources = await storage.getAllLearningResources();
+          
+          // If still no resources, return the generated ones directly
+          if (!resources || resources.length === 0) {
+            return res.json(predefinedResources);
+          }
+        }
+        
+        // If user ID is provided, customize resources based on user's career goal
+        const userId = req.query.userId ? parseInt(req.query.userId as string) : null;
+        if (userId) {
+          try {
+            const careerGoals = await storage.getCareerGoalsByUserId(userId);
+            if (careerGoals && careerGoals.length > 0 && careerGoals[0].targetRoleId) {
+              const targetRoleId = careerGoals[0].targetRoleId;
+              console.log(`[DEBUG] Customizing learning resources for user ${userId} with target role ID ${targetRoleId}`);
+              
+              // Get the target role
+              const roles = await storage.getRoles();
+              const targetRole = roles.find((r: any) => r.id.toString() === targetRoleId.toString());
+              
+              if (targetRole && targetRole.requiredSkills) {
+                // Add role-specific resources if they're not already in the list
+                const roleSpecificResources = generateRoleSpecificResources(targetRole.title, targetRole.requiredSkills);
+                
+                // Merge existing resources with role-specific ones, avoiding duplicates
+                const existingTitles = new Set(resources.map(r => r.title));
+                for (const resource of roleSpecificResources) {
+                  if (!existingTitles.has(resource.title)) {
+                    resources.push(resource as any);
+                    existingTitles.add(resource.title);
+                    
+                    // Save this resource to the database for future use
+                    try {
+                      await storage.createLearningResource(resource);
+                    } catch (err) {
+                      console.error("Error creating role-specific resource:", err);
+                    }
+                  }
+                }
+              }
+            }
+          } catch (err) {
+            console.error("Error customizing resources for user:", err);
+          }
+        }
+        
         res.json(resources);
       } catch (error) {
         next(error);
       }
     }
   );
+  
+  // Helper function to generate predefined learning resources
+  function generatePredefinedLearningResources() {
+    return [
+      // General resources
+      {
+        title: "Introduction to Programming",
+        description: "Learn the fundamentals of programming with this comprehensive course.",
+        resourceType: "course",
+        url: "https://www.coursera.org/learn/introduction-to-programming",
+        provider: "Coursera",
+        skillIds: ["1", "2", "3"],
+        duration: 20
+      },
+      {
+        title: "Project Management Fundamentals",
+        description: "Master the basics of project management with this practical guide.",
+        resourceType: "course",
+        url: "https://www.udemy.com/course/project-management-fundamentals/",
+        provider: "Udemy",
+        skillIds: ["4", "5"],
+        duration: 15
+      },
+      {
+        title: "Data Analysis with Python",
+        description: "Learn how to analyze data effectively using Python.",
+        resourceType: "course",
+        url: "https://www.datacamp.com/courses/data-analysis-with-python",
+        provider: "DataCamp",
+        skillIds: ["6", "7"],
+        duration: 25
+      },
+      {
+        title: "UX Design Principles",
+        description: "Understand the key principles of effective user experience design.",
+        resourceType: "article",
+        url: "https://www.interaction-design.org/literature/topics/ux-design",
+        provider: "Interaction Design Foundation",
+        skillIds: ["8", "9"],
+        duration: 5
+      },
+      {
+        title: "Introduction to Machine Learning",
+        description: "Get started with machine learning concepts and applications.",
+        resourceType: "course",
+        url: "https://www.edx.org/learn/machine-learning",
+        provider: "edX",
+        skillIds: ["10", "11"],
+        duration: 30
+      }
+    ];
+  }
+  
+  // Helper function to generate role-specific learning resources
+  function generateRoleSpecificResources(roleTitle: string, requiredSkills: string[]) {
+    const resources = [];
+    
+    // Base resources for the role
+    resources.push({
+      title: `Complete Guide to ${roleTitle}`,
+      description: `A comprehensive guide covering all aspects of becoming a successful ${roleTitle}.`,
+      resourceType: "course",
+      url: `https://www.udemy.com/course/${roleTitle.toLowerCase().replace(/\s+/g, '-')}-guide`,
+      provider: "Udemy",
+      skillIds: [],
+      duration: 30
+    });
+    
+    resources.push({
+      title: `${roleTitle} Certification Preparation`,
+      description: `Prepare for industry certification as a ${roleTitle} with this course.`,
+      resourceType: "course",
+      url: `https://www.coursera.org/professional-certificates/${roleTitle.toLowerCase().replace(/\s+/g, '-')}`,
+      provider: "Coursera",
+      skillIds: [],
+      duration: 40
+    });
+    
+    // Add resources for each required skill
+    if (requiredSkills && requiredSkills.length > 0) {
+      requiredSkills.forEach((skill, index) => {
+        resources.push({
+          title: `Mastering ${skill}`,
+          description: `An in-depth course on ${skill} for aspiring ${roleTitle}s.`,
+          resourceType: "course",
+          url: `https://www.pluralsight.com/courses/${skill.toLowerCase().replace(/\s+/g, '-')}`,
+          provider: "Pluralsight",
+          skillIds: [(index + 100).toString()], // Using arbitrary IDs
+          duration: 20
+        });
+        
+        // Add a book resource for alternate learning style
+        resources.push({
+          title: `${skill}: A Practical Guide`,
+          description: `The essential handbook for understanding ${skill} in professional contexts.`,
+          resourceType: "book",
+          url: `https://www.amazon.com/${skill.toLowerCase().replace(/\s+/g, '-')}-practical-guide`,
+          provider: "Various Publishers",
+          skillIds: [(index + 100).toString()],
+          duration: 15
+        });
+      });
+    }
+    
+    // Add role-specific custom resources based on common roles
+    if (roleTitle === "NLP Engineer") {
+      resources.push(
+        {
+          title: "Deep Learning for Natural Language Processing",
+          description: "Advanced course on using deep learning techniques for NLP tasks.",
+          resourceType: "course",
+          url: "https://www.fast.ai/courses/nlp",
+          provider: "fast.ai",
+          skillIds: ["198"],
+          duration: 35
+        },
+        {
+          title: "Modern Natural Language Processing in Python",
+          description: "Learn to build state-of-the-art NLP systems using Python and transformers.",
+          resourceType: "course",
+          url: "https://www.deeplearning.ai/courses/natural-language-processing",
+          provider: "DeepLearning.AI",
+          skillIds: ["198"],
+          duration: 25
+        }
+      );
+    } else if (roleTitle === "Agile Coach") {
+      resources.push(
+        {
+          title: "Professional Agile Coaching",
+          description: "Learn advanced coaching techniques to help teams excel with agile methodologies.",
+          resourceType: "course",
+          url: "https://www.scrumalliance.org/courses/agile-coaching",
+          provider: "Scrum Alliance",
+          skillIds: ["218"],
+          duration: 30
+        },
+        {
+          title: "Team Facilitation for Agile Coaches",
+          description: "Master the art of facilitating high-performing agile teams.",
+          resourceType: "workshop",
+          url: "https://www.agilecoachinginstitute.com/team-facilitation",
+          provider: "Agile Coaching Institute",
+          skillIds: ["218"],
+          duration: 20
+        }
+      );
+    } else if (roleTitle === "Pharmaceutical Sales Representative") {
+      resources.push(
+        {
+          title: "Medical Terminology for Pharmaceutical Professionals",
+          description: "Essential medical terminology course for pharmaceutical sales representatives.",
+          resourceType: "course",
+          url: "https://www.pharmaceudemy.com/medical-terminology",
+          provider: "Pharmaceudemy",
+          skillIds: ["28"],
+          duration: 25
+        },
+        {
+          title: "Consultative Selling in Pharmaceutical Industry",
+          description: "Advanced sales techniques specifically for pharmaceutical representatives.",
+          resourceType: "course",
+          url: "https://www.cnpr.org/pharmaceutical-sales-courses",
+          provider: "CNPR",
+          skillIds: ["28"],
+          duration: 30
+        }
+      );
+    }
+    
+    return resources;
+  }
 
   // Get learning resources by type
   app.get(

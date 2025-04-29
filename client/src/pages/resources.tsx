@@ -15,9 +15,10 @@ export default function Resources({ user }: { user: any }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   
-  // Fetch learning resources
+  // Fetch learning resources - passing userId to get role-specific resources
   const { data: resources, isLoading } = useQuery({
-    queryKey: ['/api/learning-resources'],
+    queryKey: ['/api/learning-resources', user?.id],
+    queryFn: () => fetch(`/api/learning-resources?userId=${user.id}`).then(res => res.json()),
   });
   
   // Fetch user progress
