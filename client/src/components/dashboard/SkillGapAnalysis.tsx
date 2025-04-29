@@ -94,23 +94,36 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
       const responseData = await response.json();
       console.log("SkillGapAnalysis: Received analysis data:", responseData);
       
-      // Step 2: Refresh all relevant data to reflect the new analysis
+      // Step 2: Completely clear the cache for dashboard and role data
       console.log("SkillGapAnalysis: Refreshing queries...");
-      await Promise.all([
-        queryClient.invalidateQueries({ 
-          queryKey: [`/api/users/${userId}/dashboard`],
-        }),
-        targetRoleId ? 
-          queryClient.invalidateQueries({ 
-            queryKey: [`/api/skills/role/${targetRoleId}`],
-          }) : 
-          Promise.resolve()
-      ]);
       
-      // Force refetch
+      // First invalidate the queries to mark them as stale
+      await queryClient.invalidateQueries({ 
+        queryKey: [`/api/users/${userId}/dashboard`]
+      });
+      
+      if (targetRoleId) {
+        await queryClient.invalidateQueries({ 
+          queryKey: [`/api/skills/role/${targetRoleId}`]
+        });
+      }
+      
+      // Reset the query cache entirely for these endpoints
+      queryClient.removeQueries({ 
+        queryKey: [`/api/users/${userId}/dashboard`]
+      });
+      
+      if (targetRoleId) {
+        queryClient.removeQueries({ 
+          queryKey: [`/api/skills/role/${targetRoleId}`]
+        });
+      }
+      
+      // Force refetch to get fresh data
       await queryClient.refetchQueries({ 
         queryKey: [`/api/users/${userId}/dashboard`],
-        type: 'active'
+        type: 'all',
+        exact: false
       });
       
       console.log("SkillGapAnalysis: Queries refreshed successfully");
@@ -177,26 +190,42 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
           </div>
         ) : (
           <>
-            <div className="mb-4 text-sm">
-              <strong>Current Target Role:</strong> {targetRoleId ? `ID: ${targetRoleId}` : 'Default role'}
+            <div className="mb-4 text-sm bg-secondary/20 p-2 rounded border">
+              <strong>Current Target Role:</strong> {
+                targetRoleId 
+                  ? `${typeof targetRoleId === 'object' 
+                      ? JSON.stringify(targetRoleId) 
+                      : targetRoleId}`
+                  : 'Default role'
+              }
             </div>
-            {skillGaps.map((skill) => (
-              <SkillProgressBar
-                key={skill.id}
-                skillName={skill.name}
-                percentage={skill.percentage}
-              />
-            ))}
+            <div className="space-y-3">
+              {skillGaps.map((skill) => (
+                <SkillProgressBar
+                  key={skill.id}
+                  skillName={skill.name}
+                  percentage={skill.percentage}
+                />
+              ))}
+            </div>
           </>
         )}
         
         <div className="mt-6">
-          <Link href="/assessment?tab=analysis">
-            <a className="inline-flex items-center text-sm font-medium text-primary hover:text-primary-800">
-              View full skill gap analysis
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </a>
-          </Link>
+          <div className="flex justify-between items-center">
+            <Link href="/assessment?tab=analysis">
+              <a className="inline-flex items-center text-sm font-medium text-primary hover:text-primary-800">
+                View full skill gap analysis
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </a>
+            </Link>
+            {/* Debug section */}
+            {process.env.NODE_ENV !== 'production' && (
+              <div className="text-xs text-gray-400">
+                Cache ID: {Date.now().toString().slice(-4)}
+              </div>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
