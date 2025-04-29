@@ -6,13 +6,20 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import LearningPathCard from "@/components/ui/LearningPathCard";
-import { BarChart2, Calendar, Target, Loader2 } from "lucide-react";
+import { BarChart2, Calendar, Target, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function LearningPath({ user }: { user: any }) {
   const { toast } = useToast();
+  const [mismatchDetected, setMismatchDetected] = useState(false);
   
   // Fetch learning paths
-  const { data: learningPaths, isLoading: isLoadingPaths } = useQuery({
+  const { 
+    data: learningPaths, 
+    isLoading: isLoadingPaths,
+    refetch: refetchLearningPaths 
+  } = useQuery({
     queryKey: [`/api/users/${user.id}/learning-paths`],
   });
   
@@ -25,6 +32,25 @@ export default function LearningPath({ user }: { user: any }) {
   const { data: careerGoals, isLoading: isLoadingGoals } = useQuery({
     queryKey: [`/api/users/${user.id}/career-goals`],
   });
+  
+  // Effect to detect and fix mismatches between career goal and learning path
+  useEffect(() => {
+    if (!isLoadingPaths && !isLoadingGoals && learningPaths?.length > 0 && careerGoals?.length > 0) {
+      const currentPath = learningPaths[0];
+      const currentGoal = careerGoals[0];
+      
+      // Check if learning path title contains the current career goal
+      const pathMatchesGoal = currentPath.title.includes(currentGoal.title);
+      
+      console.log("[DEBUG] Learning path sync check:", {
+        pathTitle: currentPath.title,
+        goalTitle: currentGoal.title,
+        matches: pathMatchesGoal
+      });
+      
+      setMismatchDetected(!pathMatchesGoal);
+    }
+  }, [learningPaths, careerGoals, isLoadingPaths, isLoadingGoals]);
   
   const isLoading = isLoadingPaths || isLoadingResources || isLoadingGoals;
   
@@ -42,9 +68,16 @@ export default function LearningPath({ user }: { user: any }) {
       // Force a dashboard query refresh to ensure we have the latest career goal data
       await queryClient.invalidateQueries({ queryKey: [`/api/users/${user.id}/dashboard`] });
       
+      const currentGoal = careerGoals[0];
+      console.log("[DEBUG] Learning path - Generating path for career goal:", {
+        id: currentGoal.id,
+        title: currentGoal.title,
+        targetRoleId: currentGoal.targetRoleId
+      });
+      
       await apiRequest("POST", "/api/ai/generate-learning-path", {
         userId: user.id,
-        careerGoalId: careerGoals[0].id,
+        careerGoalId: currentGoal.id,
       });
       
       // Invalidate learning paths to refresh data
@@ -52,7 +85,7 @@ export default function LearningPath({ user }: { user: any }) {
       
       toast({
         title: "Learning path generated",
-        description: "Your new personalized learning path has been created.",
+        description: `New personalized learning path for ${currentGoal.title} has been created.`,
       });
     } catch (error) {
       toast({
@@ -73,12 +106,53 @@ export default function LearningPath({ user }: { user: any }) {
 
   const primaryPath = learningPaths && learningPaths.length > 0 ? learningPaths[0] : null;
 
+  // Function to handle synchronization of learning path with career goal
+  const handleSyncLearningPath = () => {
+    refetchLearningPaths();
+    
+    // Inform user of the refresh action
+    toast({
+      title: "Refreshing learning path",
+      description: "Updating learning path to match your current career goal",
+    });
+    
+    // Reset mismatch state
+    setMismatchDetected(false);
+  };
+
   return (
     <div className="p-6 pb-20 md:pb-6">
       <div className="mb-8">
         <h2 className="text-2xl font-bold mb-2">Learning Path</h2>
         <p className="text-gray-600">Your personalized learning journey based on your skills and career goals.</p>
       </div>
+      
+      {mismatchDetected && primaryPath && careerGoals?.length > 0 && (
+        <Alert className="mb-6 border-amber-500 bg-amber-50">
+          <AlertTriangle className="h-5 w-5 text-amber-500" />
+          <AlertTitle className="text-amber-700">Learning Path Mismatch Detected</AlertTitle>
+          <AlertDescription className="space-y-2">
+            <p className="text-amber-700">
+              Your learning path is for a different role than your current career goal.
+            </p>
+            <div className="flex items-center justify-between mt-2">
+              <div>
+                <span className="font-medium">Current Path:</span> {primaryPath.title}
+                <br />
+                <span className="font-medium">Current Goal:</span> {careerGoals[0].title}
+              </div>
+              <Button 
+                variant="outline" 
+                className="border-amber-500 text-amber-600 hover:bg-amber-100 hover:text-amber-700"
+                onClick={handleSyncLearningPath}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Sync Learning Path
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {primaryPath ? (
         <>
