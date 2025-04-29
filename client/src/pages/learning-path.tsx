@@ -92,13 +92,19 @@ export default function LearningPath({ user }: { user: any }) {
       const currentPath = learningPaths[0];
       const currentGoal = careerGoals[0];
       
-      // Check if learning path title contains the current career goal
-      const pathMatchesGoal = currentPath.title.includes(currentGoal.title);
+      // Check if learning path title contains the current career goal or has the same target role ID
+      const titleMatches = currentPath.title.includes(currentGoal.title);
+      const roleIdMatches = currentPath.targetRoleId === currentGoal.targetRoleId;
+      const pathMatchesGoal = titleMatches || roleIdMatches;
       
       console.log("[DEBUG] Learning path sync check:", {
         pathTitle: currentPath.title,
         goalTitle: currentGoal.title,
-        matches: pathMatchesGoal
+        titleMatches,
+        pathRoleId: currentPath.targetRoleId,
+        goalRoleId: currentGoal.targetRoleId,
+        roleIdMatches,
+        pathMatchesGoal
       });
       
       setMismatchDetected(!pathMatchesGoal);
@@ -195,7 +201,9 @@ export default function LearningPath({ user }: { user: any }) {
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Generating...
                   </>
-                ) : "Regenerate Path"}
+                ) : careerGoals && careerGoals.length > 0 ? 
+                     `Generate Path for ${careerGoals[0].title}` : 
+                     "Regenerate Path"}
               </Button>
             </div>
           </div>
