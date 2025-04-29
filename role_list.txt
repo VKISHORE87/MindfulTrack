@@ -1,0 +1,150 @@
+3D Printing Systems Specialist
+5G Systems Developer
+Academic Analytics Engineer
+Academic ERP Systems Specialist
+Actuarial Systems Developer
+Animation Software Developer
+API Developer/Architect
+Application Developer/Engineer
+Application Security Engineer
+Artificial Intelligence Engineer
+AR/VR Developer
+Assessment Systems Developer
+ATM Network Administrator
+Augmented/Virtual Reality Developer
+Automated Testing Systems Engineer
+Billing Systems Developer
+Blockchain Developer
+Blockchain Developer/Engineer
+Business Intelligence Developer
+Campus Management Systems Developer
+Claims Processing Systems Developer
+Clinical Decision Support Systems Developer
+Clinical Trials Management Systems Developer
+Compliance Specialist
+Computer Vision Engineer
+Containerization Specialist
+Content Management Systems Developer
+Customer Portal Developer
+Customer Relationship Management (CRM) Specialist
+Customer Service Systems Developer
+Database Administrator
+Database Administrator
+Database Administrator
+Database Administrator
+Database Administrator
+Database Administrator
+Database Administrator
+Database Administrator
+DevOps Engineer
+DevOps Engineer
+DevOps Engineer
+DevOps Engineer
+Digital Banking Platform Manager
+Digital Rights Management (DRM) Specialist
+Digital Twin Developer
+Digital Twin Developer
+Drug Discovery Software Developer
+Drug Safety Database Administrator
+E-commerce Platform Developer
+Edge Computing Engineer
+Electronic Batch Record Systems Developer
+Electronic Health Records (EHR) Developer
+ERP Systems Administrator
+ETL Developer
+Fraud Detection Engineer
+Full Stack Developer
+Gaming Platform Developer
+Health Information Exchange (HIE) Specialist
+Help Desk Support
+IaaS/PaaS/SaaS Specialist
+Identity and Access Management Specialist
+Incident Response Specialist
+Industrial IoT Developer
+Inventory Management Systems Developer
+IoT Solutions Architect
+IT Infrastructure Manager
+IT Project Manager
+IT Project Manager
+IT Security Analyst/Engineer
+IT Security Specialist
+IT Security Specialist
+IT Support Specialist
+IT Support Specialist
+Laboratory Information Management Systems (LIMS) Specialist
+Learning Management System (LMS) Developer
+Library Management Systems Administrator
+Machine Learning Engineer
+Medical Device Integration Specialist
+Medical Imaging Systems Administrator
+Mobile Banking Developer
+Multi-cloud Integration Specialist
+Network Administrator
+Network Administrator
+Network Engineer
+Network Engineer
+Network Engineer
+Network Engineer
+Network Engineer
+Network Operations Center (NOC) Engineer
+Network Security Specialist
+Omnichannel Systems Integration Engineer
+Patient Portal Developer
+Payment Gateway Developer
+Payment Processing Systems Developer
+Penetration Tester
+Pharmacovigilance Systems Administrator
+Point of Sale (POS) Systems Engineer
+Policy Administration Systems Manager
+Predictive Maintenance Systems Developer
+Premium Calculation Systems Developer
+Product Catalog Systems Developer
+Production Planning Systems Developer
+Project Manager
+Quality Assurance Engineer
+Quality Management Systems Developer
+Quantum Computing Specialist
+Radio Access Network (RAN) Systems Developer
+Recommendation Engine Developer
+Regulatory Compliance IT Specialist
+Regulatory Compliance IT Specialist
+Risk Management Systems Specialist
+Robotics Process Automation (RPA) Developer
+Robotics Systems Programmer
+SCADA Systems Engineer
+SDN/NFV Specialist
+Security Architect
+Security Engineer
+Security Operations Center (SOC) Analyst
+Security Solutions Developer
+Serverless Application Developer
+Software Developer
+Software Developer
+Software Developer
+Streaming Platform Developer
+Student Information Systems (SIS) Specialist
+Subscriber Management Systems Developer
+Supply Chain Systems Developer
+Supply Chain Validation Engineer
+Supply Chain Visibility Systems Developer
+Systems Administrator
+Systems Administrator
+Systems Administrator
+Systems Administrator
+Systems Administrator
+Systems Administrator
+Systems Engineer
+Systems Integration Specialist
+Telecom API Developer
+Telecom Network Management Systems Developer
+Telemedicine Platform Developer
+Threat Intelligence Analyst
+Trading Systems Developer
+Underwriting Systems Specialist
+UX/UI Developer
+VFX Pipeline Developer
+Video Processing Systems Engineer
+Virtual Classroom Platform Engineer
+Voice over IP (VoIP) Engineer
+Wealth Management Systems Developer
+Web Developer
