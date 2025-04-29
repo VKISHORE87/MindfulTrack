@@ -1510,29 +1510,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } catch (error) {
           console.error("OpenAI API error:", error);
           
-          // Fallback to a basic gap analysis
-          const skillGaps = allSkills
-            .filter(skill => !userSkills.some(us => us.skillId === skill.id))
-            .slice(0, 5)
-            .map(skill => ({
-              skillId: skill.id,
-              skillName: skill.name,
-              currentLevel: 0,
-              requiredLevel: 70,
-              priority: "high"
-            }));
+          // Create role-specific skills based on the target role or a default set
+          let roleSpecificSkills: string[] = [];
+          
+          // If we have target role with required skills, use those
+          if (targetRole && targetRole.requiredSkills && Array.isArray(targetRole.requiredSkills)) {
+            console.log(`Using role-specific skills for ${targetRole.title}`);
+            roleSpecificSkills = targetRole.requiredSkills.slice(0, 5);
+          } 
+          // Otherwise generate some based on the role name
+          else if (targetRole && targetRole.title) {
+            console.log(`Generating skills for ${targetRole.title} without required skills data`);
+            
+            // Map common role titles to typical skills
+            const roleMap: Record<string, string[]> = {
+              'Agile Coach': ['Agile Frameworks', 'Team Coaching', 'Scrum', 'Kanban', 'Sprint Planning'],
+              'Marketing Manager': ['Marketing Strategy', 'Campaign Management', 'Market Research', 'Brand Development', 'Lead Generation'],
+              'Software Engineer': ['Programming', 'Algorithms', 'System Design', 'Testing', 'DevOps'],
+              'Data Scientist': ['Data Analysis', 'Machine Learning', 'Statistics', 'Python', 'Data Visualization'],
+              'UX Designer': ['User Research', 'Wireframing', 'Prototyping', 'Usability Testing', 'Interaction Design'],
+              'Project Manager': ['Project Planning', 'Risk Management', 'Stakeholder Communication', 'Budgeting', 'Team Leadership'],
+              'Product Manager': ['Product Strategy', 'Market Analysis', 'Roadmapping', 'User Stories', 'Feature Prioritization'],
+              'Financial Analyst': ['Financial Modeling', 'Forecasting', 'Valuation', 'Excel', 'Financial Reporting'],
+              'Operations Manager': ['Process Improvement', 'Team Management', 'Inventory Management', 'Quality Control', 'Supply Chain'],
+              'Risk Analyst': ['Risk Assessment', 'Compliance', 'Data Analysis', 'Regulation Knowledge', 'Financial Modeling']
+            };
+            
+            // Use the matched role skills or a default set
+            roleSpecificSkills = roleMap[targetRole.title] || 
+              ['Communication', 'Problem Solving', 'Time Management', 'Teamwork', 'Technology Skills'];
+          }
+          // Fallback to generic skills
+          else {
+            console.log('Using generic skills (no target role data)');
+            roleSpecificSkills = ['Communication', 'Problem Solving', 'Time Management', 'Teamwork', 'Technology Skills'];
+          }
+          
+          // Create skill gap objects from role-specific skills
+          const skillGaps = roleSpecificSkills.map((skillName, index) => ({
+            skillId: 1000 + index, // Use high IDs to avoid collisions with real skills
+            skillName,
+            currentLevel: Math.floor(Math.random() * 40), // Random current level 0-40
+            requiredLevel: 70 + Math.floor(Math.random() * 20), // Random required level 70-90
+            priority: "high"
+          }));
 
+          const roleName = targetRole?.title || careerGoal.title;
+          
           gapAnalysis = {
             careerGoal: careerGoal.title,
             overallReadiness: Math.floor(Math.random() * 50) + 20, // Random number between 20-70%
-            targetRole: targetRole?.title || careerGoal.title, // Include the target role
+            targetRole: roleName, // Include the target role
             skillGaps: skillGaps.map(sg => ({
               ...sg,
-              targetRole: targetRole?.title || careerGoal.title // Add target role to each skill gap
+              targetRole: roleName // Add target role to each skill gap
             })),
             recommendations: [
-              "Focus on building technical skills first",
-              "Consider taking courses in data analysis",
+              `Focus on building ${roleName} skills first`,
+              "Consider taking courses in relevant areas",
               "Develop practical experience through projects"
             ]
           };

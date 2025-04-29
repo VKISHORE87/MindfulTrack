@@ -243,9 +243,18 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
           <Alert variant="destructive" className="mb-4">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Data Inconsistency Detected</AlertTitle>
-            <AlertDescription>
-              The skills displayed below are for the role "{displayedRole}" but you selected a different target role. 
-              Click the "Refresh Analysis" button above to update the data.
+            <AlertDescription className="space-y-2">
+              <p>The skills displayed below are for the role "{displayedRole}" but you selected a different target role.</p>
+              <Button 
+                onClick={() => refreshData(true)}
+                disabled={isRefreshing}
+                variant="outline"
+                size="sm"
+                className="mt-2"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Refreshing...' : 'Update Skills for Current Role'}
+              </Button>
             </AlertDescription>
           </Alert>
         )}
