@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { 
   BarChart2, 
   CheckCircle, 
@@ -207,7 +208,8 @@ export default function ProgressPage({ user }: { user: any }) {
               <CardContent>
                 {learningPaths && learningPaths.length > 0 && currentCareerGoal ? (
                   <div className="space-y-6">
-                    {learningPaths.filter(path => path.title.includes(currentCareerGoal.title)).map((path) => {
+                    {/* Show all learning paths since we might not have one specifically for the current goal yet */}
+                    {learningPaths.map((path) => {
                       // Calculate path completion
                       const totalPathResources = path.modules.reduce(
                         (total, module) => total + module.resources.length, 
@@ -244,8 +246,17 @@ export default function ProgressPage({ user }: { user: any }) {
                 ) : (
                   <div className="h-64 flex flex-col items-center justify-center text-center">
                     <AlertCircle className="h-12 w-12 text-gray-300 mb-4" />
-                    <p className="text-gray-500">No learning paths available</p>
-                    <p className="text-sm text-gray-400">Generate a path to start tracking your progress</p>
+                    <p className="text-gray-500">No learning paths available for {currentCareerGoal.title}</p>
+                    <p className="text-sm text-gray-400 mb-4">Generate a path to start tracking your progress</p>
+                    <Button
+                      onClick={() => {
+                        // Navigate to the learning path page
+                        window.location.href = "/learning-path";
+                      }}
+                      className="mt-2 bg-primary hover:bg-primary-700"
+                    >
+                      Generate Learning Path
+                    </Button>
                   </div>
                 )}
               </CardContent>
