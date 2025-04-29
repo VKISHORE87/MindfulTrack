@@ -48,8 +48,15 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
         });
       }
       
+      // Log to confirm function is being called
+      alert("Debug: Refresh function called. Check console for logs.");
+      
       // Get the user's career goals
       const careerGoalsResponse = await fetch(`/api/users/${userId}/career-goals`);
+      if (!careerGoalsResponse.ok) {
+        throw new Error(`Failed to fetch career goals: ${careerGoalsResponse.status} ${careerGoalsResponse.statusText}`);
+      }
+      
       const careerGoals = await careerGoalsResponse.json();
       
       if (!careerGoals || careerGoals.length === 0) {
@@ -72,27 +79,45 @@ export default function SkillGapAnalysis({ skillGaps, userId = 1, targetRoleId }
         forceRefresh: true
       });
       
-      // Step 1: Generate a new skill gap analysis by calling the API
-      const response = await fetch("/api/ai/skill-gap-analysis", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId,
-          careerGoalId,
-          targetRoleId: targetRoleId || undefined,
-          forceRefresh: true
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to generate skill gap analysis: ${response.status} ${response.statusText}`);
+      try {
+        // Step 1: Generate a new skill gap analysis by calling the API
+        const response = await fetch("/api/ai/skill-gap-analysis", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId,
+            careerGoalId,
+            targetRoleId: targetRoleId || undefined,
+            forceRefresh: true
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to generate skill gap analysis: ${response.status} ${response.statusText}`);
+        }
+        
+        // Get the response data for debugging
+        const responseData = await response.json();
+        console.log("SkillGapAnalysis: Received analysis data:", responseData);
+        
+        // Show success message
+        if (showToast) {
+          toast({
+            title: "API call successful",
+            description: "Successfully called the skill gap analysis API."
+          });
+        }
+      } catch (apiError) {
+        console.error("API call error:", apiError);
+        toast({
+          title: "API call failed",
+          description: apiError.message,
+          variant: "destructive",
+        });
+        throw apiError; // Re-throw to be caught by outer try/catch
       }
-      
-      // Get the response data for debugging
-      const responseData = await response.json();
-      console.log("SkillGapAnalysis: Received analysis data:", responseData);
       
       // Step 2: Completely clear the cache for dashboard and role data
       console.log("SkillGapAnalysis: Refreshing queries...");
