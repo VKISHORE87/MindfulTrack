@@ -22,7 +22,7 @@ const CareerGoalContext = createContext<CareerGoalContextType>({
 });
 
 // Provider component
-export function CareerGoalProvider({ children }: { children: ReactNode }) {
+export const CareerGoalProvider = ({ children }: { children: ReactNode }) => {
   const [targetRoleSkills, setTargetRoleSkills] = useState<string[]>([]);
 
   // Query to get the current career goal
@@ -42,7 +42,7 @@ export function CareerGoalProvider({ children }: { children: ReactNode }) {
 
   // Query to get the target role details when currentGoal changes
   const { data: targetRole } = useQuery({
-    queryKey: ['/api/interview/roles', currentGoal?.targetRoleId],
+    queryKey: [`/api/interview/roles/${currentGoal?.targetRoleId || 0}`],
     enabled: !!currentGoal?.targetRoleId,
     staleTime: 1000 * 60 * 30, // 30 minutes, roles change less frequently
   });
@@ -93,7 +93,7 @@ export function CareerGoalProvider({ children }: { children: ReactNode }) {
 }
 
 // Custom hook for using the context
-export function useCareerGoal() {
+export const useCareerGoal = () => {
   const context = useContext(CareerGoalContext);
   if (!context) {
     throw new Error('useCareerGoal must be used within a CareerGoalProvider');
