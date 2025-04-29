@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -8,17 +8,32 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
-import { BookOpen, Search, Video, FileText } from "lucide-react";
+import { BookOpen, Search, Video, FileText, Tag, ExternalLink } from "lucide-react";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skill } from "@shared/schema";
 
 export default function Resources({ user }: { user: any }) {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
+  
+  // Fetch all skills
+  const { data: skills } = useQuery({
+    queryKey: ['/api/skills'],
+    queryFn: () => fetch('/api/skills').then(res => res.json()),
+  });
   
   // Fetch learning resources - passing userId to get role-specific resources
   const { data: resources, isLoading } = useQuery({
-    queryKey: ['/api/learning-resources', user?.id],
-    queryFn: () => fetch(`/api/learning-resources?userId=${user.id}`).then(res => res.json()),
+    queryKey: ['/api/learning-resources', user?.id, selectedSkillId],
+    queryFn: async () => {
+      if (selectedSkillId) {
+        return fetch(`/api/learning-resources/skill/${selectedSkillId}`).then(res => res.json());
+      } else {
+        return fetch(`/api/learning-resources?userId=${user.id}`).then(res => res.json());
+      }
+    },
   });
   
   // Fetch user progress
@@ -30,7 +45,7 @@ export default function Resources({ user }: { user: any }) {
   const filteredResources = resources?.filter(resource => {
     const matchesSearch = searchTerm === "" || 
       resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      resource.description.toLowerCase().includes(searchTerm.toLowerCase());
+      resource.description?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesTab = activeTab === "all" || resource.resourceType === activeTab;
     
@@ -152,6 +167,54 @@ export default function Resources({ user }: { user: any }) {
         <p className="text-gray-600">Discover curated resources to help you build your skills.</p>
       </div>
       
+      {/* Skills Dropdown */}
+      <div className="mb-8 p-4 border rounded-lg bg-slate-50">
+        <div className="flex flex-col md:flex-row items-start gap-4">
+          <div className="w-full max-w-lg">
+            <h3 className="text-lg font-medium mb-2 flex items-center">
+              <Tag className="mr-2 h-5 w-5 text-primary" />
+              Browse by Skill
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Select a specific skill to view learning materials focused on that skill area
+            </p>
+            <Select 
+              value={selectedSkillId || ""}
+              onValueChange={(value) => setSelectedSkillId(value === "" ? null : value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a skill to explore..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Skills</SelectItem>
+                {skills?.map((skill) => (
+                  <SelectItem key={skill.id} value={skill.id.toString()}>
+                    {skill.name} ({skill.category})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {selectedSkillId && (
+              <div className="mt-4 flex items-center">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-blue-600 p-0 h-auto"
+                  onClick={() => setSelectedSkillId(null)}
+                >
+                  Clear selection
+                </Button>
+                <span className="mx-2 text-muted-foreground">|</span>
+                <p className="text-sm text-muted-foreground">
+                  Showing resources for: <strong>{skills?.find(s => s.id.toString() === selectedSkillId)?.name}</strong>
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
         <div className="relative w-full md:w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -208,6 +271,46 @@ export default function Resources({ user }: { user: any }) {
                 </CardHeader>
                 <CardContent className="flex-grow">
                   <p className="text-sm text-gray-600">{resource.description}</p>
+                  
+                  {/* Provider info with link to resource */}
+                  {resource.provider && (
+                    <div className="mt-3 flex items-center">
+                      <span className="text-xs text-blue-600 font-medium mr-2">Provider:</span>
+                      <span className="text-xs text-gray-700">{resource.provider}</span>
+                      {resource.url && (
+                        <a 
+                          href={resource.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="ml-auto inline-flex items-center text-xs text-blue-600 hover:text-blue-800"
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1" />
+                          Visit resource
+                        </a>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Skills addressed by this resource */}
+                  {resource.skillIds && resource.skillIds.length > 0 && (
+                    <div className="mt-3">
+                      <span className="text-xs text-blue-600 font-medium mb-1 block">Skills addressed:</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {resource.skillIds.map(skillId => {
+                          const skill = skills?.find(s => s.id.toString() === skillId);
+                          return skill ? (
+                            <Badge 
+                              key={skillId} 
+                              variant="outline" 
+                              className="text-xs py-0 h-5"
+                            >
+                              {skill.name}
+                            </Badge>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+                  )}
                   
                   {isStarted && !isCompleted && (
                     <div className="mt-4">
