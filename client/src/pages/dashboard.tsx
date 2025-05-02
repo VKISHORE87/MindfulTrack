@@ -12,6 +12,40 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Sparkles, PanelLeft, Eye, EyeOff, BarChart2, Route, Briefcase } from "lucide-react";
 import { useCareerGoal } from "@/contexts/CareerGoalContext";
+import { queryClient } from "@/lib/queryClient";
+import { LearningResource } from "@shared/schema";
+
+// Define dashboard data types
+interface DashboardData {
+  user: {
+    id: number;
+    name: string;
+    greeting?: string;
+  };
+  stats: {
+    overallProgress: number;
+    skillsValidated: string;
+    learningTime: string;
+    resourcesCompleted: string;
+  };
+  careerGoal?: {
+    id: number;
+    title: string;
+    timeline: string;
+    readiness: number;
+  };
+  keySkills?: Array<{
+    name: string;
+    status?: string;
+    percentage?: number;
+    [key: string]: any;
+  }>;
+  learningPath?: {
+    title: string;
+    modules: any[];
+  };
+  recentActivities: any[];
+}
 
 export default function Dashboard({ user }: { user: any }) {
   const [showAiFeatures, setShowAiFeatures] = useState(true);
@@ -20,7 +54,7 @@ export default function Dashboard({ user }: { user: any }) {
   // Use our centralized career goal context
   const { currentGoal, targetRoleSkills, isLoading: isLoadingGoal } = useCareerGoal();
   
-  const { data: dashboardData, isLoading, refetch } = useQuery({
+  const { data: dashboardData, isLoading, refetch } = useQuery<DashboardData>({
     queryKey: [`/api/users/${user.id}/dashboard`],
     // Set a shorter staleTime to ensure we refetch data more frequently
     staleTime: 30000, // 30 seconds
@@ -29,10 +63,16 @@ export default function Dashboard({ user }: { user: any }) {
   // Effect to refetch dashboard data when component mounts or when currentGoal changes
   // This ensures we have fresh data after saving a career goal
   useEffect(() => {
+    console.log("[DEBUG] Dashboard - Current goal changed, refetching data:", 
+      currentGoal ? { id: currentGoal.id, title: currentGoal.title, targetRoleId: currentGoal.targetRoleId } : null
+    );
+    // Force a full refetch to ensure the latest data
     refetch();
-  }, [refetch, currentGoal]);
+    // Also invalidate the learning resources query since those may be role-specific
+    queryClient.invalidateQueries({ queryKey: ['/api/learning-resources'] });
+  }, [refetch, currentGoal, currentGoal?.id, currentGoal?.targetRoleId]);
 
-  const { data: learningResources, isLoading: isLoadingResources } = useQuery({
+  const { data: learningResources, isLoading: isLoadingResources } = useQuery<LearningResource[]>({
     queryKey: ['/api/learning-resources'],
   });
 
@@ -193,7 +233,7 @@ export default function Dashboard({ user }: { user: any }) {
               <LearningPath 
                 title={dashboardData.learningPath.title}
                 modules={dashboardData.learningPath.modules}
-                resources={learningResources || []}
+                resources={learningResources || [] as LearningResource[]}
               />
             </div>
           )}
