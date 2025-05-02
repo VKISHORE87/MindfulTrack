@@ -7117,7 +7117,7 @@ Return a JSON response with the following structure:
         // For now, we're using userId = 1 for demo purposes
         const userId = 1;
         
-        const userSkills = await storage.getUserSkills(userId);
+        const userSkills = await storage.getUserSkillsByUserId(userId);
         res.json(userSkills);
       } catch (error) {
         next(error);

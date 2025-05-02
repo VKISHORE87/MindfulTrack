@@ -1688,17 +1688,52 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
+  async getUserSkillBySkillId(userId: number, skillId: number): Promise<UserSkill | undefined> {
+    const [userSkill] = await db
+      .select()
+      .from(userSkills)
+      .where(
+        and(
+          eq(userSkills.userId, userId),
+          eq(userSkills.skillId, skillId)
+        )
+      );
+    return userSkill;
+  }
+
   async createUserSkill(userSkill: InsertUserSkill): Promise<UserSkill> {
     const [newUserSkill] = await db.insert(userSkills).values(userSkill).returning();
     return newUserSkill;
   }
 
-  async updateUserSkill(id: number, userSkillData: Partial<InsertUserSkill>): Promise<UserSkill | undefined> {
-    const [updatedUserSkill] = await db.update(userSkills)
-      .set(userSkillData)
-      .where(eq(userSkills.id, id))
-      .returning();
-    return updatedUserSkill || undefined;
+  async updateUserSkill(idOrUserId: number, userSkillDataOrSkillId: Partial<InsertUserSkill> | number, userSkillData?: Partial<InsertUserSkill>): Promise<UserSkill | undefined> {
+    // First overload: updateUserSkill(id, userSkillData)
+    if (typeof userSkillDataOrSkillId !== 'number') {
+      const id = idOrUserId;
+      const [updatedUserSkill] = await db.update(userSkills)
+        .set(userSkillDataOrSkillId)
+        .where(eq(userSkills.id, id))
+        .returning();
+      return updatedUserSkill;
+    } 
+    // Second overload: updateUserSkill(userId, skillId, userSkillData)
+    else {
+      const userId = idOrUserId;
+      const skillId = userSkillDataOrSkillId;
+      
+      if (!userSkillData) return undefined;
+      
+      const [updatedUserSkill] = await db.update(userSkills)
+        .set(userSkillData)
+        .where(
+          and(
+            eq(userSkills.userId, userId),
+            eq(userSkills.skillId, skillId)
+          )
+        )
+        .returning();
+      return updatedUserSkill;
+    }
   }
 
   async deleteUserSkill(id: number): Promise<boolean> {
