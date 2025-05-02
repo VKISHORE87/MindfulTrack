@@ -218,10 +218,20 @@ export default function CareerRoleComparison() {
       targetSkills 
     });
     
-    // Create a set of current skills for easy lookup (case-insensitive)
-    const currentSkillsSet = new Set(currentSkills.map(skill => 
-      skill && typeof skill === 'string' ? skill.toLowerCase() : ''
-    ).filter(skill => skill !== ''));
+    // Create an exact mapping of current skills and a case-insensitive set for more flexible matching
+    const currentSkillsLowerCase = new Set<string>();
+    const currentSkillsExact = new Set<string>();
+    
+    currentSkills.forEach(skill => {
+      if (skill && typeof skill === 'string') {
+        currentSkillsExact.add(skill);
+        currentSkillsLowerCase.add(skill.toLowerCase());
+      }
+    });
+    
+    // Debug output
+    console.log("Current Skills Set:", Array.from(currentSkillsExact));
+    console.log("Current Skills Lowercase Set:", Array.from(currentSkillsLowerCase));
     
     const calculatedGaps: SkillGap[] = [];
     
@@ -232,30 +242,21 @@ export default function CareerRoleComparison() {
       const skillName = skill;
       const requiredLevel = 90; // Assume 90% proficiency needed for target role
       
-      // Check if the current role has this skill (case-insensitive)
-      const hasSkill = currentSkillsSet.has(skill.toLowerCase());
-      let status: 'missing' | 'partial' | 'proficient';
-      let currentLevel: number;
+      // First try exact match, then try case-insensitive match
+      const exactMatch = currentSkillsExact.has(skill);
+      const caseInsensitiveMatch = currentSkillsLowerCase.has(skill.toLowerCase());
+      const hasSkill = exactMatch || caseInsensitiveMatch;
       
-      if (hasSkill) {
-        // Skill exists in current role - we'll skip these skills in the merged view
-        currentLevel = 80; // Assume 80% proficiency in current role skills
-        const gap = requiredLevel - currentLevel;
+      // Debug output for this skill
+      console.log(`Checking target skill: "${skill}" - Exact match: ${exactMatch}, Case-insensitive match: ${caseInsensitiveMatch}`);
+      
+      // Only include skills that are not in the current role
+      if (!hasSkill) {
+        // Skill doesn't exist in current role - this is what we want to highlight
+        const currentLevel = 30; // Baseline knowledge (30%)
+        const status = 'missing';
+        const gap = Math.max(0, requiredLevel - currentLevel);
         
-        if (gap > 20) {
-          status = 'partial'; // Needs improvement
-        } else {
-          status = 'proficient'; // Already good enough
-        }
-      } else {
-        // Skill doesn't exist in current role at all - these are the ones we want to highlight
-        currentLevel = 30; // Baseline knowledge (30%)
-        status = 'missing'; // Completely missing skill
-        
-        // Calculate the gap
-        const gap = Math.max(0, requiredLevel - currentLevel); // Ensure gap is never negative
-        
-        // Only add skills that are unique to the target role
         calculatedGaps.push({
           skillName,
           currentLevel,
@@ -266,19 +267,33 @@ export default function CareerRoleComparison() {
       }
     });
     
-    // Sort gaps by status and then by gap size
-    calculatedGaps.sort((a, b) => {
-      // First sort by status
-      if (a.status === 'missing' && b.status !== 'missing') return -1;
-      if (a.status !== 'missing' && b.status === 'missing') return 1;
-      if (a.status === 'partial' && b.status === 'proficient') return -1;
-      if (a.status === 'proficient' && b.status === 'partial') return 1;
+    // If no gaps are found but the roles are different, add all target role skills
+    // This ensures we always show the skills needed for the transition when roles are different
+    if (calculatedGaps.length === 0 && targetSkills.length > 0 && currentRole.id !== targetRole.id) {
+      console.log("No unique skills found between different roles. Adding all target skills.");
       
-      // Then sort by gap size for same status
-      return b.gap - a.gap;
-    });
+      // For transitions between different roles, we should show all target role skills
+      // These are skills the user will need to focus on even if they have similar skills
+      targetSkills.forEach((skill, index) => {
+        if (skill && typeof skill === 'string') {
+          calculatedGaps.push({
+            skillName: skill,
+            currentLevel: 40, // Some knowledge but needs improvement
+            requiredLevel: 90,
+            gap: 50,
+            status: 'missing'
+          });
+        }
+      });
+    }
+    
+    // Sort gaps by gap size (largest first)
+    calculatedGaps.sort((a, b) => b.gap - a.gap);
     
     setSkillGaps(calculatedGaps);
+    
+    // Debug the final result
+    console.log("Final calculated skill gaps:", calculatedGaps);
   };
 
   // Handle current role search
