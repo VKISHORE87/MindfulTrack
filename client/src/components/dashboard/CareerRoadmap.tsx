@@ -1,122 +1,123 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Route, CheckCircle, Circle, ArrowRight } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCareerGoal } from "@/contexts/CareerGoalContext";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle, Clock, ArrowRight } from "lucide-react";
 
-interface RoadmapMilestone {
-  title: string;
-  description: string;
-  skills: string[];
-  completed: boolean;
-  timeframe: string;
-}
-
-interface CareerRoadmapProps {
-  milestones?: RoadmapMilestone[];
-}
-
-export default function CareerRoadmap({ milestones = [] }: CareerRoadmapProps) {
-  const { currentGoal, targetRoleSkills } = useCareerGoal();
+export default function CareerRoadmap() {
+  const { currentGoal } = useCareerGoal();
+  const targetRole = currentGoal?.title || 'Not set';
   
-  // Generate default milestones if none provided
-  const defaultMilestones: RoadmapMilestone[] = [
+  // Sample milestones for the roadmap
+  const milestones = [
     {
-      title: "Foundation Skills",
-      description: "Build core competencies required for the role",
-      skills: targetRoleSkills.slice(0, 2),
-      completed: true,
-      timeframe: "1-2 months"
+      title: "Foundation Building",
+      timeframe: "Months 1-3",
+      tasks: [
+        { title: "Complete initial skill assessment", completed: true },
+        { title: "Identify priority learning resources", completed: true },
+        { title: "Finish core technical skills training", completed: false }
+      ],
+      current: false
     },
     {
-      title: "Intermediate Knowledge",
-      description: "Develop specialized knowledge and experience",
-      skills: targetRoleSkills.slice(2, 4),
-      completed: false,
-      timeframe: "3-4 months"
+      title: "Skill Development",
+      timeframe: "Months 4-6",
+      tasks: [
+        { title: "Complete System Design fundamentals", completed: false },
+        { title: "Build portfolio projects", completed: false },
+        { title: "Obtain technical certifications", completed: false }
+      ],
+      current: true
     },
     {
-      title: "Advanced Expertise",
-      description: "Master complex concepts and gain practical experience",
-      skills: targetRoleSkills.slice(0, 3),
-      completed: false,
-      timeframe: "5-8 months"
+      title: "Role-Specific Practice",
+      timeframe: "Months 7-9",
+      tasks: [
+        { title: "Tackle real-world problems", completed: false },
+        { title: "Participate in industry events", completed: false },
+        { title: "Network with professionals", completed: false }
+      ],
+      current: false
     },
     {
-      title: currentGoal?.title || "Target Role",
-      description: "Transition to target role and continue professional development",
-      skills: [],
-      completed: false,
-      timeframe: "9-12 months"
+      title: "Final Preparation",
+      timeframe: "Months 10-12",
+      tasks: [
+        { title: "Mock interviews and assessments", completed: false },
+        { title: "Resume and profile refinement", completed: false },
+        { title: "Job application strategy", completed: false }
+      ],
+      current: false
     }
   ];
-  
-  // Use provided milestones or defaults
-  const displayMilestones = milestones.length > 0 ? milestones : defaultMilestones;
 
   return (
-    <Card className="border-primary/10">
+    <Card>
       <CardHeader className="pb-2">
-        <div className="flex items-center">
-          <Route className="h-5 w-5 text-primary mr-2" />
-          <h3 className="font-semibold text-lg">Career Roadmap</h3>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg font-medium">
+            Career Roadmap
+          </CardTitle>
+          <Badge variant="outline" className="text-xs">
+            Target: {targetRole}
+          </Badge>
         </div>
       </CardHeader>
       <CardContent>
+        <div className="text-sm text-muted-foreground mb-4">
+          Your 12-month journey to {targetRole}
+        </div>
+        
         <div className="relative">
-          {/* Vertical timeline line */}
-          <div className="absolute left-3.5 top-1 h-full w-0.5 bg-gray-200"></div>
+          {/* Timeline line */}
+          <div className="absolute left-2.5 top-0 h-full w-0.5 bg-gray-200 z-0"></div>
           
-          <div className="space-y-6">
-            {displayMilestones.map((milestone, index) => (
-              <div key={index} className="relative pl-10 pb-2">
-                {/* Milestone status indicator */}
-                <div className="absolute left-0 top-1">
-                  {milestone.completed ? (
-                    <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
-                      <CheckCircle className="h-5 w-5 text-primary" />
-                    </div>
-                  ) : (
-                    <div className="h-7 w-7 rounded-full bg-gray-100 border border-gray-300 flex items-center justify-center">
-                      <Circle className="h-4 w-4 text-gray-400" />
-                    </div>
-                  )}
-                </div>
-                
-                {/* Milestone content */}
-                <div className={`transition ${milestone.completed ? 'opacity-100' : 'opacity-80'}`}>
-                  <div className="flex items-center mb-1">
-                    <h4 className={`font-medium ${index === displayMilestones.length - 1 ? 'text-primary' : ''}`}>
-                      {milestone.title}
-                    </h4>
-                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full ml-2">
-                      {milestone.timeframe}
-                    </span>
+          {/* Milestones */}
+          <div className="space-y-5">
+            {milestones.map((milestone, idx) => (
+              <div key={idx} className="relative z-10">
+                <div className="flex items-start">
+                  {/* Status indicator */}
+                  <div className={`rounded-full h-5 w-5 flex-shrink-0 mr-3 flex items-center justify-center ${
+                    milestone.current ? 'bg-amber-500' : 
+                    (idx < milestones.findIndex(m => m.current) ? 'bg-green-500' : 'bg-gray-200')
+                  }`}>
+                    {idx < milestones.findIndex(m => m.current) && (
+                      <CheckCircle className="h-3 w-3 text-white" />
+                    )}
+                    {milestone.current && (
+                      <Clock className="h-3 w-3 text-white" />
+                    )}
                   </div>
                   
-                  <p className="text-sm text-gray-600 mb-1.5">
-                    {milestone.description}
-                  </p>
-                  
-                  {/* Skills for this milestone */}
-                  {milestone.skills.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {milestone.skills.map((skill, skillIndex) => (
-                        <span 
-                          key={skillIndex}
-                          className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary-700"
-                        >
-                          {skill}
-                        </span>
+                  {/* Milestone content */}
+                  <div className={`bg-${milestone.current ? 'primary/5' : 'white'} p-3 rounded-lg border w-full ${
+                    milestone.current ? 'border-primary/20' : 'border-gray-100'
+                  }`}>
+                    <div className="flex justify-between mb-1">
+                      <h4 className="font-medium text-sm">{milestone.title}</h4>
+                      <span className="text-xs text-gray-500">{milestone.timeframe}</span>
+                    </div>
+                    
+                    <div className="space-y-1 mt-2">
+                      {milestone.tasks.map((task, taskIdx) => (
+                        <div key={taskIdx} className="flex items-center text-xs">
+                          {task.completed ? (
+                            <CheckCircle className="h-3 w-3 text-green-500 mr-1" />
+                          ) : (
+                            milestone.current ? (
+                              <ArrowRight className="h-3 w-3 text-amber-500 mr-1" />
+                            ) : (
+                              <div className="h-3 w-3 border border-gray-300 rounded-full mr-1"></div>
+                            )
+                          )}
+                          <span className={task.completed ? 'text-gray-500 line-through' : ''}>
+                            {task.title}
+                          </span>
+                        </div>
                       ))}
                     </div>
-                  )}
-                  
-                  {/* Next step indicator for current milestone */}
-                  {index < displayMilestones.length - 1 && !milestone.completed && index === displayMilestones.findIndex(m => !m.completed) && (
-                    <div className="text-xs text-primary font-medium mt-1 flex items-center">
-                      Current focus
-                      <ArrowRight className="h-3 w-3 ml-1" />
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
             ))}

@@ -1,0 +1,598 @@
+# Enhance Dashboard Widgets with Hover Details & Fix Target Role Display
+
+## Objective
+Enhance the Upcraft application's dashboard by:
+1. Adding detailed data tooltips on hover for the four main metric widgets
+2. Ensuring the dashboard always shows the latest target role selected in the Career Transitions page
+3. Maintaining visual consistency with the existing design
+
+## Requirements for Widget Hover Functionality
+
+### 1. Overall Progress Widget (12%)
+Implement a hover tooltip that shows:
+- Breakdown of progress by skill category (technical, soft skills, etc.)
+- Number of completed vs. total required skills
+- List of recent achievements contributing to progress
+- Time-based progression chart
+- Next milestones to reach
+
+```jsx
+// Example component for enhanced Overall Progress widget
+const OverallProgressWidget = ({ progress, skillBreakdown, recentAchievements }) => {
+  return (
+    <div className="relative">
+      <div className="p-4 rounded-lg bg-white shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="flex items-center mb-2">
+          <BarChartIcon className="text-purple-500 mr-2" />
+          <h3 className="text-sm font-medium text-gray-500">Overall Progress</h3>
+        </div>
+        <p className="text-2xl font-bold">{progress}%</p>
+        
+        {/* Tooltip that appears on hover */}
+        <div className="absolute hidden group-hover:block z-10 w-80 p-4 bg-white rounded-lg shadow-xl border border-gray-200 -translate-x-1/2 left-1/2 mt-2">
+          <h4 className="font-medium mb-2">Progress Breakdown</h4>
+          
+          {/* Progress breakdown by category */}
+          <div className="mb-3">
+            {skillBreakdown.map(category => (
+              <div key={category.name} className="flex justify-between items-center mb-1">
+                <span className="text-sm">{category.name}</span>
+                <div className="flex items-center">
+                  <div className="w-32 h-2 bg-gray-200 rounded-full mr-2">
+                    <div 
+                      className="h-2 bg-purple-500 rounded-full" 
+                      style={{ width: `${category.progress}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-xs">{category.progress}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Recent achievements */}
+          <h4 className="font-medium mb-1">Recent Achievements</h4>
+          <ul className="text-xs mb-3">
+            {recentAchievements.map(item => (
+              <li key={item.id} className="mb-1 flex items-start">
+                <CheckCircleIcon className="h-3 w-3 text-green-500 mr-1 mt-0.5" />
+                <span>{item.title}</span>
+              </li>
+            ))}
+          </ul>
+          
+          {/* Next milestones */}
+          <h4 className="font-medium mb-1">Next Milestones</h4>
+          <div className="text-xs text-gray-600">
+            Complete "Introduction to Programming" to gain +5% progress
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+### 2. Skills Validated Widget (1 / 10)
+Implement a hover tooltip that shows:
+- List of validated skills with validation dates
+- Validation methods for each skill (assessment, credential, etc.)
+- Skills remaining to be validated with priority level
+- Recommended next skills to validate
+- Skills relevant to current target role vs. all validated skills
+
+```jsx
+// Example component for enhanced Skills Validated widget
+const SkillsValidatedWidget = ({ validatedCount, totalCount, validatedSkills, pendingSkills }) => {
+  return (
+    <div className="relative group">
+      <div className="p-4 rounded-lg bg-white shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="flex items-center mb-2">
+          <CheckCircleIcon className="text-green-500 mr-2" />
+          <h3 className="text-sm font-medium text-gray-500">Skills Validated</h3>
+        </div>
+        <p className="text-2xl font-bold">{validatedCount} / {totalCount}</p>
+        
+        {/* Tooltip that appears on hover */}
+        <div className="absolute hidden group-hover:block z-10 w-80 p-4 bg-white rounded-lg shadow-xl border border-gray-200 -translate-x-1/2 left-1/2 mt-2">
+          <h4 className="font-medium mb-2">Validated Skills</h4>
+          
+          {/* List of validated skills */}
+          <div className="mb-3 max-h-40 overflow-y-auto">
+            {validatedSkills.map(skill => (
+              <div key={skill.id} className="flex justify-between items-center mb-1 text-sm">
+                <div className="flex items-center">
+                  <CheckCircleIcon className="h-4 w-4 text-green-500 mr-1" />
+                  <span>{skill.name}</span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  <span>{skill.validationMethod}</span>
+                  <span className="mx-1">•</span>
+                  <span>{skill.validationDate}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Next skills to validate */}
+          <h4 className="font-medium mb-1">Priority Skills to Validate</h4>
+          <ul className="text-xs mb-3">
+            {pendingSkills.slice(0, 3).map(skill => (
+              <li key={skill.id} className="mb-1 flex items-start">
+                <ArrowRightIcon className="h-3 w-3 text-orange-500 mr-1 mt-0.5" />
+                <span>{skill.name}</span>
+                <span className="ml-auto text-xs px-2 py-0.5 bg-orange-100 text-orange-800 rounded-full">
+                  {skill.priority}
+                </span>
+              </li>
+            ))}
+          </ul>
+          
+          <div className="text-xs text-center">
+            <a href="/validation" className="text-purple-600 hover:text-purple-800">
+              View all pending skills
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+### 3. Learning Time Widget (0.0 hours)
+Implement a hover tooltip that shows:
+- Breakdown of time spent by skill category
+- Time spent this week vs. previous weeks (trend)
+- Most engaged learning resources
+- Learning efficiency score
+- Learning streaks and consistency metrics
+- Recommended learning schedule
+
+```jsx
+// Example component for enhanced Learning Time widget
+const LearningTimeWidget = ({ totalHours, timeBreakdown, learningStreak }) => {
+  return (
+    <div className="relative group">
+      <div className="p-4 rounded-lg bg-white shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="flex items-center mb-2">
+          <ClockIcon className="text-yellow-500 mr-2" />
+          <h3 className="text-sm font-medium text-gray-500">Learning Time</h3>
+        </div>
+        <p className="text-2xl font-bold">{totalHours} hours</p>
+        
+        {/* Tooltip that appears on hover */}
+        <div className="absolute hidden group-hover:block z-10 w-80 p-4 bg-white rounded-lg shadow-xl border border-gray-200 -translate-x-1/2 left-1/2 mt-2">
+          <h4 className="font-medium mb-2">Learning Time Breakdown</h4>
+          
+          {/* Time breakdown chart */}
+          <div className="mb-3">
+            {timeBreakdown.map(category => (
+              <div key={category.name} className="flex justify-between items-center mb-1">
+                <span className="text-sm">{category.name}</span>
+                <div className="flex items-center">
+                  <span className="text-xs mr-2">{category.hours} hrs</span>
+                  <div className="w-24 h-2 bg-gray-200 rounded-full">
+                    <div 
+                      className="h-2 bg-yellow-500 rounded-full" 
+                      style={{ width: `${(category.hours / totalHours) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Weekly trend */}
+          <div className="mb-3">
+            <h4 className="font-medium mb-1 text-sm">Weekly Trend</h4>
+            <div className="flex items-end h-12 space-x-1">
+              {[3, 5, 2, 7, 4, 6, 3].map((hours, idx) => (
+                <div 
+                  key={idx}
+                  className="bg-purple-200 rounded-t w-6"
+                  style={{ height: `${(hours/7)*100}%` }}
+                >
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+              <span>Sun</span>
+            </div>
+          </div>
+          
+          {/* Learning streak */}
+          <div className="text-xs flex justify-between mb-3">
+            <div>
+              <span className="font-medium">Current streak:</span> {learningStreak.current} days
+            </div>
+            <div>
+              <span className="font-medium">Best streak:</span> {learningStreak.best} days
+            </div>
+          </div>
+          
+          {/* Learning efficiency */}
+          <h4 className="font-medium mb-1 text-sm">Learning Efficiency</h4>
+          <div className="flex items-center mb-3">
+            <div className="w-full bg-gray-200 rounded-full h-2 mr-2">
+              <div className="bg-green-500 h-2 rounded-full" style={{ width: '65%' }}></div>
+            </div>
+            <span className="text-xs">65%</span>
+          </div>
+          
+          <div className="text-xs text-gray-600">
+            Tip: Short, daily learning sessions are more effective than occasional long sessions.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+### 4. Resources Completed Widget (0 / 0)
+Implement a hover tooltip that shows:
+- List of completed resources with completion dates
+- Resources in progress with completion percentage
+- Resource types breakdown (courses, articles, videos, etc.)
+- Most valuable resources based on skill impact
+- Recommended next resources based on priority skills
+- Learning pathway visualization
+
+```jsx
+// Example component for enhanced Resources Completed widget
+const ResourcesCompletedWidget = ({ completedCount, totalCount, completedResources, inProgressResources }) => {
+  return (
+    <div className="relative group">
+      <div className="p-4 rounded-lg bg-white shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="flex items-center mb-2">
+          <BookOpenIcon className="text-blue-500 mr-2" />
+          <h3 className="text-sm font-medium text-gray-500">Resources Completed</h3>
+        </div>
+        <p className="text-2xl font-bold">{completedCount} / {totalCount}</p>
+        
+        {/* Tooltip that appears on hover */}
+        <div className="absolute hidden group-hover:block z-10 w-80 p-4 bg-white rounded-lg shadow-xl border border-gray-200 -translate-x-1/2 left-1/2 mt-2">
+          <h4 className="font-medium mb-2">Completed Resources</h4>
+          
+          {/* Resource type breakdown */}
+          <div className="mb-3 flex justify-between text-xs">
+            <div className="text-center">
+              <div className="h-8 w-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-1">
+                <BookIcon className="h-4 w-4" />
+              </div>
+              <div>Courses</div>
+              <div className="font-medium">{3}</div>
+            </div>
+            <div className="text-center">
+              <div className="h-8 w-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center mx-auto mb-1">
+                <DocumentTextIcon className="h-4 w-4" />
+              </div>
+              <div>Articles</div>
+              <div className="font-medium">{5}</div>
+            </div>
+            <div className="text-center">
+              <div className="h-8 w-8 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center mx-auto mb-1">
+                <VideoCameraIcon className="h-4 w-4" />
+              </div>
+              <div>Videos</div>
+              <div className="font-medium">{2}</div>
+            </div>
+            <div className="text-center">
+              <div className="h-8 w-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mx-auto mb-1">
+                <PuzzlePieceIcon className="h-4 w-4" />
+              </div>
+              <div>Projects</div>
+              <div className="font-medium">{1}</div>
+            </div>
+          </div>
+          
+          {/* Recently completed resources */}
+          <h4 className="font-medium mb-1 text-sm">Recently Completed</h4>
+          <div className="mb-3 max-h-24 overflow-y-auto">
+            {completedResources.map(resource => (
+              <div key={resource.id} className="flex justify-between items-center text-xs mb-1">
+                <span className="truncate mr-2" style={{ maxWidth: "180px" }}>{resource.title}</span>
+                <span className="text-gray-500">{resource.completionDate}</span>
+              </div>
+            ))}
+          </div>
+          
+          {/* In progress resources */}
+          <h4 className="font-medium mb-1 text-sm">In Progress</h4>
+          <div className="mb-3">
+            {inProgressResources.map(resource => (
+              <div key={resource.id} className="mb-2">
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="truncate mr-2" style={{ maxWidth: "180px" }}>{resource.title}</span>
+                  <span>{resource.progress}%</span>
+                </div>
+                <div className="w-full h-1 bg-gray-200 rounded-full">
+                  <div 
+                    className="h-1 bg-purple-500 rounded-full" 
+                    style={{ width: `${resource.progress}%` }}
+                  ></div>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="text-xs text-center">
+            <a href="/resources" className="text-purple-600 hover:text-purple-800">
+              Browse learning resources
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+## Fix Target Role Display
+
+Implement a dynamic target role display that:
+1. Always reflects the most recently selected target role from the Career Transitions page
+2. Updates in real-time when the user changes their target role
+3. Provides visual feedback when changes are made
+
+```jsx
+// Example component for dynamic Target Role display
+const TargetRoleDisplay = ({ targetRole, estimatedTimeline, onViewDetails }) => {
+  // Get the most recently selected target role from the global state
+  // This should update automatically when changed in Career Transitions page
+  
+  return (
+    <div className="mb-4">
+      <div className="flex items-center">
+        <TargetIcon className="text-purple-500 mr-2" />
+        <h3 className="font-medium">Target Role: {targetRole.title}</h3>
+        
+        {/* Show indicator if role was recently changed */}
+        {targetRole.recentlyChanged && (
+          <span className="ml-2 text-xs px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full">
+            Recently Updated
+          </span>
+        )}
+      </div>
+      
+      <div className="text-sm text-gray-600 ml-6">
+        Estimated timeline: {estimatedTimeline} months
+      </div>
+      
+      <button 
+        onClick={onViewDetails}
+        className="ml-6 text-sm text-purple-600 hover:text-purple-800 flex items-center mt-1"
+      >
+        View transition details
+        <ArrowRightIcon className="h-3 w-3 ml-1" />
+      </button>
+    </div>
+  );
+};
+
+// Ensure this component is connected to the global state and updates when target role changes
+// in the Career Transitions page
+```
+
+## Implementation Notes
+
+1. Connect the dashboard to the application's global state to ensure it always displays the most recent target role:
+
+```jsx
+// In your state management solution (Redux, Context, etc.)
+const careerSlice = createSlice({
+  name: 'career',
+  initialState: {
+    currentRole: null,
+    targetRole: null,
+    targetRoleHistory: [],
+    // ...other state
+  },
+  reducers: {
+    setTargetRole: (state, action) => {
+      // Keep history of previous target roles
+      if (state.targetRole) {
+        state.targetRoleHistory.unshift({
+          ...state.targetRole,
+          changedAt: new Date().toISOString()
+        });
+      }
+      
+      // Set new target role
+      state.targetRole = {
+        ...action.payload,
+        selectedAt: new Date().toISOString(),
+        recentlyChanged: true
+      };
+    },
+    // ...other reducers
+  }
+});
+```
+
+2. Add hover effects using CSS transitions for smooth user experience:
+
+```css
+.widget-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.widget-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.tooltip {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.widget-card:hover .tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+```
+
+3. Ensure responsive behavior for tooltips:
+
+```jsx
+// Add this logic to position tooltips correctly on small screens
+const TooltipContainer = ({ children }) => {
+  const [position, setPosition] = useState({ top: false, right: false });
+  const tooltipRef = useRef(null);
+  
+  useEffect(() => {
+    if (!tooltipRef.current) return;
+    
+    const updatePosition = () => {
+      const rect = tooltipRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      
+      setPosition({
+        top: rect.bottom > viewportHeight,
+        right: rect.right > viewportWidth
+      });
+    };
+    
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    return () => window.removeEventListener('resize', updatePosition);
+  }, [tooltipRef]);
+  
+  return (
+    <div 
+      ref={tooltipRef}
+      className={`absolute hidden group-hover:block z-10 bg-white rounded-lg shadow-xl border border-gray-200 p-4 ${
+        position.top ? 'bottom-full mb-2' : 'top-full mt-2'
+      } ${
+        position.right ? 'right-0' : 'left-1/2 -translate-x-1/2'
+      }`}
+    >
+      {children}
+    </div>
+  );
+};
+```
+
+## Data Models for Widget Details
+
+### Overall Progress Widget
+```javascript
+const progressData = {
+  overallPercentage: 12,
+  skillBreakdown: [
+    { name: "Technical Skills", progress: 15 },
+    { name: "Soft Skills", progress: 20 },
+    { name: "Domain Knowledge", progress: 5 },
+    { name: "Tools & Platforms", progress: 8 }
+  ],
+  recentAchievements: [
+    { id: 1, title: "Completed Python Basics Assessment", date: "2 days ago" },
+    { id: 2, title: "Started Project Management course", date: "5 days ago" }
+  ],
+  nextMilestones: [
+    { id: 1, title: "Complete Programming basics", progressIncrease: 5 },
+    { id: 2, title: "Take System Design assessment", progressIncrease: 3 }
+  ]
+};
+```
+
+### Skills Validated Widget
+```javascript
+const skillsData = {
+  validatedCount: 1,
+  totalCount: 10,
+  validatedSkills: [
+    { 
+      id: 1, 
+      name: "JavaScript Fundamentals", 
+      validationMethod: "Assessment", 
+      validationDate: "Apr 28, 2025",
+      score: 85
+    }
+  ],
+  pendingSkills: [
+    { id: 2, name: "Programming", priority: "High" },
+    { id: 3, name: "System Design", priority: "High" },
+    { id: 4, name: "Problem Solving", priority: "Medium" },
+    { id: 5, name: "Technical Documentation", priority: "Medium" }
+  ]
+};
+```
+
+### Learning Time Widget
+```javascript
+const learningTimeData = {
+  totalHours: 0,
+  timeBreakdown: [
+    { name: "Courses", hours: 0 },
+    { name: "Articles", hours: 0 },
+    { name: "Videos", hours: 0 },
+    { name: "Practice", hours: 0 }
+  ],
+  weeklyData: [0, 0, 0, 0, 0, 0, 0], // Hours per day for the last week
+  learningStreak: {
+    current: 0,
+    best: 0
+  },
+  efficiency: 0, // Percentage
+  recommendedSchedule: {
+    dailyGoal: 1, // hours
+    optimalTime: "Evening"
+  }
+};
+```
+
+### Resources Completed Widget
+```javascript
+const resourcesData = {
+  completedCount: 0,
+  totalCount: 0,
+  completedResources: [],
+  inProgressResources: [],
+  resourceTypes: {
+    courses: 0,
+    articles: 0,
+    videos: 0,
+    projects: 0
+  },
+  recommendedResources: [
+    { 
+      id: 1, 
+      title: "Introduction to Programming", 
+      type: "Course",
+      provider: "Coursera",
+      duration: "10 hours",
+      relevance: "High" // Relevance to current skill gaps
+    },
+    { 
+      id: 2, 
+      title: "System Design Fundamentals", 
+      type: "Article",
+      provider: "Medium",
+      duration: "20 min",
+      relevance: "High"
+    }
+  ]
+};
+```
+
+## Implementation Plan
+
+1. Create reusable tooltip components for each dashboard widget
+2. Implement global state management for target role selection
+3. Connect the dashboard to listen for target role changes
+4. Add data fetching for widget details with loading states
+5. Implement responsive design for all tooltips
+6. Add animations and transitions for smooth user experience
+7. Ensure accessibility of tooltips with keyboard navigation and ARIA attributes
+8. Add comprehensive error handling for data fetching

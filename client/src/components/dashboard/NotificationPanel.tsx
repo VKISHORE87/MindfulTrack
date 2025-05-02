@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Bell, BookOpen, Award, Calendar, LucideIcon, Zap, Target, Users } from "lucide-react";
+import { Bell, BookOpen, Award, Calendar, LucideIcon, Zap, Target } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 
