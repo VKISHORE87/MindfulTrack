@@ -1,0 +1,43 @@
+# Fix Integration Between Career Options and Dashboard Tabs in Upcraft App
+
+## Current Issues:
+1. The dashboard page doesn't reflect "Artificial Intelligence Engineer" as the target role even after it's selected and saved in the Career Options tab
+2. The Practice tab needs to be removed without impacting other application components
+
+## Required Changes:
+
+### 1. Fix Role Integration Between Tabs
+- Update the state management to ensure that when a user selects and saves a target role in the Career Options tab (e.g., "Artificial Intelligence Engineer"), it updates throughout the application, especially on the Dashboard
+- Implement proper state propagation between components
+- Ensure the Career Roadmap, Skill Radar Chart, and all relevant progress indicators reflect the selected target role
+
+### 2. Remove Practice Tab
+- Remove the Practice tab from the navigation sidebar
+- Update the routing to handle the absence of this tab
+- Ensure all navigation links work properly after removal
+- Maintain proper styling and layout integrity of the remaining tabs
+
+### 3. Application Structure Considerations
+- The application appears to have React-based architecture with multiple components
+- Make sure to update component states and props correctly
+- Check for any localStorage or state management systems (Redux, Context API, etc.) that might need updating
+- Ensure proper data flow between Career Options and Dashboard components
+
+### 4. Component Updates
+For Dashboard updates, ensure these elements reflect the correct target role:
+- Target Role display in the header
+- Skill validation progress (1/10)
+- Skill gaps (Programming, System Design, etc.)
+- Career progress radar chart
+- 12-month roadmap
+
+### 5. Data Consistency
+- Make sure all references to the target role are consistent across all views
+- Update any related metrics or progress indicators to match the selected role
+
+## Code Focus Areas:
+- State management functions
+- Component prop passing
+- Navigation/routing configuration
+- Dashboard data retrieval and display logic
+- Career Options save functionality

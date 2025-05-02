@@ -21,7 +21,6 @@ export default function Sidebar({ user, currentRoute }: SidebarProps) {
     { href: '/dashboard', label: 'Dashboard', icon: <Home className="h-5 w-5 mr-3" /> },
     { href: '/career-transitions', label: 'Career Options', icon: <Briefcase className="h-5 w-5 mr-3" /> },
     { href: '/resources', label: 'Resources', icon: <BookOpen className="h-5 w-5 mr-3" /> },
-    { href: '/practice', label: 'Practice', icon: <Dumbbell className="h-5 w-5 mr-3" /> },
     { href: '/skill-assessments', label: 'Skill Assessments', icon: <Brain className="h-5 w-5 mr-3" /> },
     { href: '/progress', label: 'Progress', icon: <TrendingUp className="h-5 w-5 mr-3" /> },
     { href: '/validation', label: 'Validation', icon: <CheckCircle className="h-5 w-5 mr-3" /> },

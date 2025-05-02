@@ -169,9 +169,7 @@ function Router() {
         </AppLayout>
       </Route>
       <Route path="/practice">
-        <AppLayout>
-          <ProtectedRoute component={Practice} />
-        </AppLayout>
+        <Redirect to="/dashboard" />
       </Route>
       <Route path="/career-transitions">
         <AppLayout>
