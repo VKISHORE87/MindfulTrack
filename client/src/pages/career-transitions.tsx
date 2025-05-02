@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import { useLocation } from "wouter";
-import CareerRoleComparison from "@/components/interview/CareerRoleComparison";
 import CareerPathComponent from "@/components/career/CareerPathComponent";
 import CareerGoalForm from "@/components/career/CareerGoalForm";
 import RoleTransitionTemplates from "@/components/career/RoleTransitionTemplates";
@@ -33,7 +32,7 @@ import { InterviewRole } from "@shared/schema";
 
 export default function CareerTransitionsPage() {
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
-  const [selectedTab, setSelectedTab] = useState<string>('role-comparison');
+  const [selectedTab, setSelectedTab] = useState<string>('transition-templates');
   const [roleSearchTerm, setRoleSearchTerm] = useState<string>('');
   const [currentRoleId, setCurrentRoleId] = useState<number | null>(null);
   const [targetRoleId, setTargetRoleId] = useState<number | null>(null);
@@ -83,7 +82,7 @@ export default function CareerTransitionsPage() {
   });
   
   // Fetch current role data
-  const { data: currentRole, isLoading: currentRoleLoading } = useQuery<InterviewRole>({
+  const { data: currentRole, isLoading: currentRoleLoading } = useQuery<InterviewRole | null>({
     queryKey: ['/api/interview/roles', currentRoleId],
     queryFn: async () => {
       if (!currentRoleId) return null;
@@ -97,7 +96,7 @@ export default function CareerTransitionsPage() {
   });
   
   // Fetch target role data
-  const { data: targetRole, isLoading: targetRoleLoading } = useQuery<InterviewRole>({
+  const { data: targetRole, isLoading: targetRoleLoading } = useQuery<InterviewRole | null>({
     queryKey: ['/api/interview/roles', targetRoleId],
     queryFn: async () => {
       if (!targetRoleId) return null;
@@ -143,13 +142,9 @@ export default function CareerTransitionsPage() {
         </header>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
-          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-5">
-            <TabsTrigger value="role-comparison">
-              <BriefcaseIcon className="h-4 w-4 mr-2" />
-              Role Comparison
-            </TabsTrigger>
+          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-4">
             <TabsTrigger value="transition-templates">
-              <ArrowRight className="h-4 w-4 mr-2" />
+              <BriefcaseIcon className="h-4 w-4 mr-2" />
               Role Transitions
             </TabsTrigger>
             <TabsTrigger value="career-paths">
@@ -165,10 +160,6 @@ export default function CareerTransitionsPage() {
               Admin
             </TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="role-comparison" className="space-y-4">
-            <CareerRoleComparison />
-          </TabsContent>
           
           <TabsContent value="transition-templates" className="space-y-6">
             <Card>
@@ -235,13 +226,20 @@ export default function CareerTransitionsPage() {
                     <div className="h-12 bg-muted rounded-lg"></div>
                     <div className="h-64 bg-muted rounded-lg"></div>
                   </div>
-                ) : (
+                ) : currentRoleId && targetRoleId ? (
                   // Render comparison card when both roles are selected
                   <RoleComparisonCard 
-                    currentRole={currentRole} 
-                    targetRole={targetRole} 
+                    currentRole={currentRole ?? null} 
+                    targetRole={targetRole ?? null} 
                     onViewLearningPath={handleViewLearningPath}
                   />
+                ) : (
+                  // Empty state when roles aren't selected
+                  <Card className="border-dashed border-gray-300 bg-gray-50">
+                    <CardContent className="py-8 text-center text-gray-500">
+                      <p>Select both current and target roles above to see a comparison</p>
+                    </CardContent>
+                  </Card>
                 )}
               </CardContent>
             </Card>

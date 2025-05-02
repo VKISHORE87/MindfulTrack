@@ -15,19 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface InterviewRole {
-  id: number;
-  title: string;
-  description: string | null;
-  requiredSkills: string[] | null;
-  industry: string;
-  level: string;
-  roleType: string;
-  averageSalary: string | null;
-  growthRate: string | null;
-  demandScore: number | null;
-  createdAt: Date | null;
-}
+import { InterviewRole } from "@shared/schema";
 
 interface RoleComparisonCardProps {
   currentRole: InterviewRole | null;
