@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import CareerRoleComparison from "@/components/interview/CareerRoleComparison";
 import CareerPathComponent from "@/components/career/CareerPathComponent";
 import CareerGoalForm from "@/components/career/CareerGoalForm";
+import RoleTransitionTemplates from "@/components/career/RoleTransitionTemplates";
 import { AdminPanel } from "@/components/admin/AdminPanel";
 import { 
   Card, 
@@ -92,10 +93,14 @@ export default function CareerTransitionsPage() {
         </header>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
-          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-4">
+          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-5">
             <TabsTrigger value="role-comparison">
               <BriefcaseIcon className="h-4 w-4 mr-2" />
               Role Comparison
+            </TabsTrigger>
+            <TabsTrigger value="transition-templates">
+              <ArrowRight className="h-4 w-4 mr-2" />
+              Role Transitions
             </TabsTrigger>
             <TabsTrigger value="career-paths">
               <Compass className="h-4 w-4 mr-2" />
@@ -113,6 +118,10 @@ export default function CareerTransitionsPage() {
           
           <TabsContent value="role-comparison" className="space-y-4">
             <CareerRoleComparison />
+          </TabsContent>
+          
+          <TabsContent value="transition-templates" className="space-y-4">
+            <RoleTransitionTemplates />
           </TabsContent>
           
           <TabsContent value="career-paths" className="space-y-4">
