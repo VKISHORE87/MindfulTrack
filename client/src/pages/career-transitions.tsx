@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import { 
   ArrowRight,
   BriefcaseIcon, 
@@ -255,61 +254,7 @@ export default function CareerTransitionsPage() {
           </TabsContent>
         </Tabs>
         
-        <Separator />
-        
-        <section className="space-y-4">
-          <h2 className="text-2xl font-bold">Why Plan Your Career Transition?</h2>
-          
-          <div className="grid gap-6 md:grid-cols-3">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <div className="bg-primary/10 p-2 rounded-full mr-2">
-                    <TrendingUp className="h-5 w-5 text-primary" />
-                  </div>
-                  Higher Earning Potential
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Strategic career transitions can lead to significant salary increases and better benefits packages.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <div className="bg-primary/10 p-2 rounded-full mr-2">
-                    <GraduationCap className="h-5 w-5 text-primary" />
-                  </div>
-                  Skill Development
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Transitions push you to develop new skills and competencies, making you more versatile and valuable.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <div className="bg-primary/10 p-2 rounded-full mr-2">
-                    <Compass className="h-5 w-5 text-primary" />
-                  </div>
-                  Career Fulfillment
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Finding work that aligns with your values and strengths leads to greater job satisfaction and fulfillment.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
+        {/* Removed "Why Plan Your Career Transition?" section as requested */}
       </div>
     </>
   );
