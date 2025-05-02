@@ -629,53 +629,56 @@ export default function CareerRoleComparison() {
                     </Card>
                   </div>
                   
-                  {/* Skills Gap Analysis */}
+                  {/* Skills Gap Analysis - Merged View */}
                   <Separator />
                   
                   <div>
                     <h3 className="text-xl font-bold mb-4">Skills Gap Analysis</h3>
-                    <div className="grid gap-6 md:grid-cols-2">
-                      <Card className="bg-blue-50 border-blue-200">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-lg">Required Skills for {currentRole?.title}</CardTitle>
+                    
+                    {/* Role Information Cards */}
+                    <div className="grid gap-6 md:grid-cols-2 mb-6">
+                      {/* Current Role Info Card */}
+                      <Card className="border-blue-200">
+                        <CardHeader className="pb-2 bg-blue-50 border-b border-blue-200">
+                          <CardTitle className="text-lg">Current Role: {currentRole?.title}</CardTitle>
+                          <CardDescription>Your foundation for the transition</CardDescription>
                         </CardHeader>
-                        <CardContent>
-                          <div className="space-y-1">
-                            {currentRole?.requiredSkills?.map((skill, index) => (
-                              <div key={index} className="flex items-center py-1 border-b border-blue-100 last:border-0">
-                                <CheckCircle className="h-4 w-4 text-blue-600 mr-2 flex-shrink-0" />
-                                <span className="text-sm">{skill}</span>
-                              </div>
-                            ))}
-                            {!currentRole?.requiredSkills?.length && (
-                              <div className="text-center py-2 text-gray-500">No skills listed</div>
-                            )}
+                        <CardContent className="pt-4">
+                          <div className="text-sm text-gray-600 mb-2">
+                            <Badge className={`${getRoleTypeColor(currentRole?.roleType || "")} mr-2`}>
+                              {currentRole?.roleType?.replace(/_/g, ' ')}
+                            </Badge>
+                            <Badge className="bg-gray-100 text-gray-800">
+                              {currentRole?.industry?.replace(/_/g, ' ')}
+                            </Badge>
                           </div>
+                          <p className="text-sm">{currentRole?.description || "No description available"}</p>
                         </CardContent>
                       </Card>
                       
-                      <Card className="bg-purple-50 border-purple-200">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-lg">Required Skills for {targetRole?.title}</CardTitle>
+                      {/* Target Role Info Card */}
+                      <Card className="border-purple-200">
+                        <CardHeader className="pb-2 bg-purple-50 border-b border-purple-200">
+                          <CardTitle className="text-lg">Target Role: {targetRole?.title}</CardTitle>
+                          <CardDescription>Your career destination</CardDescription>
                         </CardHeader>
-                        <CardContent>
-                          <div className="space-y-1">
-                            {targetRole?.requiredSkills?.map((skill, index) => (
-                              <div key={index} className="flex items-center py-1 border-b border-purple-100 last:border-0">
-                                <CheckCircle className="h-4 w-4 text-purple-600 mr-2 flex-shrink-0" />
-                                <span className="text-sm">{skill}</span>
-                              </div>
-                            ))}
-                            {!targetRole?.requiredSkills?.length && (
-                              <div className="text-center py-2 text-gray-500">No skills listed</div>
-                            )}
+                        <CardContent className="pt-4">
+                          <div className="text-sm text-gray-600 mb-2">
+                            <Badge className={`${getRoleTypeColor(targetRole?.roleType || "")} mr-2`}>
+                              {targetRole?.roleType?.replace(/_/g, ' ')}
+                            </Badge>
+                            <Badge className="bg-gray-100 text-gray-800">
+                              {targetRole?.industry?.replace(/_/g, ' ')}
+                            </Badge>
                           </div>
+                          <p className="text-sm">{targetRole?.description || "No description available"}</p>
                         </CardContent>
                       </Card>
                     </div>
 
-                    <div className="mt-6">
-                      <h4 className="text-lg font-semibold mb-3">Skill Gaps to Address</h4>
+                    {/* Required Skills for Target Role - New Merged Version */}
+                    <div>
+                      <h4 className="text-lg font-semibold mb-3">Required Skills for {targetRole?.title}</h4>
                       <div className="space-y-4">
                         {skillGaps.map((skill: SkillGap, index: number) => (
                           <div key={index} className="space-y-2 bg-white p-3 rounded-md border">
@@ -687,13 +690,7 @@ export default function CareerRoleComparison() {
                                 `}></div>
                                 <span className="font-medium">{skill.skillName}</span>
                                 {skill.status === 'missing' && (
-                                  <Badge variant="destructive" className="ml-2 text-xs">Missing</Badge>
-                                )}
-                                {skill.status === 'partial' && (
-                                  <Badge variant="outline" className="ml-2 text-xs bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Improvement Needed</Badge>
-                                )}
-                                {skill.status === 'proficient' && (
-                                  <Badge variant="outline" className="ml-2 text-xs bg-green-100 text-green-800 hover:bg-green-100">Proficient</Badge>
+                                  <Badge variant="destructive" className="ml-2 text-xs">New Skill Needed</Badge>
                                 )}
                               </div>
                               <span className="text-sm text-gray-500">
@@ -720,11 +717,7 @@ export default function CareerRoleComparison() {
                                     ? 'text-amber-600' 
                                     : 'text-green-600'}
                               `}>
-                                {skill.status === 'missing' 
-                                  ? 'Priority Skill to Acquire' 
-                                  : skill.status === 'partial' 
-                                    ? 'Need to Improve' 
-                                    : 'Already Proficient'}
+                                {'Priority Skill to Acquire for the ' + targetRole?.title + ' Role'}
                               </span>
                               <span className="text-orange-500 font-medium">Gap: {skill.gap}%</span>
                             </div>
@@ -744,15 +737,16 @@ export default function CareerRoleComparison() {
                                 <p className="text-gray-600 text-sm mt-2">Please try selecting different roles with defined skill sets.</p>
                               </div>
                             ) : (
-                              <div className="text-center py-8 bg-amber-50 rounded-md border border-amber-200">
-                                <AlertCircle className="h-8 w-8 text-amber-500 mx-auto mb-2" />
-                                <p className="text-amber-800 font-medium">Career transition still requires skill development</p>
-                                <p className="text-amber-700 text-sm mt-2">
-                                  Even though no specific skill gaps were detected, transitioning to a new role 
-                                  typically requires developing expertise in the context and application of skills.
+                              <div className="text-center py-8 bg-green-50 rounded-md border border-green-200">
+                                <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                                <p className="text-green-800 font-medium">No Missing Skills for {targetRole?.title}</p>
+                                <p className="text-green-700 text-sm mt-2">
+                                  Your current role as a {currentRole?.title} already provides you with all the 
+                                  required skills for the {targetRole?.title} position.
                                 </p>
-                                <p className="text-amber-700 text-sm mt-2">
-                                  We recommend exploring learning resources specific to the {targetRole?.title} role.
+                                <p className="text-green-700 text-sm mt-2">
+                                  We recommend continuing to develop your expertise in these shared skills to excel 
+                                  in your target role.
                                 </p>
                               </div>
                             )}
