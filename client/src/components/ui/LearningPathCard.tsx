@@ -33,11 +33,22 @@ export default function LearningPathCard({
   allResources
 }: LearningPathCardProps) {
   // Find the actual resource data using the IDs from resources
+  // Ensure we handle the case where allResources might not be an array
   const resourceDetails = resources.map(res => {
-    const detail = allResources.find(r => r.id === res.id);
+    // Make sure allResources is an array and resource IDs are being compared correctly
+    const detail = Array.isArray(allResources) 
+      ? allResources.find(r => r && typeof r === 'object' && r.id === res.id)
+      : null;
+      
+    // Return a merged object with fallback values for missing properties
     return {
       ...res,
-      ...detail
+      ...(detail || {}),
+      // Ensure these properties exist even if detail is null
+      title: detail?.title || `Resource ${res.id || 'Unknown'}`,
+      description: detail?.description || 'No description available',
+      resourceType: detail?.resourceType || 'unknown',
+      duration: detail?.duration || 60 // Default 60 minutes
     };
   });
 

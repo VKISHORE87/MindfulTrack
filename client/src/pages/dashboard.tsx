@@ -184,7 +184,7 @@ export default function Dashboard({ user }: { user: any }) {
                 title={currentGoal.title}
                 timeline={`${currentGoal.timelineMonths} months`}
                 readiness={dashboardData?.careerGoal?.readiness || 40}
-                skills={dashboardData?.keySkills || targetRoleSkills.map(skill => ({ name: skill }))}
+                skills={dashboardData?.keySkills || (Array.isArray(targetRoleSkills) ? targetRoleSkills.map(skill => ({ name: skill })) : [])}
               />
             ) : (
               <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-primary/10 rounded-xl shadow-md p-8 flex flex-col items-center justify-center text-center">

@@ -31,23 +31,39 @@ interface LearningPathProps {
 }
 
 export default function LearningPath({ title, modules, resources }: LearningPathProps) {
+  // Create safe versions of the data with fallbacks
+  const safeModules = Array.isArray(modules) ? modules : [];
+  const safeResources = Array.isArray(resources) ? resources : [];
+  
   return (
     <div className="mt-8">
       <h3 className="text-lg font-bold mb-6">Your Recommended Learning Path</h3>
       
       <Card>
         <CardContent className="p-6">
-          {modules.map((module, index) => (
-            <LearningPathCard
-              key={module.id}
-              moduleNumber={index + 1}
-              title={module.title}
-              estimatedHours={module.estimatedHours}
-              description={module.description}
-              resources={module.resources}
-              allResources={resources}
-            />
-          ))}
+          {safeModules.length > 0 ? (
+            safeModules.map((module, index) => (
+              <LearningPathCard
+                key={module.id || index}
+                moduleNumber={index + 1}
+                title={module.title || `Module ${index + 1}`}
+                estimatedHours={module.estimatedHours || 0}
+                description={module.description || 'No description available'}
+                resources={Array.isArray(module.resources) ? module.resources : []}
+                allResources={safeResources}
+              />
+            ))
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              No learning path modules available yet. 
+              <br />
+              <Link href="/learning-path">
+                <span className="text-primary hover:underline cursor-pointer">
+                  Generate a learning path
+                </span>
+              </Link>
+            </div>
+          )}
           
           <div className="mt-6 text-center">
             <Link href="/learning-path">

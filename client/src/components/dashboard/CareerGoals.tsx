@@ -133,14 +133,14 @@ export default function CareerGoals({ id, title, timeline, readiness, skills = [
                       const skillName = typeof skill === 'object' && skill ? skill.name : String(skill);
                       const status = typeof skill === 'object' && skill && skill.status ? skill.status : 'unknown';
                       
-                      // Pick icon based on status
-                      let StatusIcon = skill.status === 'missing' ? AlertTriangle : 
-                                       skill.status === 'improvement' ? TrendingUp : 
+                      // Pick icon based on status, with safer access to skill.status
+                      let StatusIcon = typeof skill === 'object' && skill && skill.status === 'missing' ? AlertTriangle : 
+                                       typeof skill === 'object' && skill && skill.status === 'improvement' ? TrendingUp : 
                                        CheckCircle;
                       
-                      // Pick color based on status
-                      let statusColor = skill.status === 'missing' ? 'text-red-500' :
-                                        skill.status === 'improvement' ? 'text-amber-500' :
+                      // Pick color based on status, with safer access to skill.status
+                      let statusColor = typeof skill === 'object' && skill && skill.status === 'missing' ? 'text-red-500' :
+                                        typeof skill === 'object' && skill && skill.status === 'improvement' ? 'text-amber-500' :
                                         'text-green-500';
                                        
                       return (
@@ -148,7 +148,7 @@ export default function CareerGoals({ id, title, timeline, readiness, skills = [
                           <StatusIcon className={`h-4 w-4 ${statusColor} flex-shrink-0`} />
                           <span>
                             {skillName}
-                            {skill.percentage && (
+                            {typeof skill === 'object' && skill && skill.percentage && (
                               <span className="ml-1 text-xs text-gray-500">
                                 ({skill.percentage}%)
                               </span>
