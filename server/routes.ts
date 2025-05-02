@@ -7109,6 +7109,66 @@ Return a JSON response with the following structure:
     }
   );
 
+  // Get user skills - for skill assessments
+  app.get(
+    "/api/users/skills",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        // For now, we're using userId = 1 for demo purposes
+        const userId = 1;
+        
+        const userSkills = await storage.getUserSkills(userId);
+        res.json(userSkills);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+  
+  // Update user skill after assessment
+  app.post(
+    "/api/users/skills/assessment",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        // For now, we're using userId = 1 for demo purposes
+        const userId = 1;
+        const { skillId, currentLevel, assessmentResult } = req.body;
+        
+        if (!skillId || currentLevel === undefined) {
+          return res.status(400).json({ error: "Missing required fields" });
+        }
+        
+        // Check if user skill exists
+        const existingSkill = await storage.getUserSkillBySkillId(userId, skillId);
+          
+        if (existingSkill) {
+          // Update existing skill
+          const updatedSkill = await storage.updateUserSkill(userId, skillId, {
+            currentLevel,
+            lastAssessed: new Date().toISOString(),
+            notes: `Last assessment score: ${assessmentResult || 'N/A'}`
+          });
+            
+          return res.json(updatedSkill);
+        } else {
+          // Create new user skill entry
+          const newSkill = await storage.createUserSkill({
+            userId,
+            skillId,
+            currentLevel,
+            targetLevel: Math.min(currentLevel + 1, 5), // Default target is one level higher, max 5
+            lastAssessed: new Date().toISOString(),
+            notes: `Initial assessment score: ${assessmentResult || 'N/A'}`
+          });
+            
+          return res.status(201).json(newSkill);
+        }
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -47,8 +47,10 @@ export interface IStorage {
   getUserSkill(id: number): Promise<UserSkill | undefined>;
   getUserSkillsByUserId(userId: number): Promise<UserSkill[]>;
   getUserSkillsWithDetails(userId: number): Promise<(UserSkill & { skillName: string, category: string })[]>;
+  getUserSkillBySkillId(userId: number, skillId: number): Promise<UserSkill | undefined>;
   createUserSkill(userSkill: InsertUserSkill): Promise<UserSkill>;
   updateUserSkill(id: number, userSkillData: Partial<InsertUserSkill>): Promise<UserSkill | undefined>;
+  updateUserSkill(userId: number, skillId: number, userSkillData: Partial<InsertUserSkill>): Promise<UserSkill | undefined>;
   deleteUserSkill(id: number): Promise<boolean>;
 
   // Learning resource methods
