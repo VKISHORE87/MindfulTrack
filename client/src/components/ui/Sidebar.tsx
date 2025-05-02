@@ -9,7 +9,8 @@ import {
   CheckCircle,
   LightbulbIcon,
   Dumbbell,
-  Briefcase
+  Briefcase,
+  ClipboardCheck
 } from "lucide-react";
 
 interface SidebarProps {
@@ -23,6 +24,7 @@ export default function Sidebar({ user, currentRoute }: SidebarProps) {
     { href: '/career-transitions', label: 'Career Options', icon: <Briefcase className="h-5 w-5 mr-3" /> },
     { href: '/resources', label: 'Resources', icon: <BookOpen className="h-5 w-5 mr-3" /> },
     { href: '/practice', label: 'Practice', icon: <Dumbbell className="h-5 w-5 mr-3" /> },
+    { href: '/skill-assessments', label: 'Skill Assessments', icon: <ClipboardCheck className="h-5 w-5 mr-3" /> },
     { href: '/progress', label: 'Progress', icon: <TrendingUp className="h-5 w-5 mr-3" /> },
     { href: '/validation', label: 'Validation', icon: <CheckCircle className="h-5 w-5 mr-3" /> },
   ];
