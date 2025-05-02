@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { BarChart2, CheckCircle, Clock, BookOpen, ArrowRight, FileText, Video, PuzzleIcon, ChevronUp } from "lucide-react";
+import { BarChart2, CheckCircle, Clock, BookOpen, ArrowRight, FileText, Video, BookOpen as BookIcon, ChevronUp } from "lucide-react";
 import { HoverTooltip } from "@/components/ui/hover-tooltip";
 import { Progress } from "@/components/ui/progress";
 import { useCareerGoal } from "@/contexts/CareerGoalContext";
@@ -83,7 +83,7 @@ export default function StatCard({
     { type: "Courses", count: 3, icon: BookOpen },
     { type: "Articles", count: 5, icon: FileText },
     { type: "Videos", count: 2, icon: Video },
-    { type: "Projects", count: 1, icon: BookOpen }
+    { type: "Projects", count: 1, icon: BookIcon }
   ],
   completedResources = [
     { id: 1, title: "Introduction to JavaScript", type: "Course", progress: 100, completionDate: "2 weeks ago" },
