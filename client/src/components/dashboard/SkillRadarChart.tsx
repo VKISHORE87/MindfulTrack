@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCareerGoal } from "@/contexts/CareerGoalContext";
 import * as d3 from 'd3';
@@ -8,25 +8,47 @@ interface SkillRadarChartProps {
   height: number;
 }
 
+interface SkillData {
+  name: string;
+  current: number;
+  target: number;
+}
+
 export default function SkillRadarChart({ width, height }: SkillRadarChartProps) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const { targetRoleSkills } = useCareerGoal();
+  const { targetRoleSkills, currentGoal } = useCareerGoal();
+  const [skills, setSkills] = useState<SkillData[]>([]);
   
-  // Sample skills data - in production, this would come from API
-  const skills = [
-    { name: "Programming", current: 75, target: 90 },
-    { name: "System Design", current: 50, target: 80 },
-    { name: "Problem Solving", current: 65, target: 70 },
-    { name: "Technical Documentation", current: 45, target: 85 },
-    { name: "Project Management", current: 60, target: 75 }
-  ];
+  // Update skills data when targetRoleSkills changes
+  useEffect(() => {
+    if (targetRoleSkills.length > 0) {
+      // Map the skills from context to the format needed for the chart
+      const updatedSkills = targetRoleSkills.map(skill => ({
+        name: skill,
+        // In a real implementation, these values would come from user assessment
+        current: Math.floor(Math.random() * 60) + 20, // 20-80 range for demo
+        target: Math.floor(Math.random() * 20) + 80, // 80-100 range for demo
+      }));
+      
+      setSkills(updatedSkills);
+    } else {
+      // Default skills if none are available from context
+      setSkills([
+        { name: "Programming", current: 75, target: 90 },
+        { name: "System Design", current: 50, target: 80 },
+        { name: "Problem Solving", current: 65, target: 70 },
+        { name: "Technical Documentation", current: 45, target: 85 },
+        { name: "Project Management", current: 60, target: 75 }
+      ]);
+    }
+  }, [targetRoleSkills]);
 
   useEffect(() => {
-    if (!svgRef.current) return;
+    if (!svgRef.current || skills.length === 0) return;
     
     // Use D3 to create a radar chart
     drawRadarChart();
-  }, []);
+  }, [skills, currentGoal]);
 
   const drawRadarChart = () => {
     if (!svgRef.current) return;

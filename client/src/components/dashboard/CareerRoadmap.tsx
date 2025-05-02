@@ -1,55 +1,107 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCareerGoal } from "@/contexts/CareerGoalContext";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Clock, ArrowRight } from "lucide-react";
+import { CheckCircle, Clock, ArrowRight, AlertCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+
+// Define milestone type
+interface Task {
+  title: string;
+  completed: boolean;
+}
+
+interface Milestone {
+  title: string;
+  timeframe: string;
+  tasks: Task[];
+  current: boolean;
+}
 
 export default function CareerRoadmap() {
-  const { currentGoal } = useCareerGoal();
+  const { currentGoal, targetRoleSkills } = useCareerGoal();
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Get the target role name from the current goal
   const targetRole = currentGoal?.title || 'Not set';
   
-  // Sample milestones for the roadmap
-  const milestones = [
-    {
-      title: "Foundation Building",
-      timeframe: "Months 1-3",
-      tasks: [
-        { title: "Complete initial skill assessment", completed: true },
-        { title: "Identify priority learning resources", completed: true },
-        { title: "Finish core technical skills training", completed: false }
-      ],
-      current: false
-    },
-    {
-      title: "Skill Development",
-      timeframe: "Months 4-6",
-      tasks: [
-        { title: "Complete System Design fundamentals", completed: false },
-        { title: "Build portfolio projects", completed: false },
-        { title: "Obtain technical certifications", completed: false }
-      ],
-      current: true
-    },
-    {
-      title: "Role-Specific Practice",
-      timeframe: "Months 7-9",
-      tasks: [
-        { title: "Tackle real-world problems", completed: false },
-        { title: "Participate in industry events", completed: false },
-        { title: "Network with professionals", completed: false }
-      ],
-      current: false
-    },
-    {
-      title: "Final Preparation",
-      timeframe: "Months 10-12",
-      tasks: [
-        { title: "Mock interviews and assessments", completed: false },
-        { title: "Resume and profile refinement", completed: false },
-        { title: "Job application strategy", completed: false }
-      ],
-      current: false
+  // Generate appropriate milestones based on targetRoleSkills
+  useEffect(() => {
+    setIsLoading(true);
+    
+    // Default milestone structure
+    const defaultMilestones: Milestone[] = [
+      {
+        title: "Foundation Building",
+        timeframe: "Months 1-3",
+        tasks: [
+          { title: "Complete initial skill assessment", completed: true },
+          { title: "Identify priority learning resources", completed: true },
+          { title: "Finish core technical skills training", completed: false }
+        ],
+        current: false
+      },
+      {
+        title: "Skill Development",
+        timeframe: "Months 4-6",
+        tasks: [
+          { title: "Complete System Design fundamentals", completed: false },
+          { title: "Build portfolio projects", completed: false },
+          { title: "Obtain technical certifications", completed: false }
+        ],
+        current: true
+      },
+      {
+        title: "Role-Specific Practice",
+        timeframe: "Months 7-9",
+        tasks: [
+          { title: "Tackle real-world problems", completed: false },
+          { title: "Participate in industry events", completed: false },
+          { title: "Network with professionals", completed: false }
+        ],
+        current: false
+      },
+      {
+        title: "Final Preparation",
+        timeframe: "Months 10-12",
+        tasks: [
+          { title: "Mock interviews and assessments", completed: false },
+          { title: "Resume and profile refinement", completed: false },
+          { title: "Job application strategy", completed: false }
+        ],
+        current: false
+      }
+    ];
+    
+    // If we have target role skills, customize the middle milestone tasks
+    if (targetRoleSkills.length > 0) {
+      const middleMilestone = { ...defaultMilestones[1] };
+      
+      // Update the tasks to reflect the first 3 skills from targetRoleSkills
+      middleMilestone.tasks = targetRoleSkills.slice(0, 3).map(skill => ({
+        title: `Master ${skill}`,
+        completed: false
+      }));
+      
+      defaultMilestones[1] = middleMilestone;
     }
-  ];
+    
+    // Get role-specific preparation tasks in Final Preparation
+    if (targetRole !== 'Not set') {
+      // Build final preparation tasks based on the target role
+      const finalMilestone = { ...defaultMilestones[3] };
+      finalMilestone.tasks = [
+        { title: `${targetRole} mock interviews`, completed: false },
+        { title: "Portfolio showcasing required skills", completed: false },
+        { title: `${targetRole} application strategy`, completed: false }
+      ];
+      
+      defaultMilestones[3] = finalMilestone;
+    }
+    
+    setMilestones(defaultMilestones);
+    setIsLoading(false);
+  }, [targetRoleSkills, targetRole]);
 
   return (
     <Card>
