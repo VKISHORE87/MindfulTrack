@@ -31,7 +31,7 @@ import { InterviewRole } from "@shared/schema";
 
 export default function CareerTransitionsPage() {
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
-  const [selectedTab, setSelectedTab] = useState<string>('career-goals');
+  const [selectedTab, setSelectedTab] = useState<string>('role-comparison');
   const [roleSearchTerm, setRoleSearchTerm] = useState<string>('');
   const { toast } = useToast();
   const [location] = useLocation();
@@ -93,11 +93,7 @@ export default function CareerTransitionsPage() {
         </header>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
-          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-5">
-            <TabsTrigger value="career-goals">
-              <Target className="h-4 w-4 mr-2" />
-              Career Goals
-            </TabsTrigger>
+          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-4">
             <TabsTrigger value="role-comparison">
               <BriefcaseIcon className="h-4 w-4 mr-2" />
               Role Comparison
@@ -115,51 +111,6 @@ export default function CareerTransitionsPage() {
               Admin
             </TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="career-goals" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>My Career Goals</CardTitle>
-                <CardDescription>
-                  Set and manage your career goals and track your progress over time.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {goalLoading ? (
-                  <div className="space-y-4">
-                    <div className="animate-pulse h-10 w-full bg-secondary rounded"></div>
-                    <div className="animate-pulse h-24 w-full bg-secondary rounded"></div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="animate-pulse h-10 w-full bg-secondary rounded"></div>
-                      <div className="animate-pulse h-10 w-full bg-secondary rounded"></div>
-                    </div>
-                  </div>
-                ) : goalError ? (
-                  <div className="p-4 border border-destructive/50 bg-destructive/10 rounded-md">
-                    <p className="text-destructive">Error loading career goal: {(goalError as Error).message}</p>
-                  </div>
-                ) : (
-                  <CareerGoalForm 
-                    existingGoal={careerGoal || {
-                      id: 1,
-                      title: "Senior Software Engineer",
-                      timeline: "1 year",
-                      readiness: 65,
-                      targetRoleId: "15",
-                      description: "My goal is to master system design and lead a development team."
-                    }}
-                    onSuccess={() => {
-                      toast({
-                        title: "Success",
-                        description: "Your career goal has been saved successfully",
-                      });
-                      // Navigation is now handled in the CareerGoalForm component
-                    }}
-                  />
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
           
           <TabsContent value="role-comparison" className="space-y-4">
             <CareerRoleComparison />

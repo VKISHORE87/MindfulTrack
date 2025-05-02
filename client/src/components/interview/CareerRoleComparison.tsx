@@ -25,10 +25,12 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Loader2, ArrowRight, TrendingUp, DollarSign, BarChart4, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { apiRequest } from "@/lib/queryClient";
+import { useCareerGoal } from "@/contexts/CareerGoalContext";
 
 // Type definitions for the roles
 interface InterviewRole {
@@ -55,6 +57,8 @@ interface SkillGap {
 
 export default function CareerRoleComparison() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { currentGoal, updateCurrentGoal } = useCareerGoal();
   const [currentRoleId, setCurrentRoleId] = useState<string>("");
   const [targetRoleId, setTargetRoleId] = useState<string>("");
   const [industryFilter, setIndustryFilter] = useState<string>("");
@@ -64,6 +68,7 @@ export default function CareerRoleComparison() {
   const [showTargetSuggestions, setShowTargetSuggestions] = useState<boolean>(false);
   const [isComparing, setIsComparing] = useState<boolean>(false);
   const [skillGaps, setSkillGaps] = useState<SkillGap[]>([]);
+  const [isSavingGoal, setIsSavingGoal] = useState<boolean>(false);
   
   // References for click outside detection
   const currentSearchRef = React.useRef<HTMLDivElement>(null);
@@ -330,6 +335,80 @@ export default function CareerRoleComparison() {
     setTargetRoleId(role.id.toString());
     setTargetRoleSearch(role.title);
     setShowTargetSuggestions(false);
+  };
+  
+  // Mutation for creating/updating career goal
+  const saveGoalMutation = useMutation({
+    mutationFn: async () => {
+      if (!targetRole) {
+        throw new Error("Target role data is not available");
+      }
+      
+      // Check if we have an existing goal to update
+      const endpoint = currentGoal 
+        ? `/api/users/career-goals/${currentGoal.id}` 
+        : '/api/users/career-goals';
+      
+      const method = currentGoal ? 'PATCH' : 'POST';
+      
+      // Default to 12 months timeline if creating a new goal
+      const timelineMonths = currentGoal?.timelineMonths || 12;
+      
+      const goalData = {
+        title: targetRole.title,
+        targetRoleId: targetRole.id,
+        timelineMonths: timelineMonths,
+        description: `Career goal created from role comparison: transition to ${targetRole.title}`
+      };
+      
+      const res = await apiRequest(method, endpoint, goalData);
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Failed to save career goal');
+      }
+      
+      return res.json();
+    },
+    onSuccess: async (data) => {
+      // Get the goal ID from the response
+      const goalId = data.id;
+      
+      toast({
+        title: "Career goal saved",
+        description: `Your target role "${targetRole?.title}" has been set as your career goal`,
+      });
+      
+      // Set this as the current goal across the app
+      if (goalId) {
+        await updateCurrentGoal(goalId);
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to save goal",
+        description: error.message || "Could not set this role as your career goal",
+        variant: "destructive"
+      });
+    },
+    onSettled: () => {
+      setIsSavingGoal(false);
+    }
+  });
+  
+  // Handler for save career goal button
+  const handleSaveCareerGoal = () => {
+    if (!targetRoleId || !targetRole) {
+      toast({
+        title: "No target role selected",
+        description: "Please select a target role first",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsSavingGoal(true);
+    saveGoalMutation.mutate();
   };
 
   const getRoleTypeColor = (roleType: string) => {
@@ -713,9 +792,27 @@ export default function CareerRoleComparison() {
                     </div>
                   </div>
                   
-                  <div className="flex justify-end">
-                    <Button onClick={handleReset} variant="outline" className="mr-2">
+                  <div className="flex justify-end space-x-2">
+                    <Button onClick={handleReset} variant="outline">
                       Reset
+                    </Button>
+                    <Button 
+                      onClick={handleSaveCareerGoal} 
+                      variant="secondary"
+                      disabled={isSavingGoal || !targetRole}
+                      className="bg-green-100 hover:bg-green-200 text-green-800 border-green-300"
+                    >
+                      {isSavingGoal ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving Goal
+                        </>
+                      ) : (
+                        <>
+                          <Target className="mr-2 h-4 w-4" />
+                          Set As Career Goal
+                        </>
+                      )}
                     </Button>
                     <Button>
                       View Detailed Learning Path
