@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Loader2, ArrowRight, TrendingUp, DollarSign, BarChart4, CheckCircle, AlertCircle } from "lucide-react";
+import { Loader2, ArrowRight, TrendingUp, DollarSign, BarChart4, CheckCircle, AlertCircle, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
