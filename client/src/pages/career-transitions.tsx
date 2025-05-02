@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { queryClient } from "@/lib/queryClient";
+import { useCareerGoal } from "@/contexts/CareerGoalContext";
 import CareerPathComponent from "@/components/career/CareerPathComponent";
 import CareerGoalForm from "@/components/career/CareerGoalForm";
 import RoleTransitionTemplates from "@/components/career/RoleTransitionTemplates";
@@ -25,10 +29,10 @@ import {
   Settings,
   Bookmark as BookmarkIcon,
   Target,
-  Search
+  Search,
+  CheckCircle
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
 import { InterviewRole } from "@shared/schema";
 
 export default function CareerTransitionsPage() {
@@ -39,6 +43,7 @@ export default function CareerTransitionsPage() {
   const [targetRoleId, setTargetRoleId] = useState<number | null>(null);
   const { toast } = useToast();
   const [location] = useLocation();
+  const { updateCurrentGoal } = useCareerGoal();
   
   // Extract the tab from URL query parameters when the component mounts or location changes
   useEffect(() => {
@@ -151,6 +156,18 @@ export default function CareerTransitionsPage() {
       
       if (!response.ok) {
         throw new Error('Failed to save target role');
+      }
+      
+      // Get the response data which should include the career goal ID
+      const data = await response.json();
+      
+      // If we have a goal ID, update the current goal in context
+      if (data && data.goalId) {
+        console.log("[DEBUG] Career transitions - Updating current goal:", data.goalId);
+        await updateCurrentGoal(data.goalId);
+        
+        // Invalidate all dashboard queries to ensure UI is updated
+        queryClient.invalidateQueries({ queryKey: ['/api/users/dashboard'] });
       }
       
       // Show success message
