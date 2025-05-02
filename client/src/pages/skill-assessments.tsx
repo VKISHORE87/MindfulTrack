@@ -1,7 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet";
-import SkillAssessment from "@/components/skills/SkillAssessment";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
+import SkillAssessmentExam from "@/components/practice/SkillAssessmentExam";
 
 export default function SkillAssessmentsPage() {
   return (
@@ -11,15 +11,13 @@ export default function SkillAssessmentsPage() {
       </Helmet>
       
       <div className="container py-6 space-y-8">
-        <header className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Skill Assessments</h1>
-          <p className="text-muted-foreground">
-            Validate your skills, get personalized feedback, and track your progress toward job readiness.
-          </p>
-        </header>
+        <PageHeader 
+          heading="Skill Assessments" 
+          subheading="Evaluate your proficiency in specific skills, receive personalized feedback, and identify areas for improvement"
+        />
         
         <div className="space-y-6">
-          <SkillAssessment />
+          <SkillAssessmentExam />
         </div>
       </div>
     </>

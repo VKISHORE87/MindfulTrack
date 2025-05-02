@@ -14,7 +14,7 @@ import Validation from "@/pages/validation";
 import Profile from "@/pages/profile";
 import Practice from "@/pages/practice";
 import CareerTransitions from "@/pages/career-transitions";
-// Removed SkillAssessments import - functionality now integrated into Practice tab
+import SkillAssessments from "@/pages/skill-assessments";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import ForgotPassword from "@/pages/forgot-password";
@@ -104,7 +104,7 @@ function getPageTitle(path: string): string {
     'validation': 'Skill Validation',
     'practice': 'Practice Skills',
     'career-transitions': 'Career Options',
-    // 'skill-assessments': 'Skill Assessments', // Removed - functionality now in Practice tab
+    'skill-assessments': 'Skill Assessments',
     'profile': 'My Profile'
   };
   
@@ -184,7 +184,9 @@ function Router() {
         </AppLayout>
       </Route>
       <Route path="/skill-assessments">
-        <Redirect to="/practice" />
+        <AppLayout>
+          <ProtectedRoute component={SkillAssessments} />
+        </AppLayout>
       </Route>
       <Route>
         <AppLayout hideNavigation={true}>

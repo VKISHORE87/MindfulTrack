@@ -4,7 +4,8 @@ import {
   TrendingUp,
   User,
   Dumbbell,
-  Briefcase
+  Briefcase,
+  Brain
 } from "lucide-react";
 
 interface MobileNavigationProps {
@@ -16,6 +17,7 @@ export default function MobileNavigation({ currentRoute }: MobileNavigationProps
     { href: '/dashboard', label: 'Dashboard', icon: <Home className="h-6 w-6" /> },
     { href: '/career-transitions', label: 'Careers', icon: <Briefcase className="h-6 w-6" /> },
     { href: '/practice', label: 'Practice', icon: <Dumbbell className="h-6 w-6" /> },
+    { href: '/skill-assessments', label: 'Assess', icon: <Brain className="h-6 w-6" /> },
     { href: '/profile', label: 'Profile', icon: <User className="h-6 w-6" /> },
   ];
 
