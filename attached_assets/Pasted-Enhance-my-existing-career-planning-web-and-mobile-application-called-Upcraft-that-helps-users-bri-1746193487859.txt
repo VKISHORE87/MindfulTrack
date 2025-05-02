@@ -1,0 +1,106 @@
+Enhance my existing career planning web and mobile application called "Upcraft" that helps users bridge skill gaps between current and target roles. The application currently has several tabs including Dashboard, Career Options, Resources, Practice, Skill Assessments, Progress, and Validation. I need to improve the dashboard with interactive data visualization, optimize navigation, eliminate redundancy, and prepare for future AI coach integration.
+Core Requirements
+1. Dashboard Enhancement
+Create an interactive, data-driven dashboard that:
+
+Displays live user data with clickable widgets that navigate to source pages
+Visualizes skill gaps with intuitive charts and progress indicators
+Includes a "Career Roadmap" visual timeline showing projected skill acquisition milestones
+Implements a skill radar chart comparing current vs. required skills for target role
+Shows recommended learning resources based on priority skill gaps
+Adds notification system for progress milestones and new opportunities
+
+2. Application Optimization
+
+Remove the redundant Practice tab as Skill Assessments provides similar functionality
+Consolidate the Progress and Validation tabs into a unified "Progress & Achievements" section
+Make navigation more intuitive with clear visual hierarchy and contextual breadcrumbs
+Implement "quick action" buttons on the dashboard for common user tasks
+Add a search functionality that works across all sections of the app
+Create consistent styling across all pages with improved UI component patterns
+
+3. Resource Curation Enhancement
+
+Add a resource aggregator that pulls free, high-quality learning content from the internet
+Implement a rating/review system for resources to help users identify the most valuable ones
+Create a "Learning Path Generator" that sequences resources for specific skill acquisition
+Add tags and filters to resources to make them more discoverable
+Include difficulty levels and estimated completion time for resources
+
+4. Infrastructure for Future AI Coach
+
+Create placeholder components and UI elements for future AI coach feature
+Implement the data structure to store user-coach interactions
+Design conversation templates and question banks for common career transition scenarios
+Prepare API endpoints for future AI integration
+Include a user preferences section for personalization options
+
+Technical Requirements
+
+Use React for the frontend with TypeScript for type safety
+Implement responsive design with Tailwind CSS
+Use Chart.js or D3.js for interactive data visualizations
+Ensure all components are accessible and follow WCAG guidelines
+Implement proper state management (Redux or Context API)
+Create reusable component library for consistency
+Add proper error handling and loading states
+Implement client-side data caching for performance
+Ensure clean code architecture with separation of concerns
+Add comprehensive test coverage with Jest and React Testing Library
+
+Specific Component Implementations
+Enhanced Dashboard
+jsx// Create a fully interactive dashboard with the following components:
+// 1. Summary cards with key metrics
+// 2. Skill gap visualization (radar chart)
+// 3. Learning progress timeline
+// 4. Priority skills to develop section
+// 5. Recent activity feed
+// 6. Quick actions panel
+// 7. Recommended resources based on skill gaps
+// 8. Career path visualization
+
+// Ensure all components are clickable and navigate to relevant sections
+// Add data fetching with proper loading/error states
+// Implement filters to customize dashboard view
+Resource Discovery System
+jsx// Create an enhanced resource browser that:
+// 1. Aggregates free learning resources from the web
+// 2. Allows filtering by skill, difficulty, format, and estimated time
+// 3. Shows user ratings and reviews
+// 4. Provides resource recommendations based on skill gaps
+// 5. Allows users to bookmark and track completed resources
+// 6. Displays skill coverage for each resource
+Career Transition Path Visualizer
+jsx// Implement an interactive career path visualization that:
+// 1. Shows step-by-step progression from current to target role
+// 2. Highlights skills needed at each transition step
+// 3. Displays estimated time for each transition step
+// 4. Recommends alternative paths based on existing skills
+// 5. Allows users to customize their learning journey
+Unified Progress Tracker
+jsx// Create a comprehensive progress tracking system that:
+// 1. Shows overall progress toward target role
+// 2. Tracks skill acquisition with visual indicators
+// 3. Records completed learning resources and assessments
+// 4. Displays skill validation and credentials
+// 5. Provides motivation through milestones and achievements
+Design Guidelines
+
+Use the existing purple color scheme but ensure proper contrast ratios
+Implement consistent spacing and typography throughout the application
+Use clear iconography and visual cues for interactive elements
+Add subtle animations and transitions for a polished user experience
+Ensure all data visualizations are both visually appealing and easy to understand
+Create a clear visual hierarchy to guide users through complex information
+
+Additional Requirements
+
+Ensure all components degrade gracefully on smaller screens
+Implement proper data persistence for user progress
+Add clear onboarding for new users
+Include helpful tooltips for complex features
+Ensure performance optimization for smooth interactions
+Implement comprehensive error recovery mechanisms
+
+Please build this enhanced application while maintaining compatibility with the existing functionality. The focus should be on creating an intuitive, data-driven dashboard and optimizing the overall user experience while preparing for future AI coach integration.

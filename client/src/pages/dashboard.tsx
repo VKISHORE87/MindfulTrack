@@ -11,6 +11,9 @@ import NextStepsPanel from "@/components/dashboard/NextStepsPanel";
 import CareerPathRecommendations from "@/components/dashboard/CareerPathRecommendations";
 import LearningProgressSummary from "@/components/dashboard/LearningProgressSummary";
 import AIRecommendationsPanel from "@/components/dashboard/AIRecommendationsPanel";
+import SkillRadarChart from "@/components/dashboard/SkillRadarChart";
+import CareerRoadmap from "@/components/dashboard/CareerRoadmap";
+import NotificationPanel from "@/components/dashboard/NotificationPanel";
 
 // Existing components that we'll reuse in a more modular way
 import StatCard from "@/components/dashboard/StatCard";
@@ -223,9 +226,22 @@ export default function Dashboard({ user }: { user: any }) {
             </div>
           </div>
           
-          {/* B. Learning & Resources Section */}
+          {/* B. Visualization & Career Path Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* B1. Learning Progress Summary */}
+            {/* B1. Skill Radar Chart */}
+            <div>
+              <SkillRadarChart width={300} height={300} />
+            </div>
+            
+            {/* B2. Career Roadmap */}
+            <div>
+              <CareerRoadmap />
+            </div>
+          </div>
+          
+          {/* C. Learning & Resources Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* C1. Learning Progress Summary */}
             <div>
               <LearningProgressSummary 
                 completedCount={resourcesCount.completed}
@@ -234,17 +250,26 @@ export default function Dashboard({ user }: { user: any }) {
               />
             </div>
             
-            {/* B2. Career Path Recommendations */}
+            {/* C2. Notifications Panel */}
             <div>
-              <CareerPathRecommendations 
-                alternateRoles={dashboardData?.alternateRoles} 
-              />
+              <NotificationPanel />
             </div>
           </div>
           
-          {/* C. Recent Activity */}
-          <div className="mb-8">
-            <RecentActivity activities={dashboardData?.recentActivities || []} />
+          {/* D. Career Path Recommendations & Recent Activity */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* D1. Career Path Recommendations */}
+            <div>
+              <CareerPathRecommendations 
+                alternateRoles={dashboardData?.alternateRoles} 
+                maxDisplayed={3}
+              />
+            </div>
+            
+            {/* D2. Recent Activity */}
+            <div>
+              <RecentActivity activities={dashboardData?.recentActivities || []} />
+            </div>
           </div>
           
           {/* Debug info section */}
