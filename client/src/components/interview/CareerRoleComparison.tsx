@@ -183,6 +183,7 @@ export default function CareerRoleComparison() {
   };
 
   // Calculate skill gaps by comparing current role skills with target role skills
+  // Modified to only include skills that are unique to the target role
   const calculateSkillGaps = () => {
     if (!currentRole || !targetRole) {
       console.error("Role data missing for skill gap calculation", { currentRole, targetRole });
@@ -217,17 +218,10 @@ export default function CareerRoleComparison() {
       targetSkills 
     });
     
-    // Create a mapping of current skills with an assumed proficiency level (case-insensitive comparison)
-    const currentSkillsMap = new Map();
-    currentSkills.forEach(skill => {
-      if (skill && typeof skill === 'string') {
-        // Store both original case and lowercase for matching
-        currentSkillsMap.set(skill.toLowerCase(), {
-          originalSkill: skill,
-          proficiency: 80 // Assume 80% proficiency in current role skills
-        });
-      }
-    });
+    // Create a set of current skills for easy lookup (case-insensitive)
+    const currentSkillsSet = new Set(currentSkills.map(skill => 
+      skill && typeof skill === 'string' ? skill.toLowerCase() : ''
+    ).filter(skill => skill !== ''));
     
     const calculatedGaps: SkillGap[] = [];
     
@@ -238,14 +232,14 @@ export default function CareerRoleComparison() {
       const skillName = skill;
       const requiredLevel = 90; // Assume 90% proficiency needed for target role
       
-      // Try exact match and case-insensitive match
-      const currentSkillInfo = currentSkillsMap.get(skill.toLowerCase());
+      // Check if the current role has this skill (case-insensitive)
+      const hasSkill = currentSkillsSet.has(skill.toLowerCase());
       let status: 'missing' | 'partial' | 'proficient';
       let currentLevel: number;
       
-      if (currentSkillInfo) {
-        // Skill exists in current role
-        currentLevel = currentSkillInfo.proficiency;
+      if (hasSkill) {
+        // Skill exists in current role - we'll skip these skills in the merged view
+        currentLevel = 80; // Assume 80% proficiency in current role skills
         const gap = requiredLevel - currentLevel;
         
         if (gap > 20) {
@@ -254,24 +248,25 @@ export default function CareerRoleComparison() {
           status = 'proficient'; // Already good enough
         }
       } else {
-        // Skill doesn't exist in current role at all
+        // Skill doesn't exist in current role at all - these are the ones we want to highlight
         currentLevel = 30; // Baseline knowledge (30%)
         status = 'missing'; // Completely missing skill
+        
+        // Calculate the gap
+        const gap = Math.max(0, requiredLevel - currentLevel); // Ensure gap is never negative
+        
+        // Only add skills that are unique to the target role
+        calculatedGaps.push({
+          skillName,
+          currentLevel,
+          requiredLevel,
+          gap,
+          status
+        });
       }
-      
-      const gap = Math.max(0, requiredLevel - currentLevel); // Ensure gap is never negative
-      
-      // Add all target skills to show complete comparison
-      calculatedGaps.push({
-        skillName,
-        currentLevel,
-        requiredLevel,
-        gap,
-        status
-      });
     });
     
-    // Sort gaps by status (missing first, then partial) and then by gap size
+    // Sort gaps by status and then by gap size
     calculatedGaps.sort((a, b) => {
       // First sort by status
       if (a.status === 'missing' && b.status !== 'missing') return -1;
@@ -282,31 +277,6 @@ export default function CareerRoleComparison() {
       // Then sort by gap size for same status
       return b.gap - a.gap;
     });
-    
-    // IMPORTANT: Add a forced gap for target roles that are different than current
-    // This ensures we always show at least some skill gaps when comparing different roles
-    if (calculatedGaps.length > 0 && 
-        targetSkills.length > 0 && 
-        currentRole.id !== targetRole.id && 
-        calculatedGaps.every(gap => gap.status === 'proficient')) {
-      
-      // We need to ensure at least a few skills have gaps
-      const skillsToUpdate = Math.min(2, calculatedGaps.length);
-      for (let i = 0; i < skillsToUpdate; i++) {
-        calculatedGaps[i].status = 'partial';
-        calculatedGaps[i].gap = 25; // Show a moderate gap
-        calculatedGaps[i].currentLevel = 65; // Lower the current level
-      }
-      
-      // Re-sort the list to show the partial skills at the top
-      calculatedGaps.sort((a, b) => {
-        if (a.status === 'missing' && b.status !== 'missing') return -1;
-        if (a.status !== 'missing' && b.status === 'missing') return 1;
-        if (a.status === 'partial' && b.status === 'proficient') return -1;
-        if (a.status === 'proficient' && b.status === 'partial') return 1;
-        return b.gap - a.gap;
-      });
-    }
     
     setSkillGaps(calculatedGaps);
   };
