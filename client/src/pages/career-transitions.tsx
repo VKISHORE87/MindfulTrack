@@ -5,6 +5,7 @@ import CareerRoleComparison from "@/components/interview/CareerRoleComparison";
 import CareerPathComponent from "@/components/career/CareerPathComponent";
 import CareerGoalForm from "@/components/career/CareerGoalForm";
 import RoleTransitionTemplates from "@/components/career/RoleTransitionTemplates";
+import RoleComparisonCard from "@/components/career/RoleComparisonCard";
 import { AdminPanel } from "@/components/admin/AdminPanel";
 import { 
   Card, 
@@ -23,7 +24,8 @@ import {
   GraduationCap, 
   TrendingUp, 
   Settings,
-  Target
+  Target,
+  Search
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -33,6 +35,8 @@ export default function CareerTransitionsPage() {
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [selectedTab, setSelectedTab] = useState<string>('role-comparison');
   const [roleSearchTerm, setRoleSearchTerm] = useState<string>('');
+  const [currentRoleId, setCurrentRoleId] = useState<number | null>(null);
+  const [targetRoleId, setTargetRoleId] = useState<number | null>(null);
   const { toast } = useToast();
   const [location] = useLocation();
   
@@ -77,6 +81,52 @@ export default function CareerTransitionsPage() {
       return res.json();
     }
   });
+  
+  // Fetch current role data
+  const { data: currentRole, isLoading: currentRoleLoading } = useQuery<InterviewRole>({
+    queryKey: ['/api/interview/roles', currentRoleId],
+    queryFn: async () => {
+      if (!currentRoleId) return null;
+      const res = await fetch(`/api/interview/roles/${currentRoleId}`);
+      if (!res.ok) {
+        throw new Error('Failed to fetch current role');
+      }
+      return res.json();
+    },
+    enabled: !!currentRoleId
+  });
+  
+  // Fetch target role data
+  const { data: targetRole, isLoading: targetRoleLoading } = useQuery<InterviewRole>({
+    queryKey: ['/api/interview/roles', targetRoleId],
+    queryFn: async () => {
+      if (!targetRoleId) return null;
+      const res = await fetch(`/api/interview/roles/${targetRoleId}`);
+      if (!res.ok) {
+        throw new Error('Failed to fetch target role');
+      }
+      return res.json();
+    },
+    enabled: !!targetRoleId
+  });
+  
+  // Handler for viewing the learning path
+  const handleViewLearningPath = () => {
+    if (targetRoleId) {
+      // Navigate to learning roadmap tab
+      setSelectedTab('learning-roadmap');
+      toast({
+        title: "Learning path view",
+        description: "Navigated to the learning roadmap section"
+      });
+    } else {
+      toast({
+        title: "No target role selected",
+        description: "Please select a target role to view its learning path",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <>
@@ -120,7 +170,82 @@ export default function CareerTransitionsPage() {
             <CareerRoleComparison />
           </TabsContent>
           
-          <TabsContent value="transition-templates" className="space-y-4">
+          <TabsContent value="transition-templates" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl">Role Comparison & Required Skills</CardTitle>
+                <CardDescription>
+                  Compare roles side-by-side and see the skills needed for a successful transition
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Role selection controls */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Current Role Selection */}
+                  <div className="space-y-2">
+                    <h3 className="text-base font-medium flex items-center">
+                      <BriefcaseIcon className="h-4 w-4 mr-2 text-blue-600" />
+                      Current Role
+                    </h3>
+                    <select 
+                      className="w-full h-10 px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      value={currentRoleId || ''}
+                      onChange={(e) => setCurrentRoleId(e.target.value ? parseInt(e.target.value) : null)}
+                    >
+                      <option value="">-- Select your current role --</option>
+                      {roles?.map((role) => (
+                        <option key={`current-${role.id}`} value={role.id}>
+                          {role.title} ({role.industry})
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-muted-foreground">
+                      Select the role that best matches your current position
+                    </p>
+                  </div>
+                  
+                  {/* Target Role Selection */}
+                  <div className="space-y-2">
+                    <h3 className="text-base font-medium flex items-center">
+                      <Target className="h-4 w-4 mr-2 text-purple-600" />
+                      Target Role
+                    </h3>
+                    <select 
+                      className="w-full h-10 px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      value={targetRoleId || ''}
+                      onChange={(e) => setTargetRoleId(e.target.value ? parseInt(e.target.value) : null)}
+                    >
+                      <option value="">-- Select your target role --</option>
+                      {roles?.map((role) => (
+                        <option key={`target-${role.id}`} value={role.id}>
+                          {role.title} ({role.industry})
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-muted-foreground">
+                      Select the role you want to transition into
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Role Comparison Card */}
+                {(currentRoleLoading || targetRoleLoading) ? (
+                  // Loading state
+                  <div className="animate-pulse space-y-4">
+                    <div className="h-12 bg-muted rounded-lg"></div>
+                    <div className="h-64 bg-muted rounded-lg"></div>
+                  </div>
+                ) : (
+                  // Render comparison card when both roles are selected
+                  <RoleComparisonCard 
+                    currentRole={currentRole} 
+                    targetRole={targetRole} 
+                    onViewLearningPath={handleViewLearningPath}
+                  />
+                )}
+              </CardContent>
+            </Card>
+            
             <RoleTransitionTemplates />
           </TabsContent>
           
