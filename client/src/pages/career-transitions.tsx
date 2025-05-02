@@ -23,6 +23,7 @@ import {
   GraduationCap, 
   TrendingUp, 
   Settings,
+  Bookmark as BookmarkIcon,
   Target,
   Search
 } from "lucide-react";
@@ -126,6 +127,47 @@ export default function CareerTransitionsPage() {
       });
     }
   };
+  
+  // Handler for saving target role to user profile
+  const handleSaveTargetRole = async () => {
+    if (!targetRoleId) {
+      toast({
+        title: "No target role selected",
+        description: "Please select a target role first",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      // Make API call to save target role
+      const response = await fetch('/api/users/career-goals/set-target-role', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ targetRoleId }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save target role');
+      }
+      
+      // Show success message
+      toast({
+        title: "Target role saved",
+        description: `${targetRole?.title} has been set as your target role`,
+      });
+      
+    } catch (error) {
+      console.error('Error saving target role:', error);
+      toast({
+        title: "Error saving target role",
+        description: "Please try again later",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <>
@@ -142,14 +184,10 @@ export default function CareerTransitionsPage() {
         </header>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
-          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-4">
+          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-3">
             <TabsTrigger value="transition-templates">
               <BriefcaseIcon className="h-4 w-4 mr-2" />
               Role Transitions
-            </TabsTrigger>
-            <TabsTrigger value="career-paths">
-              <Compass className="h-4 w-4 mr-2" />
-              Career Paths
             </TabsTrigger>
             <TabsTrigger value="learning-roadmap">
               <GraduationCap className="h-4 w-4 mr-2" />
@@ -228,11 +266,42 @@ export default function CareerTransitionsPage() {
                   </div>
                 ) : currentRoleId && targetRoleId ? (
                   // Render comparison card when both roles are selected
-                  <RoleComparisonCard 
-                    currentRole={currentRole ?? null} 
-                    targetRole={targetRole ?? null} 
-                    onViewLearningPath={handleViewLearningPath}
-                  />
+                  <>
+                    <RoleComparisonCard 
+                      currentRole={currentRole ?? null} 
+                      targetRole={targetRole ?? null} 
+                      onViewLearningPath={handleViewLearningPath}
+                    />
+                    
+                    {/* Save Target Role Button */}
+                    <div className="flex justify-end mt-4">
+                      <Button
+                        onClick={handleSaveTargetRole}
+                        className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700"
+                      >
+                        <BookmarkIcon className="h-4 w-4 mr-2" />
+                        Save {targetRole?.title} as Target Role
+                      </Button>
+                    </div>
+                    
+                    {/* Career Path Progression Timeline */}
+                    {targetRoleId && (
+                      <div className="mt-8 pt-6 border-t border-gray-200">
+                        <div className="mb-4">
+                          <h3 className="text-xl font-semibold mb-2 flex items-center">
+                            <Compass className="h-5 w-5 mr-2 text-primary" />
+                            Career Progression Timeline
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            View the recommended path to transition from {currentRole?.title} to {targetRole?.title}
+                          </p>
+                        </div>
+                        <div className="bg-background rounded-lg shadow-sm border p-4">
+                          <CareerPathComponent roleId={targetRoleId} />
+                        </div>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   // Empty state when roles aren't selected
                   <Card className="border-dashed border-gray-300 bg-gray-50">
@@ -247,117 +316,7 @@ export default function CareerTransitionsPage() {
             <RoleTransitionTemplates />
           </TabsContent>
           
-          <TabsContent value="career-paths" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Career Path Explorer</CardTitle>
-                <CardDescription>
-                  Discover common career progression paths for various roles and industries.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Role selection dropdown */}
-                <div className="w-full md:max-w-lg">
-                  <h3 className="text-base font-medium mb-2">Select a role to view its career progression path:</h3>
-                  
-                  {rolesLoading ? (
-                    <div className="animate-pulse h-10 w-full bg-secondary rounded"></div>
-                  ) : (
-                    <div className="space-y-4">
-                      {/* Search and dropdown */}
-                      {/* Search input */}
-                      <div className="relative mb-2">
-                        <label htmlFor="roleSearch" className="text-sm font-medium text-muted-foreground mb-1 block">
-                          Search roles by title or industry:
-                        </label>
-                        <input
-                          id="roleSearch"
-                          type="text"
-                          className="w-full h-10 px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                          placeholder="Type to search..."
-                          value={roleSearchTerm}
-                          onChange={(e) => setRoleSearchTerm(e.target.value)}
-                        />
-                      </div>
-
-                      {/* Role selector */}
-                      <div className="relative">
-                        <label htmlFor="roleSelect" className="text-sm font-medium text-muted-foreground mb-1 block">
-                          Select a role:
-                        </label>
-                        <select 
-                          id="roleSelect"
-                          className="w-full h-10 px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                          value={selectedRoleId || ''}
-                          onChange={(e) => setSelectedRoleId(e.target.value ? parseInt(e.target.value) : null)}
-                        >
-                          <option value="">-- Select a role --</option>
-                          {roles
-                            ?.filter(role => 
-                              roleSearchTerm === '' || 
-                              role.title.toLowerCase().includes(roleSearchTerm.toLowerCase()) ||
-                              (role.industry && role.industry.toLowerCase().includes(roleSearchTerm.toLowerCase()))
-                            )
-                            .map((role) => (
-                              <option key={role.id} value={role.id}>
-                                {role.title} ({role.industry})
-                              </option>
-                            ))
-                          }
-                        </select>
-                        {roleSearchTerm && roles?.filter(role => 
-                          role.title.toLowerCase().includes(roleSearchTerm.toLowerCase()) ||
-                          (role.industry && role.industry.toLowerCase().includes(roleSearchTerm.toLowerCase()))
-                        ).length === 0 && (
-                          <p className="text-xs text-muted-foreground mt-1">No roles match your search.</p>
-                        )}
-                      </div>
-
-                      {/* Selection guidance */}
-                      {selectedRoleId ? (
-                        <div className="py-2">
-                          <p className="text-sm text-primary font-medium">
-                            Role selected: {roles?.find(r => r.id === selectedRoleId)?.title}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            View the career progression path for this role below.
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="py-2">
-                          <p className="text-sm text-muted-foreground">
-                            Select a role from the dropdown above to view its career progression path.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Career path visualization */}
-                {selectedRoleId ? (
-                  <div className="mt-4 border-t pt-6">
-                    <h3 className="text-xl font-semibold mb-4 flex items-center">
-                      <Compass className="h-5 w-5 mr-2 text-primary" />
-                      Career Progression Timeline
-                    </h3>
-                    <div className="bg-background rounded-lg shadow-sm border p-4">
-                      <CareerPathComponent roleId={selectedRoleId} />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-12 bg-muted/30 rounded-lg mt-4">
-                    <Compass className="h-16 w-16 text-primary mx-auto mb-3 opacity-60" />
-                    <h3 className="text-lg font-medium mb-2">Career Path Explorer</h3>
-                    <p className="text-muted-foreground max-w-md mx-auto">
-                      Select a role from the dropdown above to view its detailed career progression timeline, 
-                      required skills, and recommended next steps.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+          {/* Career Paths tab content removed as requested */}
           
           <TabsContent value="learning-roadmap" className="space-y-4">
             <Card>
