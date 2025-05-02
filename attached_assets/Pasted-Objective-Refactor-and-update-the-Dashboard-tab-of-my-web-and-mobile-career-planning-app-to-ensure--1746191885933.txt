@@ -1,0 +1,68 @@
+Objective:
+Refactor and update the Dashboard tab of my web and mobile career planning app to ensure it reflects meaningful, up-to-date, and user-specific data, integrates seamlessly with other tabs, and maintains clean, non-redundant UI.
+
+✅ Functional Requirements:
+Integrate with Existing Inputs:
+
+Fetch and display data based on:
+
+Current Role
+
+Target Role
+
+Pull data from the same sources used in the Skills Gap and Role Transition tabs.
+
+Display These Metrics in Dashboard:
+
+Progress toward target role (e.g., % skills acquired).
+
+Top skill gaps (3–5 prioritized).
+
+Recommended next step (placeholder for AI coach).
+
+Alternate career suggestions (placeholder or summary view).
+
+A summary of completed and pending skill-building actions.
+
+Keep the Dashboard Modular:
+
+Break into reusable components like ProgressTracker, SkillGapSummary, CareerPathRecommendations.
+
+Allow these components to pull updated data dynamically from shared state/store (e.g., Redux, Context API, or centralized API).
+
+Clean UI:
+
+Remove any redundant buttons or UI elements already present in other tabs (e.g., duplicate “Assess Skills” or “Explore Roles” buttons).
+
+Ensure a clean layout consistent with design system (if any).
+
+Inter-tab Compatibility:
+
+Make sure updates to the Dashboard do not break existing functionality in:
+
+Skill Gap Assessment tab
+
+Role Transition Path tab
+
+AI Coach tab (even though it’s inactive now)
+
+Future-Proof for AI Coach Integration:
+
+Leave placeholders or components ready for future integration with the AI coach (e.g., AIRecommendationsPanel).
+
+📦 Technical Expectations:
+Language: React (if using web) or React Native (if for mobile).
+
+If using a framework like Next.js or Expo, ensure proper routing and state persistence.
+
+Use of mock data or dummy content is acceptable for metrics until backend integration.
+
+Avoid code duplication; reuse components where appropriate.
+
+🧼 UI/UX Cleanup:
+Identify and remove any buttons or elements already available in the other tabs.
+
+Ensure consistent padding, spacing, and font usage across components.
+
+Maintain responsive layout for both web and mobile formats.
+
