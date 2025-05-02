@@ -22,9 +22,17 @@ export default function ProgressTracker({
   const { currentGoal, targetRoleSkills } = useCareerGoal();
   
   // Calculate stats based on context data if available
-  const actualProgress = progress || (currentGoal ? Math.min(80, Math.max(30, completedSkills / Math.max(1, totalSkills) * 100)) : 0);
+  const actualProgress = progress || 
+    (completedSkills && totalSkills ? 
+      Math.min(80, Math.max(30, completedSkills / Math.max(1, totalSkills) * 100)) : 
+      0);
+  
   const actualCompletedSkills = completedSkills || 0;
   const actualTotalSkills = totalSkills || (targetRoleSkills ? targetRoleSkills.length : 0);
+  
+  // Safe access to currentGoal properties
+  const goalTitle = currentGoal?.title || '';
+  const timelineMonths = currentGoal?.timelineMonths || 0;
   
   return (
     <Card className="border-primary/10 bg-gradient-to-r from-blue-50/50 to-indigo-50/50">
@@ -51,13 +59,13 @@ export default function ProgressTracker({
           </div>
           
           {/* Target Role */}
-          {(targetRole?.title || currentGoal?.title) && (
+          {(targetRole?.title || goalTitle) && (
             <div className="flex items-center p-3 bg-indigo-50 rounded-lg">
               <Award className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" />
               <div>
-                <div className="font-medium text-sm">Target Role: {targetRole?.title || currentGoal?.title}</div>
+                <div className="font-medium text-sm">Target Role: {targetRole?.title || goalTitle}</div>
                 <div className="text-xs text-gray-600">
-                  Estimated timeline: {targetRole?.timeframe || currentGoal?.timelineMonths ? `${currentGoal.timelineMonths} months` : '6-12 months'}
+                  Estimated timeline: {targetRole?.timeframe || (timelineMonths > 0 ? `${timelineMonths} months` : '6-12 months')}
                 </div>
               </div>
             </div>

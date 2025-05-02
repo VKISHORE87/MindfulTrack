@@ -5,9 +5,10 @@ import { useCareerGoal } from "@/contexts/CareerGoalContext";
 
 interface Skill {
   name: string;
-  status?: 'missing' | 'improvement' | 'strong';
+  status?: 'missing' | 'improvement' | 'strong' | string;
   percentage?: number;
   priority?: number;
+  [key: string]: any; // Allow additional properties
 }
 
 interface SkillGapSummaryProps {

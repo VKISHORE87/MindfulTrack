@@ -206,7 +206,7 @@ export default function Dashboard({ user }: { user: any }) {
             {/* A2. Skill Gap Summary */}
             <div>
               <SkillGapSummary 
-                skills={dashboardData?.keySkills} 
+                skills={dashboardData?.keySkills as any[]} 
                 maxDisplayed={5}
               />
             </div>
