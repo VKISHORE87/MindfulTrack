@@ -2,27 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import LearningPathCard from "@/components/ui/LearningPathCard";
 import { Link } from "wouter";
-
-interface Resource {
-  id: number;
-  completed: boolean;
-}
-
-interface Module {
-  id: number;
-  title: string;
-  description: string;
-  estimatedHours: number;
-  resources: Resource[];
-}
-
-interface LearningResource {
-  id: number;
-  title: string;
-  description: string;
-  resourceType: string;
-  duration: number;
-}
+import { Module, LearningResource } from "@/types/learning";
 
 interface LearningPathProps {
   title: string;

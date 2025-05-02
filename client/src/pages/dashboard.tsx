@@ -233,7 +233,13 @@ export default function Dashboard({ user }: { user: any }) {
               <LearningPath 
                 title={dashboardData.learningPath.title}
                 modules={dashboardData.learningPath.modules}
-                resources={learningResources || [] as LearningResource[]}
+                resources={learningResources ? learningResources.map(resource => ({
+                  ...resource,
+                  // Ensure required fields exist with fallback values for null
+                  description: resource.description || 'No description available',
+                  resourceType: resource.resourceType || 'unknown',
+                  duration: resource.duration || 60,
+                })) : []}
               />
             </div>
           )}

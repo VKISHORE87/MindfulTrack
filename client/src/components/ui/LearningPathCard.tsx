@@ -1,19 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Video, FileText } from "lucide-react";
-
-interface Resource {
-  id: number;
-  completed: boolean;
-}
-
-interface LearningResource {
-  id: number;
-  title: string;
-  description: string;
-  resourceType: string;
-  duration: number;
-}
+import { Resource, LearningResource } from "@/types/learning";
 
 interface LearningPathCardProps {
   moduleNumber: number;

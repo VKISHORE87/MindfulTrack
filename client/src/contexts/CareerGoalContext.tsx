@@ -97,18 +97,35 @@ export const CareerGoalProvider = ({ children }: { children: ReactNode }) => {
         });
       }
       
-      // Invalidate all dashboard and learning path related queries
-      queryClient.invalidateQueries({ queryKey: ['/api/users/dashboard'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/users/learning-paths'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/learning-resources'] });
+      // Invalidate ALL key queries to ensure full data refresh
+      queryClient.invalidateQueries(); // This invalidates all queries in the cache 
       
-      // Force a full refetch of the current goal data
+      // Force a full refetch of the current goal data first
       await queryClient.refetchQueries({ 
         queryKey: ['/api/users/career-goals/current'],
         type: 'active'
       });
       
-      // Force a dashboard refetch
+      // Force a refetch of role data with new targetRoleId
+      if (updatedGoal && updatedGoal.targetRoleId) {
+        await queryClient.refetchQueries({ 
+          queryKey: [`/api/interview/roles/${updatedGoal.targetRoleId}`],
+          type: 'active'
+        });
+      }
+      
+      // Force these critical queries to refetch in a specific order
+      await queryClient.refetchQueries({ 
+        queryKey: ['/api/learning-resources'],
+        type: 'active'
+      });
+      
+      await queryClient.refetchQueries({ 
+        queryKey: ['/api/users/learning-paths'],
+        type: 'active'
+      });
+      
+      // Finally refetch the dashboard which depends on all of the above
       await queryClient.refetchQueries({ 
         queryKey: ['/api/users/dashboard'],
         type: 'active'
