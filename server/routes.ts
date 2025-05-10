@@ -821,6 +821,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
   
+  // Set a target role for a user's career goal
+  app.post(
+    "/api/users/career-goals/set-target-role",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        // For development, use a mock user ID
+        const userId = req.user ? (req.user as any).id : 1; // Use actual user ID if logged in
+        
+        const { targetRoleId } = req.body;
+        
+        if (!targetRoleId) {
+          return res.status(400).json({ message: "Target role ID is required" });
+        }
+        
+        // Convert to number if it's a string
+        const targetRoleIdNum = typeof targetRoleId === 'string' ? parseInt(targetRoleId) : targetRoleId;
+        
+        // Get the target role to ensure it exists
+        const targetRole = await storage.getInterviewRole(targetRoleIdNum);
+        
+        if (!targetRole) {
+          return res.status(404).json({ message: "Target role not found" });
+        }
+        
+        // Get existing goals for the user
+        const existingGoals = await storage.getCareerGoalsByUserId(userId);
+        let updatedGoal;
+        
+        // If user already has a goal, update it
+        if (existingGoals && existingGoals.length > 0) {
+          // Sort by ID (highest/newest first)
+          const sortedGoals = [...existingGoals].sort((a, b) => b.id - a.id);
+          const mostRecentGoal = sortedGoals[0];
+          
+          // Update the goal with the new target role
+          updatedGoal = await storage.updateCareerGoal(mostRecentGoal.id, {
+            targetRoleId: targetRoleIdNum,
+            title: targetRole.title,
+            description: `Career goal created from role comparison: transition to ${targetRole.title}`
+          });
+          
+          // Create activity entry for updating a target role
+          await storage.createUserActivity({
+            userId,
+            activityType: "update_career_goal",
+            description: `Updated target role to: ${targetRole.title}`,
+            metadata: { goalId: updatedGoal.id, targetRoleId: targetRoleIdNum }
+          });
+        } else {
+          // Create a new goal if none exists
+          updatedGoal = await storage.createCareerGoal({
+            userId,
+            targetRoleId: targetRoleIdNum,
+            title: targetRole.title,
+            description: `Career goal created from role comparison: transition to ${targetRole.title}`,
+            timelineMonths: 12, // Default timeline
+            readiness: 0 // Default readiness
+          });
+          
+          // Create activity entry for setting a career goal
+          await storage.createUserActivity({
+            userId,
+            activityType: "set_career_goal",
+            description: `Set career goal: ${updatedGoal.title}`,
+            metadata: { goalId: updatedGoal.id, targetRoleId: targetRoleIdNum }
+          });
+        }
+        
+        // Return the updated goal with ID
+        res.json({ 
+          goalId: updatedGoal.id,
+          targetRoleId: targetRoleIdNum,
+          title: targetRole.title
+        });
+      } catch (error) {
+        console.error("Error setting target role:", error);
+        next(error);
+      }
+    }
+  );
+  
+  // Select a career goal as the current one
+  app.post(
+    "/api/users/career-goals/:id/select",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const goalId = parseInt(req.params.id);
+        const userId = req.user ? (req.user as any).id : 1; // Use actual user ID if logged in
+        
+        // Check if the goal exists
+        const goal = await storage.getCareerGoal(goalId);
+        
+        if (!goal) {
+          return res.status(404).json({ message: "Career goal not found" });
+        }
+        
+        // Make sure the goal belongs to the user
+        if (goal.userId !== userId) {
+          return res.status(403).json({ message: "You don't have permission to select this goal" });
+        }
+        
+        // Simply return the goal data as it's already selected
+        // In a multi-goal system, we might mark this as the "active" goal
+        res.json(goal);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+  
   // Get current user's career goal
   app.get(
     "/api/users/career-goals/current",
