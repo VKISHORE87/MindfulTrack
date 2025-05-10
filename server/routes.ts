@@ -2522,7 +2522,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const newProgress = await storage.createUserResourceProgress({
           userId,
           resourceId,
-          completedAt: new Date(),
           rating: req.body.rating,
           feedback: req.body.feedback,
           timeSpentMinutes: req.body.timeSpentMinutes

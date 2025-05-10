@@ -182,8 +182,12 @@ export default function Dashboard({ user }: { user: any }) {
       
       {/* Main Dashboard Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-        <TabsList className="grid w-full grid-cols-2 md:w-auto md:inline-flex">
+        <TabsList className="grid w-full grid-cols-3 md:w-auto md:inline-flex">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="progress" className="gap-2">
+            <Activity className="h-4 w-4 text-primary" />
+            Progress
+          </TabsTrigger>
           {showAiFeatures && <TabsTrigger value="ai" className="gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
             AI Insights
@@ -282,6 +286,11 @@ export default function Dashboard({ user }: { user: any }) {
               <div>Debug - API Goal: {dashboardData?.careerGoal?.title || 'not set'} (ID: {dashboardData?.careerGoal?.id || 'none'})</div>
             </div>
           )}
+        </TabsContent>
+        
+        {/* Progress Tab */}
+        <TabsContent value="progress" className="pt-6">
+          <ProgressTab userId={user.id} />
         </TabsContent>
         
         {/* AI Insights Tab */}
