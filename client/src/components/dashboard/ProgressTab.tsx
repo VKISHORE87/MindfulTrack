@@ -306,7 +306,7 @@ const ProgressTab: React.FC<ProgressTabProps> = ({ userId }) => {
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold">
-                  {progressStats.skills.reduce((total, skill) => total + skill.total, 0)}
+                  {progressData.skills.reduce((total, skill) => total + skill.total, 0)}
                 </p>
               </CardContent>
             </Card>
@@ -317,7 +317,7 @@ const ProgressTab: React.FC<ProgressTabProps> = ({ userId }) => {
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold text-green-500">
-                  {progressStats.skills.reduce((total, skill) => total + skill.completed, 0)}
+                  {progressData.skills.reduce((total, skill) => total + skill.completed, 0)}
                 </p>
               </CardContent>
             </Card>
@@ -328,7 +328,7 @@ const ProgressTab: React.FC<ProgressTabProps> = ({ userId }) => {
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold text-primary">
-                  {progressStats.overallPercent}%
+                  {progressData.overallPercent}%
                 </p>
               </CardContent>
             </Card>
