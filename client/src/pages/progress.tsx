@@ -59,14 +59,23 @@ export default function ProgressPage({ user }: { user: any }) {
   }
   
   // Calculate progress statistics
-  const resourcesStarted = userProgress?.filter(p => p.progress > 0) || [];
-  const resourcesCompleted = userProgress?.filter(p => p.completed) || [];
-  const totalResources = resources?.length || 0;
+  // Using the new progress data structure
+  const legacyProgressItems = userProgress?.legacyProgress || [];
+  const resourcesStarted = legacyProgressItems.filter(p => p.progress > 0);
+  const resourcesCompleted = legacyProgressItems.filter(p => p.completed);
   
-  const completionPercentage = totalResources > 0 
-    ? Math.round((resourcesCompleted.length / totalResources) * 100) 
-    : 0;
+  // Use the new progress stats for total calculations
+  const overallProgressPercent = userProgress?.overallPercent || 0;
+  const skillProgressStats = userProgress?.skills || [];
   
+  // Count total resources from our API data or fallback to resources length
+  const totalCompletedResources = skillProgressStats.reduce((sum, skill) => sum + skill.completed, 0);
+  const totalResources = skillProgressStats.reduce((sum, skill) => sum + skill.total, 0) || resources?.length || 0;
+  
+  // Calculate completion percentage
+  const completionPercentage = overallProgressPercent;
+  
+  // Calculate total learning time
   const totalLearningTimeMinutes = resourcesCompleted.reduce((total, progress) => {
     const resource = resources?.find(r => r.id === progress.resourceId);
     return total + (resource?.duration || 0);
@@ -79,13 +88,15 @@ export default function ProgressPage({ user }: { user: any }) {
     ? Math.round(userSkills.reduce((sum, skill) => sum + (skill.currentLevel / skill.targetLevel * 100), 0) / userSkills.length)
     : 0;
   
-  // Sort learning resources by completion date
-  const completedResourcesByDate = [...(resourcesCompleted || [])].sort((a, b) => {
-    return new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime();
+  // Sort learning resources by completion date (using legacy data for now)
+  const completedResourcesByDate = [...resourcesCompleted].sort((a, b) => {
+    return new Date(b.completedAt || 0).getTime() - new Date(a.completedAt || 0).getTime();
   });
   
   // Group resources by month for the progress chart
   const resourcesByMonth = resourcesCompleted.reduce((acc, progress) => {
+    if (!progress.completedAt) return acc;
+    
     const date = new Date(progress.completedAt);
     const monthYear = `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
     
@@ -124,7 +135,7 @@ export default function ProgressPage({ user }: { user: any }) {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Overall Progress</p>
-                  <p className="text-xl font-bold">{dashboardData?.stats?.overallProgress || 0}%</p>
+                  <p className="text-xl font-bold">{completionPercentage}%</p>
                 </div>
               </CardContent>
             </Card>
@@ -136,7 +147,7 @@ export default function ProgressPage({ user }: { user: any }) {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Resources Completed</p>
-                  <p className="text-xl font-bold">{resourcesCompleted.length} / {totalResources}</p>
+                  <p className="text-xl font-bold">{totalCompletedResources} / {totalResources}</p>
                 </div>
               </CardContent>
             </Card>
@@ -160,7 +171,7 @@ export default function ProgressPage({ user }: { user: any }) {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Skill Progress</p>
-                  <p className="text-xl font-bold">{averageSkillProgress}%</p>
+                  <p className="text-xl font-bold">{userProgress?.skillPercent || 0}%</p>
                 </div>
               </CardContent>
             </Card>
@@ -206,18 +217,33 @@ export default function ProgressPage({ user }: { user: any }) {
                 <h3 className="text-lg font-semibold">Path Completion for {currentCareerGoal?.title || 'Current Goal'}</h3>
               </CardHeader>
               <CardContent>
-                {learningPaths && learningPaths.length > 0 && currentCareerGoal ? (
+                {learningPaths && Array.isArray(learningPaths) && learningPaths.length > 0 && currentCareerGoal ? (
                   <div className="space-y-6">
                     {/* Show all learning paths since we might not have one specifically for the current goal yet */}
                     {learningPaths.map((path) => {
+                      if (!path.modules || typeof path.modules !== 'object') {
+                        return null;
+                      }
+                      
+                      // Parse modules if it's a string
+                      const moduleData = typeof path.modules === 'string' 
+                        ? JSON.parse(path.modules)
+                        : path.modules;
+                        
+                      // Get array of modules
+                      const modules = Array.isArray(moduleData) ? moduleData : [];
+                      
                       // Calculate path completion
-                      const totalPathResources = path.modules.reduce(
-                        (total, module) => total + module.resources.length, 
+                      const totalPathResources = modules.reduce(
+                        (total, module) => {
+                          return total + (Array.isArray(module.resources) ? module.resources.length : 0);
+                        }, 
                         0
                       );
                       
-                      const completedPathResources = path.modules.reduce(
+                      const completedPathResources = modules.reduce(
                         (total, module) => {
+                          if (!Array.isArray(module.resources)) return total;
                           return total + module.resources.filter(r => r.completed).length;
                         }, 
                         0
