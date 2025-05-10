@@ -2479,15 +2479,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(403).json({ message: "Forbidden" });
         }
 
-        const progress = await storage.getUserProgressByUserId(userId);
-        res.json(progress);
+        // Get legacy progress (for backward compatibility)
+        const legacyProgress = await storage.getUserProgressByUserId(userId);
+        
+        // Get new detailed progress statistics using the new method
+        const progressStats = await storage.calculateUserProgressStats(userId);
+        
+        // Return both legacy progress data and new structure
+        res.json({
+          ...progressStats,
+          legacyProgress  // Include legacy data for backward compatibility
+        });
       } catch (error) {
+        console.error("Error fetching user progress:", error);
         next(error);
       }
     }
   );
 
-  // Update user progress for a resource
+  // Mark a resource as completed
+  app.post(
+    "/api/users/:userId/resources/:resourceId/complete",
+    isAuthenticated,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const userId = parseInt(req.params.userId);
+        const resourceId = parseInt(req.params.resourceId);
+        
+        // Check if user is updating their own progress
+        if (req.user && (req.user as any).id !== userId) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
+        
+        // Check if this resource is already marked as completed
+        const existingProgress = await storage.getUserResourceProgressByUserAndResource(userId, resourceId);
+        
+        if (existingProgress) {
+          return res.status(409).json({ message: "Resource already marked as completed" });
+        }
+        
+        // Create progress record
+        const newProgress = await storage.createUserResourceProgress({
+          userId,
+          resourceId,
+          completedAt: new Date(),
+          rating: req.body.rating,
+          feedback: req.body.feedback,
+          timeSpentMinutes: req.body.timeSpentMinutes
+        });
+        
+        // Return the newly created progress record
+        res.status(201).json(newProgress);
+      } catch (error) {
+        console.error("Error marking resource as completed:", error);
+        next(error);
+      }
+    }
+  );
+  
+  // Un-mark a resource as completed
+  app.delete(
+    "/api/users/:userId/resources/:resourceId/complete",
+    isAuthenticated,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const userId = parseInt(req.params.userId);
+        const resourceId = parseInt(req.params.resourceId);
+        
+        // Check if user is updating their own progress
+        if (req.user && (req.user as any).id !== userId) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
+        
+        // Find the progress record
+        const existingProgress = await storage.getUserResourceProgressByUserAndResource(userId, resourceId);
+        
+        if (!existingProgress) {
+          return res.status(404).json({ message: "No completion record found for this resource" });
+        }
+        
+        // Delete the progress record
+        await storage.deleteUserResourceProgress(existingProgress.id);
+        
+        // Return success
+        res.status(200).json({ message: "Resource completion record deleted successfully" });
+      } catch (error) {
+        console.error("Error removing resource completion:", error);
+        next(error);
+      }
+    }
+  );
+  
+  // Legacy endpoint - Update user progress for a resource
   app.post(
     "/api/user-progress",
     isAuthenticated,

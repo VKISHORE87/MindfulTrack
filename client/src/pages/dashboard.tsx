@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Sparkles, Activity } from "lucide-react";
 
 // New modular components
 import ProgressTracker from "@/components/dashboard/ProgressTracker";
@@ -14,6 +14,7 @@ import AIRecommendationsPanel from "@/components/dashboard/AIRecommendationsPane
 import SkillRadarChart from "@/components/dashboard/SkillRadarChart";
 import CareerRoadmap from "@/components/dashboard/CareerRoadmap";
 import NotificationPanel from "@/components/dashboard/NotificationPanel";
+import ProgressTab from "@/components/dashboard/ProgressTab";
 
 // Existing components that we'll reuse in a more modular way
 import StatCard from "@/components/dashboard/StatCard";
