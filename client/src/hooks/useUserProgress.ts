@@ -2,8 +2,9 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
-interface ProgressStats {
+export interface ProgressStats {
   overallPercent: number;
+  skillPercent: number;
   skills: Array<{
     skillId: number;
     skillName: string;
@@ -20,14 +21,33 @@ interface CompletionData {
   timeSpentMinutes?: number;
 }
 
+// A global function to get progress data
+// This ensures we use the same data across all components
+export const fetchUserProgress = async (userId: number): Promise<ProgressStats> => {
+  const response = await fetch(`/api/users/${userId}/progress`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch user progress');
+  }
+  const data = await response.json();
+  
+  // Check if skillPercent is missing and calculate it from skills data
+  if (data.skills && data.skills.length > 0 && !data.skillPercent) {
+    const totalSkillPercent = data.skills.reduce((sum: number, skill: any) => sum + skill.percent, 0);
+    data.skillPercent = Math.round(totalSkillPercent / data.skills.length);
+  }
+  
+  return data;
+};
+
 export function useUserProgress(userId: number) {
-  // Get progress statistics
+  // Get progress statistics using the shared fetch function
   const {
-    data: progressStats,
+    data,
     isLoading,
     error
   } = useQuery<ProgressStats>({
     queryKey: [`/api/users/${userId}/progress`],
+    queryFn: () => fetchUserProgress(userId),
     retry: 1
   });
 

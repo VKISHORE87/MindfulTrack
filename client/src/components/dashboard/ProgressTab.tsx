@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { useUserProgress } from '@/hooks/useUserProgress';
+import { useUserProgress, ProgressStats } from '@/hooks/useUserProgress';
 import { 
   Tabs, 
   TabsContent, 
@@ -25,7 +25,8 @@ import {
   Clock, 
   Target, 
   TrendingUp, 
-  AlertCircle
+  AlertCircle,
+  Edit
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -33,13 +34,21 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { Button } from '@/components/ui/button';
+import { queryClient } from '@/lib/queryClient';
 
 interface ProgressTabProps {
   userId: number;
 }
 
 const ProgressTab: React.FC<ProgressTabProps> = ({ userId }) => {
-  const { progressStats, isLoading, error } = useUserProgress(userId);
+  const { 
+    data: progressStats, 
+    isLoading, 
+    error,
+    markAsCompletedMutation,
+    removeCompletionMutation 
+  } = useUserProgress(userId);
   const [activeTab, setActiveTab] = useState("overview");
 
   if (isLoading) {
