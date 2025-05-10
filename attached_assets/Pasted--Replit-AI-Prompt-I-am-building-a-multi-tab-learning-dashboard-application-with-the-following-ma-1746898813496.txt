@@ -1,0 +1,39 @@
+🔧 Replit AI Prompt:
+
+I am building a multi-tab learning dashboard application with the following major sections: Dashboard, Progress, Skills, and Learning Path. I need you to refactor and complete the full functional flow of the app with the following requirements:
+
+🧩 Functional Flow & Sync:
+Ensure complete data consistency and synchronization across all tabs and sub-pages. Progress shown in the Dashboard, Progress, and Skills tabs must all reflect and update the same underlying state or store.
+
+Implement a global state management system (e.g., React Context, Redux, Zustand) to ensure all components read/write from a single source of truth for progress, skill levels, and learning path data.
+
+Ensure two-way binding where users can update skill progress (e.g., via slider or input), and these updates reflect immediately across relevant tabs.
+
+📊 Skills Tab:
+Add the ability to edit/update skill progress percentage under the "Learning Progress" section.
+
+Ensure the updated values persist and reflect across the Dashboard and Progress tabs.
+
+🧭 Learning Path Tab:
+Populate the Learning Path dynamically when a target role is selected.
+
+Map a step-by-step roadmap from the user's current role to target role. Use mock data if real data is not yet available.
+
+Ensure that this roadmap integrates with skill progress and visually updates as progress is made.
+
+🧪 UI & Interaction Issues:
+Fix broken UI buttons that currently do not respond to clicks or are static.
+
+Ensure all buttons and inputs throughout the app are functional and respond appropriately with user feedback (e.g., loading states, success messages).
+
+Review and test all interactive components on each sub-page of every tab to confirm they are functional and integrated.
+
+🔄 Regression Testing & Stability:
+Ensure new changes do not break existing functionality. Previous features should continue working after introducing new ones.
+
+Implement a regression-safe structure with clean component separation and data flow integrity.
+
+Optionally, include basic unit or integration tests if possible to guard against future breakages.
+
+🧠 Final Goal:
+The end-to-end user journey should be seamless—from landing on the app, selecting roles, updating skills, tracking progress, and following the learning path. All data, interactions, and screens should work harmoniously, reflect updates consistently, and provide a smooth and fully integrated experience.
