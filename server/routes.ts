@@ -2479,8 +2479,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(403).json({ message: "Forbidden" });
         }
 
-        // Get legacy progress (for backward compatibility)
-        const legacyProgress = await storage.getUserProgressByUserId(userId);
+        // Try to get legacy progress (for backward compatibility)
+        let legacyProgress = [];
+        try {
+          legacyProgress = await storage.getUserProgressByUserId(userId);
+        } catch (legacyError) {
+          console.warn("Legacy progress not available:", legacyError.message);
+          // Continue even if legacy progress fails - it's just for backward compatibility
+        }
         
         // Get new detailed progress statistics using the new method
         const progressStats = await storage.calculateUserProgressStats(userId);
@@ -2488,7 +2494,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Return both legacy progress data and new structure
         res.json({
           ...progressStats,
-          legacyProgress  // Include legacy data for backward compatibility
+          legacyProgress: Array.isArray(legacyProgress) ? legacyProgress : []  // Ensure it's always an array
         });
       } catch (error) {
         console.error("Error fetching user progress:", error);
