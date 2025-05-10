@@ -1,193 +1,176 @@
-import React, { createContext, useContext, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { queryClient } from '@/lib/queryClient';
 
+// Types for skills data
 export interface UserSkill {
   id: number;
   userId: number;
   skillId: number;
   skillName: string;
+  description?: string;
   category: string;
   currentLevel: number;
   targetLevel: number;
-  notes: string | null;
-  lastAssessed: string | null;
+  isPriority?: boolean;
+  updatedAt?: string;
+  createdAt?: string;
 }
 
-type SkillsContextType = {
-  skills: UserSkill[] | undefined;
+interface SkillsContextType {
+  skills: UserSkill[] | null;
   isLoading: boolean;
   error: Error | null;
-  updateSkillLevel: (skillId: number, currentLevel: number, targetLevel?: number) => void;
-  addSkill: (skillId: number, currentLevel: number, targetLevel: number) => void;
-  removeSkill: (skillId: number) => void;
-  refetchSkills: () => void;
-};
+  updateSkillLevel: (skillId: number, currentLevel: number, targetLevel: number) => Promise<void>;
+  addSkill: (skillId: number, initialLevel: number, targetLevel: number) => Promise<void>;
+  removeSkill: (skillId: number) => Promise<void>;
+  refetchSkills: () => Promise<void>;
+}
 
-const SkillsContext = createContext<SkillsContextType | undefined>(undefined);
+export const SkillsContext = createContext<SkillsContextType | null>(null);
 
-export const SkillsProvider = ({ children, userId }: { children: ReactNode; userId: number }) => {
+interface SkillsProviderProps {
+  children: ReactNode;
+  userId: number;
+}
+
+export const SkillsProvider: React.FC<SkillsProviderProps> = ({
+  children,
+  userId
+}) => {
   const { toast } = useToast();
+  const [skills, setSkills] = useState<UserSkill[] | null>(null);
 
-  // Fetch user skills
+  // Fetch skills data
   const {
-    data: skills,
+    data,
     isLoading,
     error,
-    refetch: refetchSkills
+    refetch
   } = useQuery<UserSkill[], Error>({
     queryKey: [`/api/users/${userId}/skills`],
-    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // Update skill level mutation
+  // Update local state when data changes
+  useEffect(() => {
+    if (data) {
+      setSkills(data);
+    }
+  }, [data]);
+
+  // Mutation to update skill level
   const updateSkillMutation = useMutation({
     mutationFn: async ({ skillId, currentLevel, targetLevel }: { 
       skillId: number, 
       currentLevel: number, 
-      targetLevel?: number 
+      targetLevel: number 
     }) => {
-      const updateData: any = { currentLevel };
-      if (targetLevel !== undefined) {
-        updateData.targetLevel = targetLevel;
-      }
-
-      const response = await fetch(`/api/users/${userId}/skills/${skillId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updateData),
+      return await apiRequest('PATCH', `/api/users/${userId}/skills/${skillId}`, {
+        currentLevel,
+        targetLevel
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to update skill level');
-      }
-
-      return await response.json();
     },
     onSuccess: () => {
-      toast({
-        title: 'Skill updated',
-        description: 'Your skill level has been updated successfully',
-      });
-
-      // Invalidate relevant queries to refresh data
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/skills`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/dashboard`] });
+      refetch(); // Refetch skills data to update local state
       queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/progress`] });
+      toast({
+        title: 'Skill Updated',
+        description: 'Your skill level has been successfully updated.',
+      });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Failed to update skill',
+        title: 'Error Updating Skill',
         description: error.message,
         variant: 'destructive',
       });
     },
   });
 
-  // Add new skill mutation
+  // Mutation to add a new skill
   const addSkillMutation = useMutation({
     mutationFn: async ({ skillId, currentLevel, targetLevel }: { 
       skillId: number, 
       currentLevel: number, 
       targetLevel: number 
     }) => {
-      const response = await fetch(`/api/users/${userId}/skills`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          skillId,
-          currentLevel,
-          targetLevel,
-          notes: null
-        }),
+      return await apiRequest('POST', `/api/users/${userId}/skills`, {
+        skillId,
+        currentLevel,
+        targetLevel
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to add skill');
-      }
-
-      return await response.json();
     },
     onSuccess: () => {
-      toast({
-        title: 'Skill added',
-        description: 'New skill has been added to your profile',
-      });
-
-      // Invalidate relevant queries to refresh data
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/skills`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/dashboard`] });
+      refetch(); // Refetch skills data to update local state
       queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/progress`] });
+      toast({
+        title: 'Skill Added',
+        description: 'A new skill has been added to your profile.',
+      });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Failed to add skill',
+        title: 'Error Adding Skill',
         description: error.message,
         variant: 'destructive',
       });
     },
   });
 
-  // Remove skill mutation
+  // Mutation to remove a skill
   const removeSkillMutation = useMutation({
     mutationFn: async (skillId: number) => {
-      const response = await fetch(`/api/users/${userId}/skills/${skillId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to remove skill');
-      }
-
-      return true;
+      return await apiRequest('DELETE', `/api/users/${userId}/skills/${skillId}`);
     },
     onSuccess: () => {
-      toast({
-        title: 'Skill removed',
-        description: 'The skill has been removed from your profile',
-      });
-
-      // Invalidate relevant queries to refresh data
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/skills`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/dashboard`] });
+      refetch(); // Refetch skills data to update local state
       queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/progress`] });
+      toast({
+        title: 'Skill Removed',
+        description: 'The skill has been removed from your profile.',
+      });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Failed to remove skill',
+        title: 'Error Removing Skill',
         description: error.message,
         variant: 'destructive',
       });
     },
   });
 
-  // Wrapper functions for mutations
-  const updateSkillLevel = useCallback((skillId: number, currentLevel: number, targetLevel?: number) => {
-    updateSkillMutation.mutate({ skillId, currentLevel, targetLevel });
-  }, [updateSkillMutation]);
+  // Update skill levels
+  const updateSkillLevel = async (skillId: number, currentLevel: number, targetLevel: number) => {
+    await updateSkillMutation.mutateAsync({ skillId, currentLevel, targetLevel });
+  };
 
-  const addSkill = useCallback((skillId: number, currentLevel: number, targetLevel: number) => {
-    addSkillMutation.mutate({ skillId, currentLevel, targetLevel });
-  }, [addSkillMutation]);
+  // Add a new skill
+  const addSkill = async (skillId: number, initialLevel: number, targetLevel: number) => {
+    await addSkillMutation.mutateAsync({ 
+      skillId, 
+      currentLevel: initialLevel, 
+      targetLevel 
+    });
+  };
 
-  const removeSkill = useCallback((skillId: number) => {
-    removeSkillMutation.mutate(skillId);
-  }, [removeSkillMutation]);
+  // Remove a skill
+  const removeSkill = async (skillId: number) => {
+    await removeSkillMutation.mutateAsync(skillId);
+  };
+
+  // Refetch skills data (exposed for other contexts to trigger)
+  const refetchSkills = async () => {
+    await refetch();
+  };
 
   return (
     <SkillsContext.Provider
       value={{
         skills,
         isLoading,
-        error: error || null,
+        error,
         updateSkillLevel,
         addSkill,
         removeSkill,
@@ -201,7 +184,7 @@ export const SkillsProvider = ({ children, userId }: { children: ReactNode; user
 
 export const useSkills = () => {
   const context = useContext(SkillsContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useSkills must be used within a SkillsProvider');
   }
   return context;

@@ -58,7 +58,9 @@ export const SkillsDashboard: React.FC<SkillsDashboardProps> = ({
   const [activeTab, setActiveTab] = useState<string>('table');
 
   // Extract unique categories from skills
-  const categories = skills ? [...new Set(skills.map(skill => skill.category))] : [];
+  const categories = skills 
+    ? Array.from(new Set(skills.map(skill => skill.category)))
+    : [];
 
   // Filter and sort skills based on user selections
   const filteredAndSortedSkills = skills

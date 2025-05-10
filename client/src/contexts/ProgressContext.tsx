@@ -1,126 +1,142 @@
-import React, { createContext, useContext, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { queryClient } from '@/lib/queryClient';
 
-import { ProgressStats } from '@/hooks/useUserProgress';
+// Types for progress data
+export interface ProgressResource {
+  id: number;
+  title?: string;
+  completed: boolean;
+  timeSpent?: number;
+  rating?: number;
+  feedback?: string;
+}
 
-type ProgressContextType = {
-  progressData: ProgressStats | undefined;
+export interface ProgressSkill {
+  skillId: number;
+  skillName: string;
+  completed: number;
+  total: number;
+  percent: number;
+}
+
+export interface ProgressStats {
+  overallPercent: number;
+  skills: ProgressSkill[];
+  resources?: ProgressResource[];
+}
+
+interface UpdateProgressParams {
+  rating?: number;
+  feedback?: string;
+  timeSpentMinutes?: number;
+}
+
+interface ProgressContextType {
+  progressData: ProgressStats | null;
   isLoading: boolean;
   error: Error | null;
-  updateProgress: (resourceId: number, data?: {
-    rating?: number;
-    feedback?: string;
-    timeSpentMinutes?: number;
-  }) => void;
-  removeProgress: (resourceId: number) => void;
-  refetchProgress: () => void;
-};
+  updateProgress: (resourceId: number, params: UpdateProgressParams) => Promise<void>;
+  removeProgress: (resourceId: number) => Promise<void>;
+  refetchProgress: () => Promise<void>;
+}
 
-const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
+export const ProgressContext = createContext<ProgressContextType | null>(null);
 
-export const ProgressProvider = ({ children, userId }: { children: ReactNode; userId: number }) => {
+interface ProgressProviderProps {
+  children: ReactNode;
+  userId: number;
+}
+
+export const ProgressProvider: React.FC<ProgressProviderProps> = ({
+  children,
+  userId
+}) => {
   const { toast } = useToast();
+  const [progressData, setProgressData] = useState<ProgressStats | null>(null);
 
   // Fetch progress data
   const {
-    data: progressData,
+    data,
     isLoading,
     error,
-    refetch: refetchProgress
+    refetch
   } = useQuery<ProgressStats, Error>({
     queryKey: [`/api/users/${userId}/progress`],
-    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // Mark resource as completed mutation
-  const markAsCompletedMutation = useMutation({
-    mutationFn: async ({ resourceId, data }: { resourceId: number, data?: { rating?: number, feedback?: string, timeSpentMinutes?: number } }) => {
-      const response = await fetch(`/api/users/${userId}/progress/${resourceId}/complete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data || {}),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to mark resource as completed');
-      }
-      
-      return await response.json();
+  // Update local state when data changes
+  useEffect(() => {
+    if (data) {
+      setProgressData(data);
+    }
+  }, [data]);
+
+  // Mutation to update progress
+  const updateProgressMutation = useMutation({
+    mutationFn: async ({ resourceId, params }: { resourceId: number, params: UpdateProgressParams }) => {
+      return await apiRequest('POST', `/api/users/${userId}/progress/${resourceId}`, params);
     },
     onSuccess: () => {
+      refetch(); // Refetch progress data to update local state
       toast({
-        title: 'Progress updated',
-        description: 'Your progress has been updated successfully',
+        title: 'Progress Updated',
+        description: 'Your progress has been successfully updated.',
       });
-      
-      // Invalidate relevant queries to refresh data
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/progress`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/dashboard`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/learning-paths`] });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Failed to update progress',
+        title: 'Error Updating Progress',
         description: error.message,
         variant: 'destructive',
       });
     },
   });
 
-  // Remove completion mutation
-  const removeCompletionMutation = useMutation({
+  // Mutation to remove progress
+  const removeProgressMutation = useMutation({
     mutationFn: async (resourceId: number) => {
-      const response = await fetch(`/api/users/${userId}/progress/${resourceId}/remove`, {
-        method: 'POST',
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to remove progress');
-      }
-      
-      return await response.json();
+      return await apiRequest('DELETE', `/api/users/${userId}/progress/${resourceId}`);
     },
     onSuccess: () => {
+      refetch(); // Refetch progress data to update local state
       toast({
-        title: 'Progress removed',
-        description: 'The resource has been marked as incomplete',
+        title: 'Progress Removed',
+        description: 'The resource has been marked as incomplete.',
       });
-      
-      // Invalidate relevant queries to refresh data
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/progress`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/dashboard`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/learning-paths`] });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Failed to remove progress',
+        title: 'Error Removing Progress',
         description: error.message,
         variant: 'destructive',
       });
     },
   });
 
-  // Wrapper functions for the mutations
-  const updateProgress = useCallback((resourceId: number, data?: { rating?: number, feedback?: string, timeSpentMinutes?: number }) => {
-    markAsCompletedMutation.mutate({ resourceId, data });
-  }, [markAsCompletedMutation]);
+  // Update progress for a resource
+  const updateProgress = async (resourceId: number, params: UpdateProgressParams) => {
+    await updateProgressMutation.mutateAsync({ resourceId, params });
+  };
 
-  const removeProgress = useCallback((resourceId: number) => {
-    removeCompletionMutation.mutate(resourceId);
-  }, [removeCompletionMutation]);
+  // Remove progress for a resource
+  const removeProgress = async (resourceId: number) => {
+    await removeProgressMutation.mutateAsync(resourceId);
+  };
+
+  // Refetch progress data (exposed for other contexts to trigger)
+  const refetchProgress = async () => {
+    await refetch();
+  };
 
   return (
     <ProgressContext.Provider
       value={{
         progressData,
         isLoading,
-        error: error || null,
+        error,
         updateProgress,
         removeProgress,
         refetchProgress,
@@ -133,7 +149,7 @@ export const ProgressProvider = ({ children, userId }: { children: ReactNode; us
 
 export const useProgress = () => {
   const context = useContext(ProgressContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useProgress must be used within a ProgressProvider');
   }
   return context;

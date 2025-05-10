@@ -67,11 +67,9 @@ export const LearningPathRoadmap: React.FC<LearningPathRoadmapProps> = ({
     
     const completedResources = moduleResources.filter(resource => {
       // Find if this resource is marked as completed in progress data
-      const resourceExists = progressData.skills
-        .flatMap(skill => skill.resources || [])
-        .some(progressResource => 
-          progressResource && progressResource.id === resource.id && progressResource.completed
-        );
+      const resourceExists = progressData.resources?.some(progressResource => 
+        progressResource && progressResource.id === resource.id && progressResource.completed
+      );
       
       return resourceExists;
     });
@@ -96,13 +94,11 @@ export const LearningPathRoadmap: React.FC<LearningPathRoadmapProps> = ({
     
     const completedResources = path.modules.reduce((count: number, module: any) => {
       const moduleCompletedResources = module.resources?.filter((resource: any) => {
-        return progressData?.skills
-          .flatMap(skill => skill.resources || [])
-          .some(progressResource => 
-            progressResource && 
-            progressResource.id === resource.id && 
-            progressResource.completed
-          );
+        return progressData?.resources?.some(progressResource => 
+          progressResource && 
+          progressResource.id === resource.id && 
+          progressResource.completed
+        );
       })?.length || 0;
       
       return count + moduleCompletedResources;
@@ -210,14 +206,12 @@ export const LearningPathRoadmap: React.FC<LearningPathRoadmapProps> = ({
             <div className="flex flex-col items-end">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-sm font-medium">Overall Progress:</span>
-                <Badge variant={pathProgress >= 80 ? "success" : (pathProgress >= 40 ? "warning" : "default")}>
+                <Badge variant={pathProgress >= 80 ? "default" : (pathProgress >= 40 ? "outline" : "secondary")}>
                   {pathProgress}%
                 </Badge>
               </div>
               
-              <Progress value={pathProgress} className="w-[150px] h-2">
-                <ProgressIndicator style={{ transform: `translateX(-${100 - pathProgress}%)` }} />
-              </Progress>
+              <Progress value={pathProgress} className="w-[150px] h-2" />
             </div>
           </div>
         </CardHeader>

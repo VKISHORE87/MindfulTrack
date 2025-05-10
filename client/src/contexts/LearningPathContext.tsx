@@ -1,237 +1,145 @@
-import React, { createContext, useContext, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { queryClient } from '@/lib/queryClient';
-import { useCareerGoal } from './CareerGoalContext';
+
+// Types for learning path data
+export interface LearningPathResource {
+  id: number;
+  title: string;
+  description?: string;
+  type?: string;
+  url?: string;
+  estimatedTime?: number;
+  difficulty?: string;
+  completed?: boolean;
+}
+
+export interface LearningPathModule {
+  id: number;
+  title: string;
+  description?: string;
+  order: number;
+  resources?: LearningPathResource[];
+}
 
 export interface LearningPath {
   id: number;
-  title: string;
-  description: string | null;
   userId: number;
-  modules: {
-    title: string;
-    description?: string;
-    resources: {
-      id: number;
-      title: string;
-      description?: string;
-      type: string;
-      completed?: boolean;
-      url?: string;
-      skillId?: number;
-    }[];
-  }[];
-  createdAt: string | null;
+  title: string;
+  description?: string;
+  createdAt: string;
+  updatedAt?: string;
+  targetRoleId?: number;
+  isActive?: boolean;
+  modules: LearningPathModule[];
 }
 
-type LearningPathContextType = {
-  learningPaths: LearningPath[] | undefined;
-  activePath: LearningPath | undefined;
+interface LearningPathContextType {
+  learningPaths: LearningPath[] | null;
+  activePath: LearningPath | null;
   isLoading: boolean;
   error: Error | null;
-  createLearningPath: (pathData: { title: string, description?: string }) => void;
-  updateLearningPath: (pathId: number, pathData: { title?: string, description?: string, modules?: any }) => void;
-  deleteLearningPath: (pathId: number) => void;
-  setActivePath: (pathId: number) => void;
-  generatePathForRole: (targetRoleId: number) => void;
-};
+  setActivePath: (pathId: number) => Promise<void>;
+  generatePathForRole: (roleId: number) => Promise<void>;
+  refetchPaths: () => Promise<void>;
+}
 
-const LearningPathContext = createContext<LearningPathContextType | undefined>(undefined);
+export const LearningPathContext = createContext<LearningPathContextType | null>(null);
 
-export const LearningPathProvider = ({ children, userId }: { children: ReactNode; userId: number }) => {
+interface LearningPathProviderProps {
+  children: ReactNode;
+  userId: number;
+}
+
+export const LearningPathProvider: React.FC<LearningPathProviderProps> = ({
+  children,
+  userId
+}) => {
   const { toast } = useToast();
-  const { currentGoal } = useCareerGoal();
+  const [learningPaths, setLearningPaths] = useState<LearningPath[] | null>(null);
+  const [activePath, setActivePath] = useState<LearningPath | null>(null);
 
   // Fetch learning paths
   const {
-    data: learningPaths,
+    data,
     isLoading,
     error,
-    refetch: refetchPaths
+    refetch
   } = useQuery<LearningPath[], Error>({
     queryKey: [`/api/users/${userId}/learning-paths`],
-    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // Create learning path mutation
-  const createPathMutation = useMutation({
-    mutationFn: async (pathData: { title: string, description?: string }) => {
-      const response = await fetch(`/api/users/${userId}/learning-paths`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(pathData),
-      });
+  // Update local state when data changes
+  useEffect(() => {
+    if (data) {
+      setLearningPaths(data);
+      
+      // Set the active path (first in list or one marked as active)
+      const active = data.find(path => path.isActive) || data[0] || null;
+      setActivePath(active);
+    }
+  }, [data]);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to create learning path');
-      }
-
-      return await response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: 'Learning path created',
-        description: 'Your new learning path has been created successfully',
-      });
-
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/learning-paths`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/dashboard`] });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Failed to create learning path',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
-
-  // Update learning path mutation
-  const updatePathMutation = useMutation({
-    mutationFn: async ({ pathId, pathData }: { 
-      pathId: number, 
-      pathData: { title?: string, description?: string, modules?: any } 
-    }) => {
-      const response = await fetch(`/api/users/${userId}/learning-paths/${pathId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(pathData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to update learning path');
-      }
-
-      return await response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: 'Learning path updated',
-        description: 'Your learning path has been updated successfully',
-      });
-
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/learning-paths`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/dashboard`] });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Failed to update learning path',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
-
-  // Delete learning path mutation
-  const deletePathMutation = useMutation({
+  // Mutation to set active path
+  const setActivePathMutation = useMutation({
     mutationFn: async (pathId: number) => {
-      const response = await fetch(`/api/users/${userId}/learning-paths/${pathId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to delete learning path');
-      }
-
-      return true;
+      return await apiRequest('PATCH', `/api/users/${userId}/learning-paths/${pathId}/activate`, {});
     },
     onSuccess: () => {
+      refetch(); // Refetch learning paths to update local state
       toast({
-        title: 'Learning path deleted',
-        description: 'The learning path has been deleted successfully',
+        title: 'Learning Path Activated',
+        description: 'Your active learning path has been updated.',
       });
-
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/learning-paths`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/dashboard`] });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Failed to delete learning path',
+        title: 'Error Activating Path',
         description: error.message,
         variant: 'destructive',
       });
     },
   });
 
-  // Generate learning path for target role mutation
+  // Mutation to generate a new learning path for a role
   const generatePathMutation = useMutation({
-    mutationFn: async (targetRoleId: number) => {
-      const response = await fetch(`/api/users/${userId}/learning-paths/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ targetRoleId }),
+    mutationFn: async (roleId: number) => {
+      return await apiRequest('POST', `/api/users/${userId}/learning-paths/generate`, {
+        targetRoleId: roleId
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to generate learning path');
-      }
-
-      return await response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
+      refetch(); // Refetch learning paths to update local state
       toast({
-        title: 'Learning path generated',
-        description: 'A new learning path has been created for your target role',
+        title: 'Learning Path Generated',
+        description: 'A new learning path has been created based on your target role.',
       });
-
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/learning-paths`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/dashboard`] });
-
-      // After generating, set the new path as active
-      if (data && data.id) {
-        refetchPaths();
-      }
     },
     onError: (error: Error) => {
       toast({
-        title: 'Failed to generate learning path',
+        title: 'Error Generating Path',
         description: error.message,
         variant: 'destructive',
       });
     },
   });
 
-  // Find active path based on current career goal
-  const activePath = currentGoal && learningPaths ? 
-    learningPaths.find(path => 
-      path.title.includes(currentGoal.title) || 
-      (currentGoal.targetRoleId && path.title.includes(`Role ${currentGoal.targetRoleId}`))
-    ) : 
-    undefined;
+  // Set active learning path
+  const setActivePathHandler = async (pathId: number) => {
+    await setActivePathMutation.mutateAsync(pathId);
+  };
 
-  // Wrapper functions for mutations
-  const createLearningPath = useCallback((pathData: { title: string, description?: string }) => {
-    createPathMutation.mutate(pathData);
-  }, [createPathMutation]);
+  // Generate a new learning path for a role
+  const generatePathForRole = async (roleId: number) => {
+    await generatePathMutation.mutateAsync(roleId);
+  };
 
-  const updateLearningPath = useCallback((pathId: number, pathData: { title?: string, description?: string, modules?: any }) => {
-    updatePathMutation.mutate({ pathId, pathData });
-  }, [updatePathMutation]);
-
-  const deleteLearningPath = useCallback((pathId: number) => {
-    deletePathMutation.mutate(pathId);
-  }, [deletePathMutation]);
-
-  const setActivePath = useCallback((pathId: number) => {
-    // This is a client-side action only, it doesn't need an API call
-    // In a real implementation, we might want to persist this preference
-    console.log(`[DEBUG] Setting active path: ${pathId}`);
-  }, []);
-
-  const generatePathForRole = useCallback((targetRoleId: number) => {
-    generatePathMutation.mutate(targetRoleId);
-  }, [generatePathMutation]);
+  // Refetch learning paths (exposed for other contexts to trigger)
+  const refetchPaths = async () => {
+    await refetch();
+  };
 
   return (
     <LearningPathContext.Provider
@@ -239,12 +147,10 @@ export const LearningPathProvider = ({ children, userId }: { children: ReactNode
         learningPaths,
         activePath,
         isLoading,
-        error: error || null,
-        createLearningPath,
-        updateLearningPath,
-        deleteLearningPath,
-        setActivePath,
+        error,
+        setActivePath: setActivePathHandler,
         generatePathForRole,
+        refetchPaths,
       }}
     >
       {children}
@@ -254,7 +160,7 @@ export const LearningPathProvider = ({ children, userId }: { children: ReactNode
 
 export const useLearningPath = () => {
   const context = useContext(LearningPathContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useLearningPath must be used within a LearningPathProvider');
   }
   return context;

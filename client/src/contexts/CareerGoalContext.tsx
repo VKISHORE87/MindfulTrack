@@ -1,161 +1,135 @@
-import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
-import { queryClient } from '@/lib/queryClient';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { CareerGoal } from '@shared/schema';
+import { useToast } from '@/hooks/use-toast';
 
-// Define the context type
-interface CareerGoalContextType {
-  currentGoal: CareerGoal | null;
-  targetRoleSkills: string[];
-  isLoading: boolean;
-  error: Error | null;
-  updateCurrentGoal: (goalId: number) => Promise<void>;
+// Types for career goal data
+export interface CareerGoal {
+  id: number;
+  userId: number;
+  title: string;
+  description?: string;
+  timelineMonths?: number;
+  targetDate?: string | null;
+  targetRoleId: number;
+  createdAt: string;
 }
 
-// Create the context with default values
-const CareerGoalContext = createContext<CareerGoalContextType>({
-  currentGoal: null,
-  targetRoleSkills: [],
-  isLoading: false,
-  error: null,
-  updateCurrentGoal: async () => {}
-});
+export interface TargetRole {
+  id: number;
+  title: string;
+  description?: string;
+  requiredSkills: string[];
+  requiredSkillLevels?: Record<string, number>;
+  industry?: string;
+  level?: string;
+  roleType?: string;
+  averageSalary?: string;
+  growthRate?: string;
+  demandScore?: number;
+  createdAt?: string;
+}
 
-// Provider component
-export const CareerGoalProvider = ({ children }: { children: ReactNode }) => {
+interface CareerGoalContextType {
+  currentGoal: CareerGoal | null;
+  targetRole: TargetRole | null;
+  targetRoleSkills: string[];
+  isLoadingGoal: boolean;
+  isLoadingRole: boolean;
+  goalError: Error | null;
+  roleError: Error | null;
+  refetchGoal: () => Promise<void>;
+}
+
+export const CareerGoalContext = createContext<CareerGoalContextType | null>(null);
+
+interface CareerGoalProviderProps {
+  children: ReactNode;
+}
+
+export const CareerGoalProvider: React.FC<CareerGoalProviderProps> = ({
+  children
+}) => {
+  const { toast } = useToast();
+  const [currentGoal, setCurrentGoal] = useState<CareerGoal | null>(null);
+  const [targetRole, setTargetRole] = useState<TargetRole | null>(null);
   const [targetRoleSkills, setTargetRoleSkills] = useState<string[]>([]);
 
-  // Query to get the current career goal
-  const { 
-    data: currentGoal,
-    isLoading,
-    error
-  } = useQuery<CareerGoal>({
+  // Fetch current career goal
+  const {
+    data: goalData,
+    isLoading: isLoadingGoal,
+    error: goalError,
+    refetch: refetchGoal
+  } = useQuery<CareerGoal, Error>({
     queryKey: ['/api/users/career-goals/current'],
     staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 1,
+    onError: () => {
+      // Don't show toast for missing career goal
+      // This is a normal state when user hasn't set a goal yet
+    }
   });
 
-  // Log career goal for debugging
+  // Update current goal state when data changes
   useEffect(() => {
-    console.log("[DEBUG] CareerGoalContext - Current goal:", currentGoal);
-  }, [currentGoal]);
+    if (goalData) {
+      setCurrentGoal(goalData);
+      console.debug('[DEBUG] CareerGoalContext - Current goal:', goalData);
+    }
+  }, [goalData]);
 
-  // Define a type for the target role response
-  interface TargetRole {
-    id: number;
-    title: string;
-    description?: string;
-    requiredSkills: string[];
-    [key: string]: any;  // Allow additional properties
-  }
-
-  // Query to get the target role details when currentGoal changes
-  const { data: targetRole } = useQuery<TargetRole>({
-    queryKey: [`/api/interview/roles/${currentGoal?.targetRoleId || 0}`],
+  // Fetch target role data when current goal changes
+  const {
+    data: roleData,
+    isLoading: isLoadingRole,
+    error: roleError
+  } = useQuery<TargetRole, Error>({
+    queryKey: ['/api/interview/roles', currentGoal?.targetRoleId],
     enabled: !!currentGoal?.targetRoleId,
-    staleTime: 1000 * 60 * 30, // 30 minutes, roles change less frequently
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    onError: (error) => {
+      toast({
+        title: 'Error Loading Target Role',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
   });
-  
-  // Log target role for debugging
+
+  // Update target role state when data changes
   useEffect(() => {
-    console.log("[DEBUG] CareerGoalContext - Target role:", targetRole);
-  }, [targetRole]);
-
-  // Update targetRoleSkills whenever targetRole changes
-  useEffect(() => {
-    if (targetRole && Array.isArray(targetRole.requiredSkills)) {
-      setTargetRoleSkills(targetRole.requiredSkills);
-    } else {
-      setTargetRoleSkills([]);
+    if (roleData) {
+      setTargetRole(roleData);
+      console.debug('[DEBUG] CareerGoalContext - Target role:', roleData);
+      
+      // Extract required skills from the target role
+      const skills = roleData.requiredSkills || [];
+      setTargetRoleSkills(skills);
     }
-  }, [targetRole]);
-
-  // Function to update the current goal
-  const updateCurrentGoal = async (goalId: number) => {
-    try {
-      // First, make the actual server request
-      const response = await fetch(`/api/users/career-goals/${goalId}/select`, {
-        method: 'POST',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update career goal');
-      }
-      
-      // Get the updated goal to determine the new targetRoleId
-      const updatedGoal = await response.json();
-      console.log("[DEBUG] Career goal updated:", updatedGoal);
-      
-      // Invalidate all career goal related queries
-      queryClient.invalidateQueries({ queryKey: ['/api/users/career-goals/current'] });
-      
-      // Invalidate the target role query if there is a targetRoleId
-      if (updatedGoal && updatedGoal.targetRoleId) {
-        console.log("[DEBUG] Invalidating target role query:", updatedGoal.targetRoleId);
-        queryClient.invalidateQueries({ 
-          queryKey: [`/api/interview/roles/${updatedGoal.targetRoleId}`] 
-        });
-      }
-      
-      // Invalidate ALL key queries to ensure full data refresh
-      queryClient.invalidateQueries(); // This invalidates all queries in the cache 
-      
-      // Force a full refetch of the current goal data first
-      await queryClient.refetchQueries({ 
-        queryKey: ['/api/users/career-goals/current'],
-        type: 'active'
-      });
-      
-      // Force a refetch of role data with new targetRoleId
-      if (updatedGoal && updatedGoal.targetRoleId) {
-        await queryClient.refetchQueries({ 
-          queryKey: [`/api/interview/roles/${updatedGoal.targetRoleId}`],
-          type: 'active'
-        });
-      }
-      
-      // Force these critical queries to refetch in a specific order
-      await queryClient.refetchQueries({ 
-        queryKey: ['/api/learning-resources'],
-        type: 'active'
-      });
-      
-      await queryClient.refetchQueries({ 
-        queryKey: ['/api/users/learning-paths'],
-        type: 'active'
-      });
-      
-      // Finally refetch the dashboard which depends on all of the above
-      await queryClient.refetchQueries({ 
-        queryKey: ['/api/users/dashboard'],
-        type: 'active'
-      });
-    } catch (error) {
-      console.error('Error updating career goal:', error);
-    }
-  };
-
-  // Create a properly typed context value
-  const contextValue: CareerGoalContextType = {
-    currentGoal: currentGoal || null,
-    targetRoleSkills,
-    isLoading,
-    error: error as Error | null,
-    updateCurrentGoal
-  };
+  }, [roleData]);
 
   return (
-    <CareerGoalContext.Provider value={contextValue}>
+    <CareerGoalContext.Provider
+      value={{
+        currentGoal,
+        targetRole,
+        targetRoleSkills,
+        isLoadingGoal,
+        isLoadingRole,
+        goalError,
+        roleError,
+        refetchGoal,
+      }}
+    >
       {children}
     </CareerGoalContext.Provider>
   );
-}
+};
 
-// Custom hook for using the context
-export function useCareerGoal() {
+export const useCareerGoal = () => {
   const context = useContext(CareerGoalContext);
   if (!context) {
     throw new Error('useCareerGoal must be used within a CareerGoalProvider');
   }
   return context;
-}
+};
