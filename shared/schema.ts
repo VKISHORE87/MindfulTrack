@@ -104,6 +104,17 @@ export const skillValidations = pgTable("skill_validations", {
   validatedBy: integer("validated_by") // Optional validator (could be another user or system)
 });
 
+// User resource progress for tracking completed learning resources
+export const userResourceProgress = pgTable("user_resource_progress", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  resourceId: integer("resource_id").notNull().references(() => learningResources.id),
+  completedAt: timestamp("completed_at").defaultNow(),
+  rating: integer("rating"), // Optional user rating (1-5)
+  feedback: text("feedback"), // Optional user feedback
+  timeSpentMinutes: integer("time_spent_minutes"), // Optional tracking of time spent
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -183,6 +194,14 @@ export const insertSkillValidationSchema = createInsertSchema(skillValidations).
   validatedBy: true
 });
 
+export const insertUserResourceProgressSchema = createInsertSchema(userResourceProgress).pick({
+  userId: true,
+  resourceId: true,
+  rating: true,
+  feedback: true,
+  timeSpentMinutes: true
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -210,6 +229,9 @@ export type UserActivity = typeof userActivities.$inferSelect;
 
 export type InsertSkillValidation = z.infer<typeof insertSkillValidationSchema>;
 export type SkillValidation = typeof skillValidations.$inferSelect;
+
+export type InsertUserResourceProgress = z.infer<typeof insertUserResourceProgressSchema>;
+export type UserResourceProgress = typeof userResourceProgress.$inferSelect;
 
 // Extended types for the frontend
 export const skillCategorySchema = z.enum([

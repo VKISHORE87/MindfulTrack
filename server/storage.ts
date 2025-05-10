@@ -8,6 +8,7 @@ import {
   userProgress, UserProgress, InsertUserProgress,
   userActivities, UserActivity, InsertUserActivity,
   skillValidations, SkillValidation, InsertSkillValidation,
+  userResourceProgress, UserResourceProgress, InsertUserResourceProgress,
   interviewRoles, InterviewRole, InsertInterviewRole,
   interviewQuestions, InterviewQuestion, InsertInterviewQuestion,
   interviewSessions, InterviewSession, InsertInterviewSession,
@@ -90,6 +91,25 @@ export interface IStorage {
   createSkillValidation(validation: InsertSkillValidation): Promise<SkillValidation>;
   updateSkillValidation(id: number, validationData: Partial<InsertSkillValidation>): Promise<SkillValidation | undefined>;
   deleteSkillValidation(id: number): Promise<boolean>;
+  
+  // User resource progress methods
+  getUserResourceProgress(id: number): Promise<UserResourceProgress | undefined>;
+  getUserResourceProgressByUserId(userId: number): Promise<UserResourceProgress[]>;
+  getUserResourceProgressByResourceId(resourceId: number): Promise<UserResourceProgress[]>;
+  getUserResourceProgressByUserAndResource(userId: number, resourceId: number): Promise<UserResourceProgress | undefined>;
+  createUserResourceProgress(progress: InsertUserResourceProgress): Promise<UserResourceProgress>;
+  updateUserResourceProgress(id: number, progressData: Partial<InsertUserResourceProgress>): Promise<UserResourceProgress | undefined>;
+  deleteUserResourceProgress(id: number): Promise<boolean>;
+  calculateUserProgressStats(userId: number): Promise<{ 
+    overallPercent: number, 
+    skills: Array<{
+      skillId: number,
+      skillName: string,
+      completed: number,
+      total: number,
+      percent: number
+    }> 
+  }>;
   
   // Interview role methods
   getInterviewRole(id: number): Promise<InterviewRole | undefined>;
