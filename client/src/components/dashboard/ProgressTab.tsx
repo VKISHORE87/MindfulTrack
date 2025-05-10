@@ -43,7 +43,7 @@ interface ProgressTabProps {
 
 const ProgressTab: React.FC<ProgressTabProps> = ({ userId }) => {
   const { 
-    data: progressStats, 
+    data: progressData, 
     isLoading, 
     error,
     markAsCompletedMutation,
@@ -82,7 +82,7 @@ const ProgressTab: React.FC<ProgressTabProps> = ({ userId }) => {
     );
   }
 
-  if (!progressStats || !progressStats.skills || progressStats.skills.length === 0) {
+  if (!progressData || !progressData.skills || progressData.skills.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -99,7 +99,7 @@ const ProgressTab: React.FC<ProgressTabProps> = ({ userId }) => {
   }
 
   // Prepare data for chart
-  const chartData = progressStats.skills.map(skill => ({
+  const chartData = progressData.skills.map(skill => ({
     name: skill.skillName,
     completed: skill.percent,
     remaining: 100 - skill.percent,
@@ -130,16 +130,16 @@ const ProgressTab: React.FC<ProgressTabProps> = ({ userId }) => {
               <div className="flex flex-col space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium">Completion</span>
-                  <span className="text-sm font-medium">{progressStats.overallPercent}%</span>
+                  <span className="text-sm font-medium">{progressData.overallPercent}%</span>
                 </div>
-                <Progress value={progressStats.overallPercent} className="h-2" />
+                <Progress value={progressData.overallPercent} className="h-2" />
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="h-5 w-5 text-green-500" />
                     <div>
                       <p className="text-sm font-medium">Skills in Progress</p>
-                      <p className="text-xl font-bold">{progressStats.skills.length}</p>
+                      <p className="text-xl font-bold">{progressData.skills.length}</p>
                     </div>
                   </div>
                   
@@ -148,8 +148,8 @@ const ProgressTab: React.FC<ProgressTabProps> = ({ userId }) => {
                     <div>
                       <p className="text-sm font-medium">Resources</p>
                       <p className="text-xl font-bold">
-                        {progressStats.skills.reduce((total, skill) => total + skill.completed, 0)} / 
-                        {progressStats.skills.reduce((total, skill) => total + skill.total, 0)}
+                        {progressData.skills.reduce((total, skill) => total + skill.completed, 0)} / 
+                        {progressData.skills.reduce((total, skill) => total + skill.total, 0)}
                       </p>
                     </div>
                   </div>
@@ -159,7 +159,7 @@ const ProgressTab: React.FC<ProgressTabProps> = ({ userId }) => {
                     <div>
                       <p className="text-sm font-medium">Top Skill</p>
                       <p className="text-xl font-bold">
-                        {progressStats.skills.length > 0 ? progressStats.skills[0].skillName : 'None'}
+                        {progressData.skills.length > 0 ? progressData.skills[0].skillName : 'None'}
                       </p>
                     </div>
                   </div>
@@ -178,7 +178,7 @@ const ProgressTab: React.FC<ProgressTabProps> = ({ userId }) => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {progressStats.skills.slice(0, 3).map((skill) => (
+                {progressData.skills.slice(0, 3).map((skill) => (
                   <div key={skill.skillId} className="flex items-center space-x-4">
                     <div className="bg-primary/10 p-2 rounded-full">
                       <BookOpen className="h-4 w-4 text-primary" />
@@ -203,7 +203,7 @@ const ProgressTab: React.FC<ProgressTabProps> = ({ userId }) => {
         <TabsContent value="skills" className="space-y-4">
           {/* Skills Progress Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {progressStats.skills.map((skill) => (
+            {progressData.skills.map((skill) => (
               <HoverCard key={skill.skillId}>
                 <HoverCardTrigger asChild>
                   <Card className="cursor-pointer hover:border-primary transition-colors">

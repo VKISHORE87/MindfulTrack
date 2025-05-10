@@ -129,12 +129,12 @@ export function useUserProgress(userId: number) {
 
   // Check if a resource is completed
   const isResourceCompleted = (resourceId: number): boolean => {
-    if (!progressStats) return false;
+    if (!data) return false;
     
     // If we have legacy progress data, check there first
-    if (progressStats.legacyProgress && progressStats.legacyProgress.length > 0) {
+    if (data.legacyProgress && data.legacyProgress.length > 0) {
       // This would depend on how your legacy progress data is structured
-      const found = progressStats.legacyProgress.find(
+      const found = data.legacyProgress.find(
         (item) => item.resourceId === resourceId && item.completed
       );
       if (found) return true;
@@ -147,13 +147,15 @@ export function useUserProgress(userId: number) {
   };
 
   return {
-    progressStats,
+    data,
     isLoading,
     error,
     markAsCompleted: markAsCompletedMutation.mutate,
     removeCompletion: removeCompletionMutation.mutate,
     isMarkingCompleted: markAsCompletedMutation.isPending,
     isRemovingCompletion: removeCompletionMutation.isPending,
-    isResourceCompleted
+    isResourceCompleted,
+    markAsCompletedMutation,
+    removeCompletionMutation
   };
 }
