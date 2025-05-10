@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProgressStats {
   overallPercent: number;
@@ -30,6 +30,8 @@ export function useUserProgress(userId: number) {
     queryKey: [`/api/users/${userId}/progress`],
     retry: 1
   });
+
+  const { toast } = useToast();
 
   // Mark a resource as completed
   const markAsCompletedMutation = useMutation({
