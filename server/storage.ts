@@ -2027,6 +2027,153 @@ export class DatabaseStorage implements IStorage {
       }
     ];
   }
+  
+  // User resource progress methods
+  async getUserResourceProgress(id: number): Promise<UserResourceProgress | undefined> {
+    const [progress] = await db.select().from(userResourceProgress).where(eq(userResourceProgress.id, id));
+    return progress;
+  }
+  
+  async getUserResourceProgressByUserId(userId: number): Promise<UserResourceProgress[]> {
+    return db.select().from(userResourceProgress).where(eq(userResourceProgress.userId, userId));
+  }
+  
+  async getUserResourceProgressByResourceId(resourceId: number): Promise<UserResourceProgress[]> {
+    return db.select().from(userResourceProgress).where(eq(userResourceProgress.resourceId, resourceId));
+  }
+  
+  async getUserResourceProgressByUserAndResource(userId: number, resourceId: number): Promise<UserResourceProgress | undefined> {
+    const [progress] = await db.select().from(userResourceProgress)
+      .where(and(
+        eq(userResourceProgress.userId, userId),
+        eq(userResourceProgress.resourceId, resourceId)
+      ));
+    return progress;
+  }
+  
+  async createUserResourceProgress(progress: InsertUserResourceProgress): Promise<UserResourceProgress> {
+    const [newProgress] = await db.insert(userResourceProgress).values(progress).returning();
+    
+    // Create activity record for the completion
+    await this.createUserActivity({
+      userId: progress.userId,
+      activityType: 'completed_resource',
+      description: 'Completed a learning resource',
+      metadata: { resourceId: progress.resourceId }
+    });
+    
+    return newProgress;
+  }
+  
+  async updateUserResourceProgress(id: number, progressData: Partial<InsertUserResourceProgress>): Promise<UserResourceProgress | undefined> {
+    const [updatedProgress] = await db.update(userResourceProgress)
+      .set(progressData)
+      .where(eq(userResourceProgress.id, id))
+      .returning();
+    return updatedProgress;
+  }
+  
+  async deleteUserResourceProgress(id: number): Promise<boolean> {
+    const result = await db.delete(userResourceProgress).where(eq(userResourceProgress.id, id));
+    return result.rowCount > 0;
+  }
+  
+  async calculateUserProgressStats(userId: number): Promise<{ 
+    overallPercent: number, 
+    skills: Array<{
+      skillId: number,
+      skillName: string,
+      completed: number,
+      total: number,
+      percent: number
+    }> 
+  }> {
+    // Get all the user's completed resources
+    const completedResources = await this.getUserResourceProgressByUserId(userId);
+    
+    // Get all learning resources
+    const allResources = await this.getAllLearningResources();
+    
+    // Get all skills for this user
+    const userSkills = await this.getUserSkillsByUserId(userId);
+    
+    // Get skill details to map IDs to names
+    const skillDetails = await this.getAllSkills();
+    const skillMap = new Map(skillDetails.map(skill => [skill.id, skill]));
+    
+    // Create a map of skill IDs to resource counts and completions
+    const skillStats = new Map<number, { completed: number, total: number, skillName: string }>();
+    
+    // Initialize skill stats for all user skills
+    userSkills.forEach(userSkill => {
+      const skill = skillMap.get(userSkill.skillId);
+      if (skill) {
+        skillStats.set(userSkill.skillId, {
+          completed: 0,
+          total: 0,
+          skillName: skill.name
+        });
+      }
+    });
+    
+    // Track which resources are completed
+    const completedResourceIds = new Set(completedResources.map(res => res.resourceId));
+    
+    // Analyze all resources to count them by skill
+    allResources.forEach(resource => {
+      // Skip resources with no skill IDs
+      if (!resource.skillIds || resource.skillIds.length === 0) return;
+      
+      // For each skill that this resource maps to
+      resource.skillIds.forEach(skillIdStr => {
+        const skillId = parseInt(skillIdStr, 10);
+        
+        // Only count resources for skills the user has
+        if (skillStats.has(skillId)) {
+          const stats = skillStats.get(skillId)!;
+          stats.total += 1;
+          
+          // If the resource is completed, increment the completed count
+          if (completedResourceIds.has(resource.id)) {
+            stats.completed += 1;
+          }
+          
+          skillStats.set(skillId, stats);
+        }
+      });
+    });
+    
+    // Calculate percentages and format the output
+    let totalCompleted = 0;
+    let totalResources = 0;
+    
+    const skills = Array.from(skillStats.entries()).map(([skillId, stats]) => {
+      totalCompleted += stats.completed;
+      totalResources += stats.total;
+      
+      const percent = stats.total > 0 
+        ? Math.round((stats.completed / stats.total) * 100) 
+        : 0;
+        
+      return {
+        skillId,
+        skillName: stats.skillName,
+        completed: stats.completed,
+        total: stats.total,
+        percent
+      };
+    });
+    
+    // Calculate overall percentage
+    const overallPercent = totalResources > 0 
+      ? Math.round((totalCompleted / totalResources) * 100) 
+      : 0;
+    
+    return {
+      overallPercent,
+      skills: skills.sort((a, b) => b.percent - a.percent) // Sort by highest percentage first
+    };
+  }
 }
 
 // Switch from in-memory storage to database storage
