@@ -3,6 +3,7 @@ import { CareerGoalProvider } from './CareerGoalContext';
 import { SkillsProvider } from './SkillsContext';
 import { ProgressProvider } from './ProgressContext';
 import { LearningPathProvider } from './LearningPathContext';
+import { TargetRoleProvider } from './TargetRoleContext';
 
 // Combined provider component that wraps all the individual providers
 export default function AppProvider({
@@ -14,13 +15,15 @@ export default function AppProvider({
 }) {
   return (
     <CareerGoalProvider userId={userId}>
-      <SkillsProvider userId={userId}>
-        <ProgressProvider userId={userId}>
-          <LearningPathProvider userId={userId}>
-            {children}
-          </LearningPathProvider>
-        </ProgressProvider>
-      </SkillsProvider>
+      <TargetRoleProvider userId={userId}>
+        <SkillsProvider userId={userId}>
+          <ProgressProvider userId={userId}>
+            <LearningPathProvider userId={userId}>
+              {children}
+            </LearningPathProvider>
+          </ProgressProvider>
+        </SkillsProvider>
+      </TargetRoleProvider>
     </CareerGoalProvider>
   );
 }

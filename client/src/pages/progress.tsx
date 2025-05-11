@@ -108,7 +108,7 @@ export default function ProgressPage({ user }: { user: any }) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p>You haven't started any learning resources yet. Begin your learning journey to track your progress.</p>
+          <p>You haven&apos;t started any learning resources yet. Begin your learning journey to track your progress.</p>
         </CardContent>
       </Card>
     );
@@ -307,8 +307,8 @@ export default function ProgressPage({ user }: { user: any }) {
                     <XAxis type="number" domain={[0, 100]} />
                     <YAxis dataKey="name" type="category" width={150} />
                     <Tooltip 
-                      formatter={(value) => [`${value}%`, 'Completion']}
-                      labelFormatter={(label) => `Skill: ${label}`}
+                      formatter={(value: number) => [`${value}%`, 'Completion']}
+                      labelFormatter={(label: string) => `Skill: ${label}`}
                     />
                     <Legend />
                     <Bar dataKey="completed" name="Completed" stackId="a" fill="#10b981" />
