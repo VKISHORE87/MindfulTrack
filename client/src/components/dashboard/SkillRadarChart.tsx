@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCareerGoal } from "@/contexts/CareerGoalContext";
+import { useTargetRole } from '@/contexts/TargetRoleContext';
 import * as d3 from 'd3';
 
 interface SkillRadarChartProps {
@@ -17,16 +18,28 @@ interface SkillData {
 export default function SkillRadarChart({ width, height }: SkillRadarChartProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const { targetRoleSkills, currentGoal } = useCareerGoal();
+  const { targetRole } = useTargetRole();
   const [skills, setSkills] = useState<SkillData[]>([]);
   
-  // Update skills data when targetRoleSkills changes
+  // Update skills data when targetRole or targetRoleSkills changes
   useEffect(() => {
-    // Make sure targetRoleSkills is defined before checking its length
-    if (targetRoleSkills && targetRoleSkills.length > 0) {
+    // First priority: Use targetRole's requiredSkills if available
+    if (targetRole && targetRole.requiredSkills && targetRole.requiredSkills.length > 0) {
+      // Map the skills from targetRole to the format needed for the chart
+      const updatedSkills = targetRole.requiredSkills.map(skill => ({
+        name: skill,
+        // In a real implementation, these values would come from user assessment
+        current: Math.floor(Math.random() * 60) + 20, // 20-80 range for demo
+        target: Math.floor(Math.random() * 20) + 80, // 80-100 range for demo
+      }));
+      
+      setSkills(updatedSkills);
+    } 
+    // Second priority: Fall back to targetRoleSkills from CareerGoalContext
+    else if (targetRoleSkills && targetRoleSkills.length > 0) {
       // Map the skills from context to the format needed for the chart
       const updatedSkills = targetRoleSkills.map(skill => ({
         name: skill,
-        // In a real implementation, these values would come from user assessment
         current: Math.floor(Math.random() * 60) + 20, // 20-80 range for demo
         target: Math.floor(Math.random() * 20) + 80, // 80-100 range for demo
       }));
@@ -42,14 +55,14 @@ export default function SkillRadarChart({ width, height }: SkillRadarChartProps)
         { name: "Project Management", current: 60, target: 75 }
       ]);
     }
-  }, [targetRoleSkills]);
+  }, [targetRole, targetRoleSkills]);
 
   useEffect(() => {
     if (!svgRef.current || skills.length === 0) return;
     
     // Use D3 to create a radar chart
     drawRadarChart();
-  }, [skills, currentGoal]);
+  }, [skills, targetRole, currentGoal]);
 
   const drawRadarChart = () => {
     if (!svgRef.current) return;
@@ -186,7 +199,9 @@ export default function SkillRadarChart({ width, height }: SkillRadarChartProps)
       </CardHeader>
       <CardContent>
         <div className="text-sm text-muted-foreground mb-2">
-          Visualizing current vs. target skills for your role
+          {targetRole ? 
+            `Visualizing current vs. target skills for ${targetRole.title}` : 
+            "Visualizing current vs. target skills for your role"}
         </div>
         <div className="flex justify-center">
           <svg ref={svgRef} width={width} height={height}></svg>

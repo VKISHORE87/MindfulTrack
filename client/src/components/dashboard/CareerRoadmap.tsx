@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCareerGoal } from "@/contexts/CareerGoalContext";
+import { useTargetRole } from '@/contexts/TargetRoleContext';
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Clock, ArrowRight, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -19,11 +20,12 @@ interface Milestone {
 
 export default function CareerRoadmap() {
   const { currentGoal, targetRoleSkills } = useCareerGoal();
+  const { targetRole } = useTargetRole();
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Get the target role name from the current goal
-  const targetRole = currentGoal?.title || 'Not set';
+  // Get the target role name from targetRole context or fall back to current goal
+  const targetRoleName = targetRole?.title || currentGoal?.title || 'Not set';
   
   // Generate appropriate milestones based on targetRoleSkills
   useEffect(() => {
@@ -73,12 +75,20 @@ export default function CareerRoadmap() {
       }
     ];
     
-    // If we have target role skills, customize the middle milestone tasks
-    if (targetRoleSkills.length > 0) {
+    // First check targetRole's requiredSkills, then fall back to targetRoleSkills
+    let skillsToUse = [];
+    if (targetRole && targetRole.requiredSkills && targetRole.requiredSkills.length > 0) {
+      skillsToUse = targetRole.requiredSkills;
+    } else if (targetRoleSkills.length > 0) {
+      skillsToUse = targetRoleSkills;
+    }
+    
+    // If we have skills, customize the middle milestone tasks
+    if (skillsToUse.length > 0) {
       const middleMilestone = { ...defaultMilestones[1] };
       
-      // Update the tasks to reflect the first 3 skills from targetRoleSkills
-      middleMilestone.tasks = targetRoleSkills.slice(0, 3).map(skill => ({
+      // Update the tasks to reflect the first 3 skills from available skills
+      middleMilestone.tasks = skillsToUse.slice(0, 3).map(skill => ({
         title: `Master ${skill}`,
         completed: false
       }));
@@ -87,13 +97,13 @@ export default function CareerRoadmap() {
     }
     
     // Get role-specific preparation tasks in Final Preparation
-    if (targetRole !== 'Not set') {
+    if (targetRoleName !== 'Not set') {
       // Build final preparation tasks based on the target role
       const finalMilestone = { ...defaultMilestones[3] };
       finalMilestone.tasks = [
-        { title: `${targetRole} mock interviews`, completed: false },
+        { title: `${targetRoleName} mock interviews`, completed: false },
         { title: "Portfolio showcasing required skills", completed: false },
-        { title: `${targetRole} application strategy`, completed: false }
+        { title: `${targetRoleName} application strategy`, completed: false }
       ];
       
       defaultMilestones[3] = finalMilestone;
@@ -101,7 +111,7 @@ export default function CareerRoadmap() {
     
     setMilestones(defaultMilestones);
     setIsLoading(false);
-  }, [targetRoleSkills, targetRole]);
+  }, [targetRole, targetRoleSkills, targetRoleName]);
 
   return (
     <Card>
