@@ -114,7 +114,14 @@ export default function Resources({ user }: { user: any }) {
   // Get progress for a resource
   const getResourceProgress = (resourceId: number) => {
     if (!userProgress) return null;
-    return userProgress.find(p => p.resourceId === resourceId);
+    
+    // Based on the structure of the progress response
+    const resourceProgresses = userProgress?.resourceProgress;
+    if (Array.isArray(resourceProgresses)) {
+      return resourceProgresses.find(p => p.resourceId === resourceId);
+    }
+    
+    return null;
   };
   
   // Get icon based on resource type
