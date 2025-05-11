@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -11,17 +11,39 @@ import {
   BookOpen, 
   TrendingUp, 
   ArrowUpRight,
-  Calendar,
-  AlertCircle
+  AlertCircle,
+  Award,
+  Target
 } from "lucide-react";
+import { useUserProgress } from '@/hooks/useUserProgress';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 
 export default function ProgressPage({ user }: { user: any }) {
   const [activeTab, setActiveTab] = useState("overview");
   
-  // Fetch user progress
-  const { data: userProgress, isLoading: isLoadingProgress } = useQuery({
-    queryKey: [`/api/users/${user.id}/progress`],
-  });
+  // Use useUserProgress hook to get progress data with mutations
+  const { 
+    data: progressData, 
+    isLoading, 
+    error,
+    markAsCompletedMutation,
+    removeCompletionMutation 
+  } = useUserProgress(user.id);
   
   // Fetch learning resources
   const { data: resources, isLoading: isLoadingResources } = useQuery({
@@ -43,74 +65,60 @@ export default function ProgressPage({ user }: { user: any }) {
     queryKey: [`/api/users/${user.id}/skills`],
   });
   
-  // Fetch dashboard data
-  const { data: dashboardData, isLoading: isLoadingDashboard } = useQuery({
-    queryKey: [`/api/users/${user.id}/dashboard`],
-  });
+  const isLoadingAll = isLoading || isLoadingResources || isLoadingPaths || isLoadingSkills || isLoadingCurrentGoal;
   
-  const isLoading = isLoadingProgress || isLoadingResources || isLoadingPaths || isLoadingSkills || isLoadingDashboard || isLoadingCurrentGoal;
-  
-  if (isLoading) {
+  if (isLoadingAll) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="space-y-4 p-6">
+        <Skeleton className="h-8 w-[200px]" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Skeleton className="h-40" />
+          <Skeleton className="h-40" />
+          <Skeleton className="h-40" />
+        </div>
+        <Skeleton className="h-[300px]" />
       </div>
     );
   }
-  
-  // Calculate progress statistics
-  // Using the new progress data structure
-  const legacyProgressItems = userProgress?.legacyProgress || [];
-  const resourcesStarted = legacyProgressItems.filter(p => p.progress > 0);
-  const resourcesCompleted = legacyProgressItems.filter(p => p.completed);
-  
-  // Use the new progress stats for total calculations
-  const overallProgressPercent = userProgress?.overallPercent || 0;
-  const skillProgressStats = userProgress?.skills || [];
-  
-  // Count total resources from our API data or fallback to resources length
-  const totalCompletedResources = skillProgressStats.reduce((sum, skill) => sum + skill.completed, 0);
-  const totalResources = skillProgressStats.reduce((sum, skill) => sum + skill.total, 0) || resources?.length || 0;
-  
-  // Calculate completion percentage
-  const completionPercentage = overallProgressPercent;
-  
-  // Calculate total learning time
-  const totalLearningTimeMinutes = resourcesCompleted.reduce((total, progress) => {
-    const resource = resources?.find(r => r.id === progress.resourceId);
-    return total + (resource?.duration || 0);
-  }, 0);
-  
-  const totalLearningTimeHours = Math.round(totalLearningTimeMinutes / 60);
-  
-  // Calculate skill progress
-  const averageSkillProgress = userSkills?.length > 0
-    ? Math.round(userSkills.reduce((sum, skill) => sum + (skill.currentLevel / skill.targetLevel * 100), 0) / userSkills.length)
-    : 0;
-  
-  // Sort learning resources by completion date (using legacy data for now)
-  const completedResourcesByDate = [...resourcesCompleted].sort((a, b) => {
-    return new Date(b.completedAt || 0).getTime() - new Date(a.completedAt || 0).getTime();
-  });
-  
-  // Group resources by month for the progress chart
-  const resourcesByMonth = resourcesCompleted.reduce((acc, progress) => {
-    if (!progress.completedAt) return acc;
-    
-    const date = new Date(progress.completedAt);
-    const monthYear = `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
-    
-    if (!acc[monthYear]) {
-      acc[monthYear] = 0;
-    }
-    
-    acc[monthYear]++;
-    return acc;
-  }, {} as Record<string, number>);
-  
-  const chartData = Object.entries(resourcesByMonth).map(([month, count]) => ({
-    month,
-    count
+
+  if (error) {
+    return (
+      <Card className="border-destructive m-6">
+        <CardHeader>
+          <CardTitle className="flex items-center text-destructive">
+            <AlertCircle className="w-5 h-5 mr-2" />
+            Error Loading Progress Data
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>We encountered an error while loading your progress data. Please try again later.</p>
+          <p className="text-xs text-muted-foreground mt-2">{error.message}</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!progressData || !progressData.skills || progressData.skills.length === 0) {
+    return (
+      <Card className="m-6">
+        <CardHeader>
+          <CardTitle>No Progress Data</CardTitle>
+          <CardDescription>
+            Start learning to see your progress here!
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p>You haven't started any learning resources yet. Begin your learning journey to track your progress.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Prepare data for chart
+  const chartData = progressData.skills.map(skill => ({
+    name: skill.skillName,
+    completed: skill.percent,
+    remaining: 100 - skill.percent,
   }));
 
   return (
@@ -121,226 +129,298 @@ export default function ProgressPage({ user }: { user: any }) {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
+        <TabsList className="grid w-full grid-cols-3 mb-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="skills">Skills</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Overall Progress Card */}
+          <Card className="border-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-2xl font-bold flex items-center">
+                <Target className="mr-2 h-6 w-6 text-primary" />
+                Overall Progress
+              </CardTitle>
+              <CardDescription>
+                Your journey toward your career goal
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Completion</span>
+                  <span className="text-sm font-medium">{progressData.overallPercent}%</span>
+                </div>
+                <Progress value={progressData.overallPercent} className="h-2" />
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <div>
+                      <p className="text-sm font-medium">Skills in Progress</p>
+                      <p className="text-xl font-bold">{progressData.skills.length}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <BookOpen className="h-5 w-5 text-blue-500" />
+                    <div>
+                      <p className="text-sm font-medium">Resources</p>
+                      <p className="text-xl font-bold">
+                        {progressData.skills.reduce((total, skill) => total + skill.completed, 0)} / 
+                        {progressData.skills.reduce((total, skill) => total + skill.total, 0)}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Award className="h-5 w-5 text-amber-500" />
+                    <div>
+                      <p className="text-sm font-medium">Top Skill</p>
+                      <p className="text-xl font-bold">
+                        {progressData.skills.length > 0 ? progressData.skills[0].skillName : 'None'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Recent Activity */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl font-bold flex items-center">
+                <Clock className="mr-2 h-5 w-5 text-primary" />
+                Recent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {progressData.skills.slice(0, 3).map((skill) => (
+                  <div key={skill.skillId} className="flex items-center space-x-4">
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <BookOpen className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <p className="text-sm font-medium">{skill.skillName}</p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-muted-foreground">
+                          {skill.completed} of {skill.total} resources completed
+                        </span>
+                        <span className="text-xs font-medium">{skill.percent}%</span>
+                      </div>
+                      <Progress value={skill.percent} className="h-1" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="skills" className="space-y-4">
+          {/* Skills Progress Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {progressData.skills.map((skill) => (
+              <HoverCard key={skill.skillId}>
+                <HoverCardTrigger asChild>
+                  <Card className="cursor-pointer hover:border-primary transition-colors">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg font-bold">{skill.skillName}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium">Progress</span>
+                          <span className="text-sm font-medium">{skill.percent}%</span>
+                        </div>
+                        <Progress value={skill.percent} className="h-2" />
+                        
+                        <div className="flex justify-between items-center text-xs text-muted-foreground pt-1">
+                          <span>{skill.completed} completed</span>
+                          <span>{skill.total - skill.completed} remaining</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-80">
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold">{skill.skillName} Details</h4>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Completed</p>
+                        <p className="font-medium">{skill.completed} resources</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Total</p>
+                        <p className="font-medium">{skill.total} resources</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Completion</p>
+                        <p className="font-medium">{skill.percent}%</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Status</p>
+                        <p className="font-medium">
+                          {skill.percent === 100 ? (
+                            <span className="text-green-500">Completed</span>
+                          ) : skill.percent > 50 ? (
+                            <span className="text-amber-500">In Progress</span>
+                          ) : (
+                            <span className="text-blue-500">Started</span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="analytics" className="space-y-4">
+          {/* Progress Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <TrendingUp className="mr-2 h-5 w-5 text-primary" />
+                Skills Progress Chart
+              </CardTitle>
+              <CardDescription>
+                Visual breakdown of your skills progress
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[400px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={chartData}
+                    layout="vertical"
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" domain={[0, 100]} />
+                    <YAxis dataKey="name" type="category" width={150} />
+                    <Tooltip 
+                      formatter={(value) => [`${value}%`, 'Completion']}
+                      labelFormatter={(label) => `Skill: ${label}`}
+                    />
+                    <Legend />
+                    <Bar dataKey="completed" name="Completed" stackId="a" fill="#10b981" />
+                    <Bar dataKey="remaining" name="Remaining" stackId="a" fill="#e5e7eb" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Progress Stats Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
-              <CardContent className="pt-6 flex items-center">
-                <div className="p-3 rounded-full bg-primary-100 text-primary mr-4">
-                  <BarChart2 className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Overall Progress</p>
-                  <p className="text-xl font-bold">{completionPercentage}%</p>
-                </div>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Total Resources</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold">
+                  {progressData.skills.reduce((total, skill) => total + skill.total, 0)}
+                </p>
               </CardContent>
             </Card>
             
             <Card>
-              <CardContent className="pt-6 flex items-center">
-                <div className="p-3 rounded-full bg-green-100 text-emerald-500 mr-4">
-                  <CheckCircle className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Resources Completed</p>
-                  <p className="text-xl font-bold">{totalCompletedResources} / {totalResources}</p>
-                </div>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Completed</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold text-green-500">
+                  {progressData.skills.reduce((total, skill) => total + skill.completed, 0)}
+                </p>
               </CardContent>
             </Card>
             
             <Card>
-              <CardContent className="pt-6 flex items-center">
-                <div className="p-3 rounded-full bg-amber-100 text-amber-500 mr-4">
-                  <Clock className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Learning Time</p>
-                  <p className="text-xl font-bold">{totalLearningTimeHours} hours</p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6 flex items-center">
-                <div className="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
-                  <TrendingUp className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Skill Progress</p>
-                  <p className="text-xl font-bold">{userProgress?.skillPercent || 0}%</p>
-                </div>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Completion Rate</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold text-primary">
+                  {progressData.overallPercent}%
+                </p>
               </CardContent>
             </Card>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Learning Paths Progress */}
+          {learningPaths && Array.isArray(learningPaths) && learningPaths.length > 0 && currentCareerGoal && (
             <Card>
               <CardHeader>
-                <h3 className="text-lg font-semibold">Progress Over Time</h3>
+                <CardTitle className="flex items-center">
+                  <BookOpen className="mr-2 h-5 w-5 text-primary" />
+                  Learning Path Progress
+                </CardTitle>
+                <CardDescription>
+                  Progress in your learning paths for {currentCareerGoal.title}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                {chartData.length > 0 ? (
-                  <div className="h-64">
-                    <div className="h-full flex items-end justify-between">
-                      {chartData.map((data, i) => (
-                        <div key={i} className="flex flex-col items-center h-full justify-end flex-1">
-                          <div className="relative w-full px-2 flex justify-center mb-2">
-                            <div 
-                              className="bg-primary rounded-t-md w-8"
-                              style={{ height: `${Math.min(100, data.count * 20)}%` }}
-                            ></div>
-                            <div className="absolute -top-6 text-xs font-medium">{data.count}</div>
-                          </div>
-                          <div className="text-xs text-gray-500 mt-2 transform -rotate-45 origin-top-left">
-                            {data.month}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-64 flex flex-col items-center justify-center text-center">
-                    <AlertCircle className="h-12 w-12 text-gray-300 mb-4" />
-                    <p className="text-gray-500">No progress data available yet</p>
-                    <p className="text-sm text-gray-400">Complete resources to see your progress chart</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <h3 className="text-lg font-semibold">Path Completion for {currentCareerGoal?.title || 'Current Goal'}</h3>
-              </CardHeader>
-              <CardContent>
-                {learningPaths && Array.isArray(learningPaths) && learningPaths.length > 0 && currentCareerGoal ? (
-                  <div className="space-y-6">
-                    {/* Show all learning paths since we might not have one specifically for the current goal yet */}
-                    {learningPaths.map((path) => {
-                      if (!path.modules || typeof path.modules !== 'object') {
-                        return null;
-                      }
-                      
-                      // Parse modules if it's a string
-                      const moduleData = typeof path.modules === 'string' 
-                        ? JSON.parse(path.modules)
-                        : path.modules;
-                        
-                      // Get array of modules
-                      const modules = Array.isArray(moduleData) ? moduleData : [];
-                      
-                      // Calculate path completion
-                      const totalPathResources = modules.reduce(
-                        (total, module) => {
-                          return total + (Array.isArray(module.resources) ? module.resources.length : 0);
-                        }, 
-                        0
-                      );
-                      
-                      const completedPathResources = modules.reduce(
-                        (total, module) => {
-                          if (!Array.isArray(module.resources)) return total;
-                          return total + module.resources.filter(r => r.completed).length;
-                        }, 
-                        0
-                      );
-                      
-                      const pathCompletionPercentage = totalPathResources > 0 
-                        ? Math.round((completedPathResources / totalPathResources) * 100) 
-                        : 0;
-                      
-                      return (
-                        <div key={path.id}>
-                          <div className="flex justify-between mb-2">
-                            <div>
-                              <h4 className="font-medium">{path.title}</h4>
-                              <p className="text-xs text-gray-500">
-                                {completedPathResources} of {totalPathResources} resources completed
-                              </p>
-                            </div>
-                            <span className="text-sm font-medium">{pathCompletionPercentage}%</span>
-                          </div>
-                          <Progress value={pathCompletionPercentage} className="h-2" />
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="h-64 flex flex-col items-center justify-center text-center">
-                    <AlertCircle className="h-12 w-12 text-gray-300 mb-4" />
-                    <p className="text-gray-500">No learning paths available for {currentCareerGoal.title}</p>
-                    <p className="text-sm text-gray-400 mb-4">Generate a path to start tracking your progress</p>
-                    <Button
-                      onClick={() => {
-                        // Navigate to the learning path page
-                        window.location.href = "/learning-path";
-                      }}
-                      className="mt-2 bg-primary hover:bg-primary-700"
-                    >
-                      Generate Learning Path
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="skills">
-          <Card>
-            <CardHeader>
-              <h3 className="text-lg font-semibold">Skill Progress for {currentCareerGoal?.title || 'Current Goal'}</h3>
-            </CardHeader>
-            <CardContent>
-              {userSkills && userSkills.length > 0 ? (
                 <div className="space-y-6">
-                  {userSkills.map((skill) => {
-                    const percentage = Math.round((skill.currentLevel / skill.targetLevel) * 100);
+                  {learningPaths.map((path) => {
+                    if (!path.modules || typeof path.modules !== 'object') {
+                      return null;
+                    }
+                    
+                    // Parse modules if it's a string
+                    const moduleData = typeof path.modules === 'string' 
+                      ? JSON.parse(path.modules)
+                      : path.modules;
+                      
+                    // Get array of modules
+                    const modules = Array.isArray(moduleData) ? moduleData : [];
+                    
+                    // Calculate path completion
+                    const totalPathResources = modules.reduce(
+                      (total, module) => {
+                        return total + (Array.isArray(module.resources) ? module.resources.length : 0);
+                      }, 
+                      0
+                    );
+                    
+                    const completedPathResources = modules.reduce(
+                      (total, module) => {
+                        if (!Array.isArray(module.resources)) return total;
+                        return total + module.resources.filter(r => r.completed).length;
+                      }, 
+                      0
+                    );
+                    
+                    const pathCompletionPercentage = totalPathResources > 0 
+                      ? Math.round((completedPathResources / totalPathResources) * 100) 
+                      : 0;
                     
                     return (
-                      <div key={skill.id} className="space-y-2">
-                        <div className="flex justify-between items-end">
+                      <div key={path.id}>
+                        <div className="flex justify-between mb-2">
                           <div>
-                            <h4 className="font-medium">{skill.skillName}</h4>
-                            <div className="flex items-center text-xs text-gray-500">
-                              <span className="capitalize">{skill.category}</span>
-                              <span className="mx-2">•</span>
-                              <span>Current: {skill.currentLevel}%</span>
-                              <span className="mx-2">•</span>
-                              <span>Target: {skill.targetLevel}%</span>
-                            </div>
+                            <h4 className="font-medium">{path.title}</h4>
+                            <p className="text-xs text-gray-500">
+                              {completedPathResources} of {totalPathResources} resources completed
+                            </p>
                           </div>
-                          <div className="flex items-center">
-                            <span className="text-xs flex items-center text-emerald-600 mr-2">
-                              <ArrowUpRight className="h-3 w-3 mr-1" />
-                              Improving {Math.floor(percentage * skill.currentLevel / 100)}%
-                            </span>
-                            <span className="text-sm font-medium">{percentage}%</span>
-                          </div>
+                          <span className="text-sm font-medium">{pathCompletionPercentage}%</span>
                         </div>
-                        <Progress 
-                          value={percentage} 
-                          className="h-2"
-                        />
+                        <Progress value={pathCompletionPercentage} className="h-2" />
                       </div>
                     );
                   })}
                 </div>
-              ) : (
-                <div className="py-12 text-center">
-                  <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <TrendingUp className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-medium mb-2">No skill data available</h3>
-                  <p className="text-gray-500">Complete your skill assessment to track your progress here.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>
