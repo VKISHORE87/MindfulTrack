@@ -5,6 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Clock, ArrowRight, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
+// Define type for target role
+interface TargetRole {
+  id: number;
+  title: string;
+  requiredSkills: string[];
+  [key: string]: any; // Allow for additional properties
+}
+
 // Define milestone type
 interface Task {
   title: string;
@@ -76,7 +84,7 @@ export default function CareerRoadmap() {
     ];
     
     // First check targetRole's requiredSkills, then fall back to targetRoleSkills
-    let skillsToUse = [];
+    let skillsToUse: string[] = [];
     if (targetRole && targetRole.requiredSkills && targetRole.requiredSkills.length > 0) {
       skillsToUse = targetRole.requiredSkills;
     } else if (targetRoleSkills.length > 0) {
@@ -121,13 +129,13 @@ export default function CareerRoadmap() {
             Career Roadmap
           </CardTitle>
           <Badge variant="outline" className="text-xs">
-            Target: {targetRole}
+            Target: {targetRoleName}
           </Badge>
         </div>
       </CardHeader>
       <CardContent>
         <div className="text-sm text-muted-foreground mb-4">
-          Your 12-month journey to {targetRole}
+          Your 12-month journey to {targetRoleName}
         </div>
         
         <div className="relative">
