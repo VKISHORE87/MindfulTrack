@@ -60,17 +60,17 @@ const RoleTransitionTemplateCard: React.FC<RoleTransitionTemplateCardProps> = ({
     
     // Generate intermediate steps based on skill gap
     const intermediateSteps = [];
-    const difficulty = getDifficulty();
+    const difficultyRating = getDifficulty(); // Store in a local variable
     
     // Create intermediate steps based on the skills gap
-    if (difficulty === 'Easy') {
+    if (difficultyRating === 'Easy') {
       intermediateSteps.push({
         title: 'Skill Enhancement',
         description: `Build on your existing skills and acquire the few additional skills needed for the ${targetRole} position.`,
         duration: '3-6 months',
         skills: newSkillsNeeded
       });
-    } else if (difficulty === 'Moderate') {
+    } else if (difficultyRating === 'Moderate') {
       intermediateSteps.push({
         title: 'Skill Development',
         description: `Strengthen your existing skills and acquire the additional competencies needed for the ${targetRole} role.`,
@@ -128,10 +128,10 @@ const RoleTransitionTemplateCard: React.FC<RoleTransitionTemplateCardProps> = ({
     setTransitionPath({
       steps: intermediateSteps,
       totalDuration: calculateTotalDuration(intermediateSteps),
-      difficulty: difficulty
+      difficulty: difficultyRating
     });
     
-  }, [currentRole, targetRole, newSkillsNeeded]);
+  }, [currentRole, targetRole, newSkillsNeeded, sharedSkills.length, targetSkills.length]);
   
   const getDifficultyColor = (difficulty: string): string => {
     switch (difficulty) {
