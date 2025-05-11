@@ -25,7 +25,13 @@ import Header from "@/components/ui/Header";
 import { useQuery } from "@tanstack/react-query";
 import React, { useState, useEffect, ReactNode } from "react";
 import { useLocation } from "wouter";
+
+// Import all context providers
 import AppProvider from "@/contexts/AppProvider";
+import { CareerGoalProvider } from "@/contexts/CareerGoalContext";
+import { SkillsProvider } from "@/contexts/SkillsContext";
+import { ProgressProvider } from "@/contexts/ProgressContext";
+import { LearningPathProvider } from "@/contexts/LearningPathContext";
 
 // Create a simple Redirect component for redirecting routes
 function Redirect({ to }: { to: string }) {
