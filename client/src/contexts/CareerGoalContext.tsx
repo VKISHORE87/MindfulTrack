@@ -17,15 +17,23 @@ interface CareerGoalContextType {
   isLoading: boolean;
   error: Error | null;
   refetchGoal: () => void;
+  targetRoleSkills: string[]; // Add targetRoleSkills property
 }
 
 const CareerGoalContext = createContext<CareerGoalContextType | undefined>(undefined);
 
 export function CareerGoalProvider({ children, userId }: { children: React.ReactNode; userId: number }) {
   const [currentGoal, setCurrentGoal] = useState<CareerGoal | null>(null);
+  const [targetRoleSkills, setTargetRoleSkills] = useState<string[]>([]);
   
   const { data, isLoading, error, refetch } = useQuery<CareerGoal, Error>({
     queryKey: ['/api/users/career-goals/current'],
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+  
+  // Query target role data from API
+  const { data: roles } = useQuery<any[], Error>({
+    queryKey: ['/api/interview/roles'],
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
   
@@ -33,8 +41,17 @@ export function CareerGoalProvider({ children, userId }: { children: React.React
     if (data) {
       console.log('[DEBUG] CareerGoalContext - Current goal:', data);
       setCurrentGoal(data);
+      
+      // Find target role skills from roles data if available
+      if (roles && data.targetRoleId) {
+        console.log('[DEBUG] CareerGoalContext - Target role:', roles);
+        const targetRole = roles.find(role => role.id === data.targetRoleId);
+        if (targetRole && targetRole.requiredSkills) {
+          setTargetRoleSkills(targetRole.requiredSkills);
+        }
+      }
     }
-  }, [data]);
+  }, [data, roles]);
   
   return (
     <CareerGoalContext.Provider
@@ -42,7 +59,8 @@ export function CareerGoalProvider({ children, userId }: { children: React.React
         currentGoal,
         isLoading,
         error,
-        refetchGoal: refetch
+        refetchGoal: refetch,
+        targetRoleSkills // Provide targetRoleSkills to consumers
       }}
     >
       {children}

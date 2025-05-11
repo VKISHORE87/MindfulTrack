@@ -21,7 +21,8 @@ export default function SkillRadarChart({ width, height }: SkillRadarChartProps)
   
   // Update skills data when targetRoleSkills changes
   useEffect(() => {
-    if (targetRoleSkills.length > 0) {
+    // Make sure targetRoleSkills is defined before checking its length
+    if (targetRoleSkills && targetRoleSkills.length > 0) {
       // Map the skills from context to the format needed for the chart
       const updatedSkills = targetRoleSkills.map(skill => ({
         name: skill,
