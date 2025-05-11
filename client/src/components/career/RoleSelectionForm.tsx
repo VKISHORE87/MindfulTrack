@@ -3,12 +3,13 @@ import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCareerGoal } from '@/contexts/CareerGoalContext';
+import { useTargetRole } from '@/contexts/TargetRoleContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Save, ArrowRight } from 'lucide-react';
+import { Loader2, Save, ArrowRight, Target } from 'lucide-react';
 import RoleTransitionTemplateCard from './RoleTransitionTemplate';
 import { availableRoles, Role, getRoleById, getRolesByCategory } from '@/data/availableRoles';
 
@@ -23,29 +24,39 @@ export const RoleSelectionForm: React.FC<RoleSelectionFormProps> = ({
 }) => {
   const { toast } = useToast();
   const { currentGoal, refetchGoal } = useCareerGoal();
+  const { targetRole, setTargetRole } = useTargetRole();
   
   const [currentRoleId, setCurrentRoleId] = useState<number | null>(null);
   const [targetRoleId, setTargetRoleId] = useState<number | null>(null);
   const [currentRoleTitle, setCurrentRoleTitle] = useState<string>("");
   const [targetRoleTitle, setTargetRoleTitle] = useState<string>("");
+  const [targetRoleSkills, setTargetRoleSkills] = useState<string[]>([]);
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
   
   // Use static roles list instead of fetching from API
   const roles = availableRoles;
   const isLoadingRoles = false;
   
-  // Set initial values if we have a current goal
+  // Set initial values if we have a current goal or targetRole
   useEffect(() => {
-    if (currentGoal?.targetRoleId) {
+    // First check if we have a targetRole from context
+    if (targetRole) {
+      setTargetRoleId(targetRole.id);
+      setTargetRoleTitle(targetRole.title);
+      setTargetRoleSkills(targetRole.requiredSkills);
+    } 
+    // Otherwise use the current goal
+    else if (currentGoal?.targetRoleId) {
       setTargetRoleId(currentGoal.targetRoleId);
       
       // Find the target role title
       const role = getRoleById(currentGoal.targetRoleId);
       if (role) {
         setTargetRoleTitle(role.title);
+        setTargetRoleSkills(role.requiredSkills || []);
       }
     }
-  }, [currentGoal]);
+  }, [currentGoal, targetRole]);
   
   // Mutation to save the target role
   const saveTargetRoleMutation = useMutation({
@@ -62,6 +73,11 @@ export const RoleSelectionForm: React.FC<RoleSelectionFormProps> = ({
         title: 'Target Role Saved',
         description: 'Your career goal has been updated successfully.',
       });
+      
+      // Update global target role state
+      if (targetRoleId && targetRoleTitle) {
+        setTargetRole(targetRoleId, targetRoleTitle, targetRoleSkills);
+      }
       
       if (onRoleSelected) {
         onRoleSelected(currentRoleId!, targetRoleId!);
@@ -114,10 +130,11 @@ export const RoleSelectionForm: React.FC<RoleSelectionFormProps> = ({
     const roleId = parseInt(value);
     setTargetRoleId(roleId);
     
-    // Find the role title
+    // Find the role title and skills
     const role = getRoleById(roleId);
     if (role) {
       setTargetRoleTitle(role.title);
+      setTargetRoleSkills(role.requiredSkills || []);
     }
   };
   
@@ -251,7 +268,18 @@ export const RoleSelectionForm: React.FC<RoleSelectionFormProps> = ({
             </div>
           )}
         </CardContent>
-        <CardFooter className="justify-end">
+        <CardFooter className="flex justify-between items-center">
+          {/* Current Target Role Indicator */}
+          {targetRole && (
+            <div className="flex items-center text-sm">
+              <Target className="h-4 w-4 text-primary mr-2" />
+              <span className="text-muted-foreground mr-1">Current Target:</span>
+              <Badge variant="outline" className="font-medium">
+                {targetRole.title}
+              </Badge>
+            </div>
+          )}
+          
           <Button
             onClick={handleSave}
             disabled={saveTargetRoleMutation.isPending || !currentRoleId || !targetRoleId || currentRoleId === targetRoleId}

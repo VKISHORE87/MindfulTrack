@@ -22,6 +22,7 @@ import LearningPatternAnalysis from "@/components/dashboard/LearningPatternAnaly
 import RecentActivity from "@/components/dashboard/RecentActivity";
 
 import { useCareerGoal } from "@/contexts/CareerGoalContext";
+import { useTargetRole } from "@/contexts/TargetRoleContext";
 import { queryClient } from "@/lib/queryClient";
 import { LearningResource } from "@shared/schema";
 
@@ -77,8 +78,9 @@ export default function Dashboard({ user }: { user: any }) {
   const [showAiFeatures, setShowAiFeatures] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   
-  // Use our centralized career goal context
+  // Use our centralized career goal and target role contexts
   const { currentGoal, targetRoleSkills, isLoading: isLoadingGoal } = useCareerGoal();
+  const { targetRole } = useTargetRole();
   
   // Query for dashboard data
   const { data: dashboardData, isLoading, refetch } = useQuery<DashboardData>({

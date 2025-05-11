@@ -364,7 +364,7 @@ export default function ProgressPage({ user }: { user: any }) {
                   Learning Path Progress
                 </CardTitle>
                 <CardDescription>
-                  Progress in your learning paths for {currentCareerGoal.title}
+                  Progress in your learning paths for {currentCareerGoal.title || 'Current Goal'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -384,16 +384,16 @@ export default function ProgressPage({ user }: { user: any }) {
                     
                     // Calculate path completion
                     const totalPathResources = modules.reduce(
-                      (total, module) => {
+                      (total: number, module: any) => {
                         return total + (Array.isArray(module.resources) ? module.resources.length : 0);
                       }, 
                       0
                     );
                     
                     const completedPathResources = modules.reduce(
-                      (total, module) => {
+                      (total: number, module: any) => {
                         if (!Array.isArray(module.resources)) return total;
-                        return total + module.resources.filter(r => r.completed).length;
+                        return total + module.resources.filter((r: any) => r.completed).length;
                       }, 
                       0
                     );
