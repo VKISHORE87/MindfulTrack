@@ -1,0 +1,52 @@
+Objective
+We are restructuring the navigation and component organization in the Upcraft web app, and fixing role-based data inconsistencies across the UI. Please implement the following:
+
+✅ 1. Refactor Left Navigation Structure
+Remove:
+The current "Progress" section under the Dashboard tab (this sub-component should be removed from inside Dashboard views).
+
+Move:
+All the components and content currently under the “Progress” tab in the Dashboard section must be moved and displayed under the standalone “Progress” tab on the left navigation menu.
+
+Delete:
+Any redundant or duplicate "Progress" visual components that may exist after this move.
+
+Maintain:
+Navigation behavior should ensure a single source of truth: no duplication of "Progress" content across Dashboard and the standalone Progress section.
+
+🔄 2. Target Role Data Consistency Across All Pages
+Problem:
+Pages are displaying data for outdated or incorrect roles rather than the latest target role saved by the user.
+
+Required Fix:
+Implement a central state management strategy (React Context or global state like Redux or Zustand) to store and synchronize the current target role across all pages.
+
+On page load (or tab switch), every component that displays user-role-specific data must re-fetch or derive data based on the global “latest target role.”
+
+Ensure the following components always reflect the latest saved role:
+
+Dashboard → Career Progress section
+
+Dashboard → Skill Radar Chart
+
+Progress Tab → Skills Breakdown
+
+Learning Paths, Validation, and Resources
+
+🧪 Validation Criteria
+Navigating to the “Progress” tab should no longer show any components under Dashboard.
+
+"Progress" page should now show the complete skill and learning progress visualization.
+
+Saving or changing the target role in any component should immediately reflect across all UI sections without needing a refresh.
+
+Role-based charts, lists, and recommendations must update accordingly in all views.
+
+⚙️ Technologies to Consider
+React Context or Zustand for global role state
+
+React Router to ensure correct tab rendering
+
+Component lifecycle methods or useEffect hooks for role sync
+
+Prop drilling cleanup (if any exists) in the new structure
