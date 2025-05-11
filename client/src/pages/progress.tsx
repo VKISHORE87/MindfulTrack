@@ -90,7 +90,8 @@ export default function ProgressPage({ user }: { user: any }) {
       // Compare with current targetRole to avoid unnecessary updates
       if (!targetRole || targetRole.id !== progressData.targetRole.id) {
         console.log("[DEBUG] Syncing targetRole from progress data:", progressData.targetRole);
-        setTargetRole(progressData.targetRole);
+        const role = progressData.targetRole;
+        setTargetRole(role.id, role.title, role.requiredSkills || []);
       }
     }
   // Only depend on progressData.targetRole?.id and isLoading, not the entire objects

@@ -35,10 +35,17 @@ export default function Resources({ user }: { user: any }) {
     },
   });
   
-  // Fetch user progress
-  const { data: userProgress, isLoading: isLoadingProgress } = useQuery({
+  // Fetch user progress directly from the API to see actual structure
+  const { data: userProgress, isLoading: isLoadingProgress } = useQuery<any>({
     queryKey: [`/api/users/${user.id}/progress`],
   });
+  
+  // Log progress data when it changes for debugging
+  useEffect(() => {
+    if (userProgress) {
+      console.log("[DEBUG] Resources - Progress data structure:", userProgress);
+    }
+  }, [userProgress]);
   
   // Filter resources based on search term only
   const filteredResources = resources?.filter(resource => {
@@ -115,10 +122,23 @@ export default function Resources({ user }: { user: any }) {
   const getResourceProgress = (resourceId: number) => {
     if (!userProgress) return null;
     
-    // Based on the structure of the progress response
-    const resourceProgresses = userProgress?.resourceProgress;
-    if (Array.isArray(resourceProgresses)) {
-      return resourceProgresses.find(p => p.resourceId === resourceId);
+    // Add debug to see structure
+    console.log("[DEBUG] ResourcesPage - userProgress:", userProgress);
+    
+    // Try different approaches based on possible structures
+    // 1. Check if we have a resourceProgress array
+    if (userProgress.resourceProgress && Array.isArray(userProgress.resourceProgress)) {
+      return userProgress.resourceProgress.find((p: any) => p.resourceId === resourceId);
+    }
+    
+    // 2. Check if we have a legacyProgress array
+    if (userProgress.legacyProgress && Array.isArray(userProgress.legacyProgress)) {
+      return userProgress.legacyProgress.find((p: any) => p.resourceId === resourceId);
+    }
+    
+    // 3. Check if userProgress itself is an array
+    if (Array.isArray(userProgress)) {
+      return userProgress.find((p: any) => p.resourceId === resourceId);
     }
     
     return null;
