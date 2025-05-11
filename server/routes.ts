@@ -2488,12 +2488,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Continue even if legacy progress fails - it's just for backward compatibility
         }
         
+        // Get current career goal and associated target role data
+        const careerGoal = await storage.getLatestCareerGoalByUserId(userId);
+        let targetRole = null;
+        
+        if (careerGoal && careerGoal.targetRoleId) {
+          targetRole = await storage.getRoleById(careerGoal.targetRoleId);
+        }
+        
         // Get new detailed progress statistics using the new method
         const progressStats = await storage.calculateUserProgressStats(userId);
         
-        // Return both legacy progress data and new structure
+        // Return both legacy progress data and new structure, plus target role info
         res.json({
           ...progressStats,
+          targetRole: targetRole,
+          careerGoal: careerGoal,
           legacyProgress: Array.isArray(legacyProgress) ? legacyProgress : []  // Ensure it's always an array
         });
       } catch (error) {
