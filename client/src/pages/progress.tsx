@@ -55,7 +55,16 @@ export default function ProgressPage({ user }: { user: any }) {
   });
   
   // Fetch learning paths
-  const { data: learningPaths, isLoading: isLoadingPaths } = useQuery({
+  const { data: learningPaths, isLoading: isLoadingPaths } = useQuery<Array<{
+    id: number;
+    title: string;
+    description: string;
+    userId: number;
+    targetRoleId?: number;
+    status: string;
+    progress: number;
+    modules: Array<any>;
+  }>>({
     queryKey: [`/api/users/${user.id}/learning-paths`],
   });
   
@@ -352,7 +361,7 @@ export default function ProgressPage({ user }: { user: any }) {
           </Card>
           
           {/* Progress Stats Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4" key="progress-stats-summary">
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Total Resources</CardTitle>
@@ -396,7 +405,7 @@ export default function ProgressPage({ user }: { user: any }) {
                   Learning Path Progress
                 </CardTitle>
                 <CardDescription>
-                  Progress in your learning paths for {targetRole?.title || currentCareerGoal?.title || 'Current Goal'}
+                  Progress in your learning paths for {targetRole ? targetRole.title : (currentCareerGoal ? currentCareerGoal.title : 'Current Goal')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
