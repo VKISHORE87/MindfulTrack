@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
@@ -89,6 +89,7 @@ export default function ProgressPage({ user }: { user: any }) {
       console.log("[DEBUG] Syncing targetRole from progress data:", progressData.targetRole);
       setTargetRole(progressData.targetRole);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progressData, isLoading, setTargetRole]);
 
   const isLoadingAll = isLoading || isLoadingResources || isLoadingPaths || isLoadingSkills || isLoadingCurrentGoal;

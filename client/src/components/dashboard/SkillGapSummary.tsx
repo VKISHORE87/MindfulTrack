@@ -84,7 +84,12 @@ export default function SkillGapSummary({
       <CardHeader className="pb-2">
         <div className="flex items-center">
           <PieChart className="h-5 w-5 text-primary mr-2" />
-          <h3 className="font-semibold text-lg">Priority Skill Gaps</h3>
+          <div>
+            <h3 className="font-semibold text-lg">Priority Skill Gaps</h3>
+            {targetRole && (
+              <p className="text-sm text-muted-foreground">For {targetRole.title} role</p>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
