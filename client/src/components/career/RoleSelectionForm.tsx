@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useMutation } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCareerGoal } from '@/contexts/CareerGoalContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,16 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Save, ArrowRight, RefreshCw } from 'lucide-react';
+import { Loader2, Save, ArrowRight } from 'lucide-react';
 import RoleTransitionTemplateCard from './RoleTransitionTemplate';
-
-interface Role {
-  id: number;
-  title: string;
-  industry?: string;
-  level?: string;
-  roleType?: string;
-}
+import { availableRoles, Role, getRoleById, getRolesByCategory } from '@/data/availableRoles';
 
 interface RoleSelectionFormProps {
   userId: number;
@@ -37,11 +30,9 @@ export const RoleSelectionForm: React.FC<RoleSelectionFormProps> = ({
   const [targetRoleTitle, setTargetRoleTitle] = useState<string>("");
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
   
-  // Fetch all available roles
-  const { data: roles, isLoading: isLoadingRoles } = useQuery<Role[], Error>({
-    queryKey: ['/api/interview/roles'],
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
+  // Use static roles list instead of fetching from API
+  const roles = availableRoles;
+  const isLoadingRoles = false;
   
   // Set initial values if we have a current goal
   useEffect(() => {
@@ -49,14 +40,12 @@ export const RoleSelectionForm: React.FC<RoleSelectionFormProps> = ({
       setTargetRoleId(currentGoal.targetRoleId);
       
       // Find the target role title
-      if (roles) {
-        const role = roles.find(r => r.id === currentGoal.targetRoleId);
-        if (role) {
-          setTargetRoleTitle(role.title);
-        }
+      const role = getRoleById(currentGoal.targetRoleId);
+      if (role) {
+        setTargetRoleTitle(role.title);
       }
     }
-  }, [currentGoal, roles]);
+  }, [currentGoal]);
   
   // Mutation to save the target role
   const saveTargetRoleMutation = useMutation({
@@ -115,11 +104,9 @@ export const RoleSelectionForm: React.FC<RoleSelectionFormProps> = ({
     setCurrentRoleId(roleId);
     
     // Find the role title
-    if (roles) {
-      const role = roles.find(r => r.id === roleId);
-      if (role) {
-        setCurrentRoleTitle(role.title);
-      }
+    const role = getRoleById(roleId);
+    if (role) {
+      setCurrentRoleTitle(role.title);
     }
   };
   
@@ -128,29 +115,30 @@ export const RoleSelectionForm: React.FC<RoleSelectionFormProps> = ({
     setTargetRoleId(roleId);
     
     // Find the role title
-    if (roles) {
-      const role = roles.find(r => r.id === roleId);
-      if (role) {
-        setTargetRoleTitle(role.title);
-      }
+    const role = getRoleById(roleId);
+    if (role) {
+      setTargetRoleTitle(role.title);
     }
   };
   
-  // Group roles by industry for better organization
+  // Group roles by category
   const groupedRoles = React.useMemo(() => {
-    if (!roles) return {};
-    
     const grouped: Record<string, Role[]> = {};
+    
+    // Get unique categories without using Set
+    const categoriesMap: Record<string, boolean> = {};
     roles.forEach(role => {
-      const industry = role.industry || 'Other';
-      if (!grouped[industry]) {
-        grouped[industry] = [];
-      }
-      grouped[industry].push(role);
+      categoriesMap[role.category] = true;
+    });
+    const categories = Object.keys(categoriesMap);
+    
+    // Group roles by category
+    categories.forEach(category => {
+      grouped[category] = getRolesByCategory(category);
     });
     
     return grouped;
-  }, [roles]);
+  }, []);
   
   return (
     <div className="space-y-6">
@@ -174,25 +162,32 @@ export const RoleSelectionForm: React.FC<RoleSelectionFormProps> = ({
                   <SelectValue placeholder="Select your current role" />
                 </SelectTrigger>
                 <SelectContent>
-                  {isLoadingRoles ? (
-                    <div className="flex items-center justify-center p-4">
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      <span>Loading roles...</span>
-                    </div>
-                  ) : (
-                    Object.entries(groupedRoles).map(([industry, industryRoles]) => (
-                      <SelectGroup key={industry}>
-                        <SelectLabel>{industry}</SelectLabel>
-                        {industryRoles.map(role => (
-                          <SelectItem key={role.id} value={role.id.toString()}>
-                            {role.title}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    ))
-                  )}
+                  {Object.entries(groupedRoles).map(([category, categoryRoles]) => (
+                    <SelectGroup key={category}>
+                      <SelectLabel>{category}</SelectLabel>
+                      {categoryRoles.map(role => (
+                        <SelectItem key={role.id} value={role.id.toString()}>
+                          {role.title}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
                 </SelectContent>
               </Select>
+              
+              {/* Display required skills for selected role */}
+              {currentRoleId && (
+                <div className="mt-2">
+                  <p className="text-xs text-muted-foreground mb-1">Required Skills:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {getRoleById(currentRoleId)?.requiredSkills.map((skill, index) => (
+                      <Badge key={index} variant="outline" className="px-2 py-0 text-xs">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* Target Role Selection */}
@@ -206,25 +201,32 @@ export const RoleSelectionForm: React.FC<RoleSelectionFormProps> = ({
                   <SelectValue placeholder="Select your target role" />
                 </SelectTrigger>
                 <SelectContent>
-                  {isLoadingRoles ? (
-                    <div className="flex items-center justify-center p-4">
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      <span>Loading roles...</span>
-                    </div>
-                  ) : (
-                    Object.entries(groupedRoles).map(([industry, industryRoles]) => (
-                      <SelectGroup key={industry}>
-                        <SelectLabel>{industry}</SelectLabel>
-                        {industryRoles.map(role => (
-                          <SelectItem key={role.id} value={role.id.toString()}>
-                            {role.title}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    ))
-                  )}
+                  {Object.entries(groupedRoles).map(([category, categoryRoles]) => (
+                    <SelectGroup key={category}>
+                      <SelectLabel>{category}</SelectLabel>
+                      {categoryRoles.map(role => (
+                        <SelectItem key={role.id} value={role.id.toString()}>
+                          {role.title}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
                 </SelectContent>
               </Select>
+              
+              {/* Display required skills for selected role */}
+              {targetRoleId && (
+                <div className="mt-2">
+                  <p className="text-xs text-muted-foreground mb-1">Required Skills:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {getRoleById(targetRoleId)?.requiredSkills.map((skill, index) => (
+                      <Badge key={index} variant="secondary" className="px-2 py-0 text-xs">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           

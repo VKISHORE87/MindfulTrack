@@ -1,156 +1,33 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { queryClient, apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import React, { createContext, useContext, ReactNode } from 'react';
 
-// Types for progress data
-export interface ProgressResource {
-  id: number;
-  title?: string;
-  completed: boolean;
-  timeSpent?: number;
-  rating?: number;
-  feedback?: string;
-}
-
-export interface ProgressSkill {
-  skillId: number;
-  skillName: string;
-  completed: number;
-  total: number;
-  percent: number;
-}
-
-export interface ProgressStats {
-  overallPercent: number;
-  skills: ProgressSkill[];
-  resources?: ProgressResource[];
-}
-
-interface UpdateProgressParams {
-  rating?: number;
-  feedback?: string;
-  timeSpentMinutes?: number;
-}
-
+// Define the shape of the progress context
 interface ProgressContextType {
-  progressData: ProgressStats | null;
-  isLoading: boolean;
-  error: Error | null;
-  updateProgress: (resourceId: number, params: UpdateProgressParams) => Promise<void>;
-  removeProgress: (resourceId: number) => Promise<void>;
-  refetchProgress: () => Promise<void>;
-}
-
-export const ProgressContext = createContext<ProgressContextType | null>(null);
-
-interface ProgressProviderProps {
-  children: ReactNode;
+  // Add actual functionality as needed
   userId: number;
 }
 
-export const ProgressProvider: React.FC<ProgressProviderProps> = ({
-  children,
-  userId
-}) => {
-  const { toast } = useToast();
-  const [progressData, setProgressData] = useState<ProgressStats | null>(null);
+// Create the context
+const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
 
-  // Fetch progress data
-  const {
-    data,
-    isLoading,
-    error,
-    refetch
-  } = useQuery<ProgressStats, Error>({
-    queryKey: [`/api/users/${userId}/progress`],
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-
-  // Update local state when data changes
-  useEffect(() => {
-    if (data) {
-      setProgressData(data);
-    }
-  }, [data]);
-
-  // Mutation to update progress
-  const updateProgressMutation = useMutation({
-    mutationFn: async ({ resourceId, params }: { resourceId: number, params: UpdateProgressParams }) => {
-      return await apiRequest('POST', `/api/users/${userId}/progress/${resourceId}`, params);
-    },
-    onSuccess: () => {
-      refetch(); // Refetch progress data to update local state
-      toast({
-        title: 'Progress Updated',
-        description: 'Your progress has been successfully updated.',
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Error Updating Progress',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
-
-  // Mutation to remove progress
-  const removeProgressMutation = useMutation({
-    mutationFn: async (resourceId: number) => {
-      return await apiRequest('DELETE', `/api/users/${userId}/progress/${resourceId}`);
-    },
-    onSuccess: () => {
-      refetch(); // Refetch progress data to update local state
-      toast({
-        title: 'Progress Removed',
-        description: 'The resource has been marked as incomplete.',
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Error Removing Progress',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
-
-  // Update progress for a resource
-  const updateProgress = async (resourceId: number, params: UpdateProgressParams) => {
-    await updateProgressMutation.mutateAsync({ resourceId, params });
-  };
-
-  // Remove progress for a resource
-  const removeProgress = async (resourceId: number) => {
-    await removeProgressMutation.mutateAsync(resourceId);
-  };
-
-  // Refetch progress data (exposed for other contexts to trigger)
-  const refetchProgress = async () => {
-    await refetch();
+// Provider component
+export function ProgressProvider({ children, userId }: { children: ReactNode; userId: number }) {
+  // Placeholder implementation
+  const value = {
+    userId
   };
 
   return (
-    <ProgressContext.Provider
-      value={{
-        progressData,
-        isLoading,
-        error,
-        updateProgress,
-        removeProgress,
-        refetchProgress,
-      }}
-    >
+    <ProgressContext.Provider value={value}>
       {children}
     </ProgressContext.Provider>
   );
-};
+}
 
-export const useProgress = () => {
+// Hook for consuming the context
+export function useProgress() {
   const context = useContext(ProgressContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useProgress must be used within a ProgressProvider');
   }
   return context;
-};
+}

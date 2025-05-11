@@ -1,108 +1,263 @@
-import React from 'react';
-import { getTransitionTemplate, RoleTransitionTemplate } from '@/data/roleTransitionTemplates';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Clock, ArrowRight, Award, Workflow } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { CheckCircle2, Clock, MapPin, MoveRight, Zap } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { getRoleByTitle } from '@/data/availableRoles';
 
-interface RoleTransitionTemplateProps {
+interface RoleTransitionTemplateCardProps {
   currentRole: string;
   targetRole: string;
 }
 
-export const RoleTransitionTemplateCard: React.FC<RoleTransitionTemplateProps> = ({
+interface TransitionPath {
+  steps: Array<{
+    title: string;
+    description: string;
+    duration: string;
+    skills: string[];
+  }>;
+  totalDuration: string;
+  difficulty: 'Easy' | 'Moderate' | 'Hard' | 'Very Hard';
+}
+
+const RoleTransitionTemplateCard: React.FC<RoleTransitionTemplateCardProps> = ({
   currentRole,
   targetRole
 }) => {
-  const template = getTransitionTemplate(currentRole, targetRole);
-
-  if (!currentRole || !targetRole) {
-    return (
-      <Card className="w-full">
-        <CardContent className="pt-6 pb-6 text-center">
-          <p className="text-muted-foreground">Please select both a current role and target role to view the transition path.</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (currentRole === targetRole) {
-    return (
-      <Card className="w-full">
-        <CardContent className="pt-6 pb-6 text-center">
-          <p className="text-muted-foreground">Please select different roles for current and target positions.</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!template) {
-    return (
-      <Card className="w-full bg-muted/20">
-        <CardContent className="pt-6 pb-6">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold mb-2">Custom Transition Required</h3>
-            <p className="text-muted-foreground">
-              No predefined transition template is available for the selected roles. 
-              Our AI can generate a custom transition path based on your skills and goals.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // If we have a template, display it
+  const [transitionPath, setTransitionPath] = useState<TransitionPath | null>(null);
+  
+  // Get skills needed for the transition
+  const currentRoleData = getRoleByTitle(currentRole);
+  const targetRoleData = getRoleByTitle(targetRole);
+  
+  // Generate required skills comparison
+  const currentSkills = currentRoleData?.requiredSkills || [];
+  const targetSkills = targetRoleData?.requiredSkills || [];
+  
+  // Find new skills needed
+  const newSkillsNeeded = targetSkills.filter(skill => !currentSkills.includes(skill));
+  
+  // Find shared skills
+  const sharedSkills = targetSkills.filter(skill => currentSkills.includes(skill));
+  
+  // Calculate skill gap percentage
+  const skillGapPercentage = Math.round((sharedSkills.length / targetSkills.length) * 100);
+  
+  // Generate a difficulty rating based on the skill gap
+  const getDifficulty = (): 'Easy' | 'Moderate' | 'Hard' | 'Very Hard' => {
+    if (skillGapPercentage >= 80) return 'Easy';
+    if (skillGapPercentage >= 60) return 'Moderate';
+    if (skillGapPercentage >= 40) return 'Hard';
+    return 'Very Hard';
+  };
+  
+  // Generate a transition path based on the two roles
+  useEffect(() => {
+    if (!currentRole || !targetRole) return;
+    
+    // Generate intermediate steps based on skill gap
+    const intermediateSteps = [];
+    const difficulty = getDifficulty();
+    
+    // Create intermediate steps based on the skills gap
+    if (difficulty === 'Easy') {
+      intermediateSteps.push({
+        title: 'Skill Enhancement',
+        description: `Build on your existing skills and acquire the few additional skills needed for the ${targetRole} position.`,
+        duration: '3-6 months',
+        skills: newSkillsNeeded
+      });
+    } else if (difficulty === 'Moderate') {
+      intermediateSteps.push({
+        title: 'Skill Development',
+        description: `Strengthen your existing skills and acquire the additional competencies needed for the ${targetRole} role.`,
+        duration: '6-9 months',
+        skills: newSkillsNeeded.slice(0, Math.ceil(newSkillsNeeded.length / 2))
+      });
+      
+      intermediateSteps.push({
+        title: 'Practical Experience',
+        description: `Apply your skills in real-world scenarios and gain hands-on experience with the technologies and methodologies used in ${targetRole} roles.`,
+        duration: '3-6 months',
+        skills: newSkillsNeeded.slice(Math.ceil(newSkillsNeeded.length / 2))
+      });
+    } else {
+      // Hard and Very Hard transitions
+      const skillsPerStep = Math.ceil(newSkillsNeeded.length / 3);
+      
+      intermediateSteps.push({
+        title: 'Foundation Building',
+        description: `Develop the fundamental skills and knowledge needed for a transition to ${targetRole}.`,
+        duration: '3-6 months',
+        skills: newSkillsNeeded.slice(0, skillsPerStep)
+      });
+      
+      intermediateSteps.push({
+        title: 'Advanced Skill Development',
+        description: `Deepen your expertise in core technologies and methodologies used in ${targetRole} positions.`,
+        duration: '6-9 months',
+        skills: newSkillsNeeded.slice(skillsPerStep, skillsPerStep * 2)
+      });
+      
+      intermediateSteps.push({
+        title: 'Specialization',
+        description: `Master specialized skills and gain relevant experience needed for ${targetRole} roles.`,
+        duration: '6-12 months',
+        skills: newSkillsNeeded.slice(skillsPerStep * 2)
+      });
+    }
+    
+    // Calculate total duration based on the steps
+    const calculateTotalDuration = (steps: any[]): string => {
+      let minMonths = 0;
+      let maxMonths = 0;
+      
+      steps.forEach(step => {
+        const [min, max] = step.duration.split('-').map((n: string) => parseInt(n.replace(/[^0-9]/g, '')));
+        minMonths += min;
+        maxMonths += max;
+      });
+      
+      return `${minMonths}-${maxMonths} months`;
+    };
+    
+    // Generate the transition path
+    setTransitionPath({
+      steps: intermediateSteps,
+      totalDuration: calculateTotalDuration(intermediateSteps),
+      difficulty: difficulty
+    });
+    
+  }, [currentRole, targetRole, newSkillsNeeded]);
+  
+  const getDifficultyColor = (difficulty: string): string => {
+    switch (difficulty) {
+      case 'Easy': return 'bg-green-500';
+      case 'Moderate': return 'bg-yellow-500';
+      case 'Hard': return 'bg-orange-500';
+      case 'Very Hard': return 'bg-red-500';
+      default: return 'bg-slate-500';
+    }
+  };
+  
+  if (!transitionPath) return null;
+  
   return (
-    <Card className="w-full">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-xl">Career Transition Plan</CardTitle>
+        <CardTitle className="flex items-center justify-between">
+          <span>Transition Path: {currentRole} to {targetRole}</span>
+          <Badge className={`${getDifficultyColor(transitionPath.difficulty)} text-white`}>
+            {transitionPath.difficulty}
+          </Badge>
+        </CardTitle>
         <CardDescription>
-          Recommended path from {currentRole} to {targetRole}
+          Estimated time: {transitionPath.totalDuration} | Skill similarity: {skillGapPercentage}%
         </CardDescription>
       </CardHeader>
+      
       <CardContent className="space-y-6">
-        {/* Transition Path */}
+        {/* Skill Overlap Progress Bar */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Workflow className="text-primary h-5 w-5" />
-            <h3 className="text-lg font-medium">Recommended Transition Path</h3>
+          <div className="flex justify-between text-sm">
+            <span>Skill Gap</span>
+            <span>{skillGapPercentage}% overlap</span>
           </div>
-          <div className="pl-7 pr-4">
-            <div className="bg-muted/40 p-4 rounded-md">
-              <p className="text-md">{template.path}</p>
-            </div>
-          </div>
+          <Progress value={skillGapPercentage} className="h-2" />
         </div>
-
-        {/* Typical Timeframe */}
+        
+        {/* Shared Skills */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Clock className="text-primary h-5 w-5" />
-            <h3 className="text-lg font-medium">Typical Transition Time</h3>
-          </div>
-          <div className="pl-7">
-            <Badge variant="outline" className="text-md px-3 py-1 border-primary/30">
-              {template.time}
-            </Badge>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Key Skills to Acquire */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Award className="text-primary h-5 w-5" />
-            <h3 className="text-lg font-medium">Key Skills to Acquire</h3>
-          </div>
-          <div className="pl-7">
-            <div className="flex flex-wrap gap-2">
-              {template.skills.map((skill, index) => (
-                <Badge key={index} variant="secondary" className="px-3 py-1 text-sm">
+          <h4 className="text-sm font-medium flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+            Shared Skills
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {sharedSkills.length > 0 ? (
+              sharedSkills.map((skill, index) => (
+                <Badge key={index} variant="secondary">
                   {skill}
                 </Badge>
-              ))}
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">No shared skills found</p>
+            )}
+          </div>
+        </div>
+        
+        {/* New Skills Needed */}
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium flex items-center gap-2">
+            <Zap className="h-4 w-4 text-yellow-500" />
+            New Skills Needed
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {newSkillsNeeded.length > 0 ? (
+              newSkillsNeeded.map((skill, index) => (
+                <Badge key={index} variant="outline">
+                  {skill}
+                </Badge>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">No new skills needed</p>
+            )}
+          </div>
+        </div>
+        
+        <Separator />
+        
+        {/* Transition Steps */}
+        <div className="space-y-6">
+          <h3 className="text-lg font-medium">Recommended Transition Path</h3>
+          
+          <div className="relative">
+            {/* Start Point */}
+            <div className="flex items-center mb-6">
+              <Avatar className="h-10 w-10 bg-primary/10 border-2 border-primary">
+                <AvatarFallback className="text-primary">{currentRole.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div className="ml-4">
+                <p className="text-sm font-medium">{currentRole}</p>
+                <p className="text-xs text-muted-foreground">Starting Point</p>
+              </div>
+            </div>
+            
+            {/* Timeline Line */}
+            <div className="absolute left-5 top-10 bottom-10 w-[1px] bg-border -translate-x-1/2 z-0"></div>
+            
+            {/* Steps */}
+            {transitionPath.steps.map((step, index) => (
+              <div key={index} className="relative pl-12 pb-8">
+                <div className="absolute left-[20px] top-0 h-6 w-6 rounded-full bg-muted border-2 border-primary -translate-x-1/2 z-10"></div>
+                <div className="mb-1 font-medium flex items-center gap-2">
+                  <span>{step.title}</span>
+                  <Badge variant="outline" className="ml-2 font-normal">
+                    <Clock className="mr-1 h-3 w-3" /> {step.duration}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {step.skills.map((skill, skillIndex) => (
+                    <Badge key={skillIndex} variant="secondary" className="text-xs">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            ))}
+            
+            {/* End Point */}
+            <div className="flex items-center">
+              <Avatar className="h-10 w-10 bg-primary/20 border-2 border-primary">
+                <AvatarFallback className="text-primary">{targetRole.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div className="ml-4">
+                <p className="text-sm font-medium">{targetRole}</p>
+                <p className="text-xs text-muted-foreground">Target Position</p>
+              </div>
             </div>
           </div>
         </div>

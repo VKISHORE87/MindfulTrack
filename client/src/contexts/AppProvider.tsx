@@ -1,19 +1,19 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { CareerGoalProvider } from './CareerGoalContext';
-import { ProgressProvider } from './ProgressContext';
 import { SkillsProvider } from './SkillsContext';
+import { ProgressProvider } from './ProgressContext';
 import { LearningPathProvider } from './LearningPathContext';
 
-interface AppProviderProps {
-  children: ReactNode;
+// Combined provider component that wraps all the individual providers
+export default function AppProvider({
+  children,
+  userId
+}: {
+  children: React.ReactNode;
   userId: number;
-}
-
-// This provider combines all context providers into a single component
-// The order is important - some contexts depend on others
-export const AppProvider: React.FC<AppProviderProps> = ({ children, userId }) => {
+}) {
   return (
-    <CareerGoalProvider>
+    <CareerGoalProvider userId={userId}>
       <SkillsProvider userId={userId}>
         <ProgressProvider userId={userId}>
           <LearningPathProvider userId={userId}>
@@ -23,6 +23,4 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children, userId }) =>
       </SkillsProvider>
     </CareerGoalProvider>
   );
-};
-
-export default AppProvider;
+}
