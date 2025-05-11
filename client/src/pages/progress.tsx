@@ -60,7 +60,12 @@ export default function ProgressPage({ user }: { user: any }) {
   });
   
   // Fetch current career goal
-  const { data: currentCareerGoal, isLoading: isLoadingCurrentGoal } = useQuery({
+  const { data: currentCareerGoal, isLoading: isLoadingCurrentGoal } = useQuery<{
+    id: number;
+    title: string;
+    userId: number;
+    targetRoleId?: number;
+  }>({
     queryKey: ['/api/users/career-goals/current'],
   });
   
@@ -316,10 +321,10 @@ export default function ProgressPage({ user }: { user: any }) {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <TrendingUp className="mr-2 h-5 w-5 text-primary" />
-                Skills Progress Chart
+                Skills Progress for {targetRole ? targetRole.title : 'Current Goal'}
               </CardTitle>
               <CardDescription>
-                Visual breakdown of your skills progress
+                Visual breakdown of your skills progress toward {targetRole ? `the ${targetRole.title} role` : 'your career goal'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -334,7 +339,7 @@ export default function ProgressPage({ user }: { user: any }) {
                     <XAxis type="number" domain={[0, 100]} />
                     <YAxis dataKey="name" type="category" width={150} />
                     <Tooltip 
-                      formatter={(value: number) => [`${value}%`, 'Completion']}
+                      formatter={(value: number) => [`${value}%`, 'Completion'] as [string, string]}
                       labelFormatter={(label: string) => `Skill: ${label}`}
                     />
                     <Legend />
