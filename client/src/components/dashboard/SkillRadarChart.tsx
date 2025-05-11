@@ -193,9 +193,16 @@ export default function SkillRadarChart({ width, height }: SkillRadarChartProps)
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-medium">
-          Skill Radar Chart
-        </CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg font-medium">
+            Skill Radar Chart
+          </CardTitle>
+          {targetRole && (
+            <div className="text-sm text-muted-foreground">
+              {targetRole.title}
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="text-sm text-muted-foreground mb-2">
