@@ -52,11 +52,14 @@ export function TargetRoleProvider({ children, userId }: { children: React.React
     },
   });
   
-  // Initialize target role from current goal if available
+  // Initialize target role from current goal ONLY if targetRole is null
+  // This ensures we don't override a user-selected target role when navigating between tabs
   useEffect(() => {
-    if (currentGoal?.targetRoleId && roles) {
+    // Only initialize if we don't already have a target role set
+    if (!targetRole && currentGoal?.targetRoleId && roles) {
       const role = roles.find(r => r.id === currentGoal.targetRoleId);
       if (role) {
+        console.log("[DEBUG] Initializing target role from current goal:", role.title);
         setTargetRoleState({
           id: role.id,
           title: role.title,
@@ -67,7 +70,7 @@ export function TargetRoleProvider({ children, userId }: { children: React.React
         });
       }
     }
-  }, [currentGoal, roles]);
+  }, [currentGoal, roles, targetRole]);
   
   // Function to set target role
   const setTargetRole = async (roleId: number, roleTitle: string, requiredSkills: string[]) => {

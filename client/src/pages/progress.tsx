@@ -83,20 +83,9 @@ export default function ProgressPage({ user }: { user: any }) {
     queryKey: [`/api/users/${user.id}/skills`],
   });
   
-  // Sync the target role data with the context when progress data is loaded
-  useEffect(() => {
-    // Only update if progressData exists, is not loading, and contains targetRole data
-    if (progressData?.targetRole && !isLoading && progressData.targetRole.id) {
-      // Compare with current targetRole to avoid unnecessary updates
-      if (!targetRole || targetRole.id !== progressData.targetRole.id) {
-        console.log("[DEBUG] Syncing targetRole from progress data:", progressData.targetRole);
-        const role = progressData.targetRole;
-        setTargetRole(role.id, role.title, role.requiredSkills || []);
-      }
-    }
-  // Only depend on progressData.targetRole?.id and isLoading, not the entire objects
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [progressData?.targetRole?.id, isLoading]);
+  // Previously, we were syncing target role from progress data,
+  // but this was causing the target role to reset when switching tabs
+  // We removed the automatic syncing to respect the user's selection
 
   const isLoadingAll = isLoading || isLoadingResources || isLoadingPaths || isLoadingSkills || isLoadingCurrentGoal;
   
