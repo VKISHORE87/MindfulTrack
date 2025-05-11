@@ -16,6 +16,7 @@ import {
   Target
 } from "lucide-react";
 import { useUserProgress } from '@/hooks/useUserProgress';
+import { useTargetRole } from '@/contexts/TargetRoleContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   HoverCard,
@@ -35,6 +36,9 @@ import {
 
 export default function ProgressPage({ user }: { user: any }) {
   const [activeTab, setActiveTab] = useState("overview");
+  
+  // Use our global target role context
+  const { targetRole } = useTargetRole();
   
   // Use useUserProgress hook to get progress data with mutations
   const { 
@@ -364,7 +368,7 @@ export default function ProgressPage({ user }: { user: any }) {
                   Learning Path Progress
                 </CardTitle>
                 <CardDescription>
-                  Progress in your learning paths for {currentCareerGoal.title || 'Current Goal'}
+                  Progress in your learning paths for {targetRole?.title || currentCareerGoal?.title || 'Current Goal'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
