@@ -201,10 +201,13 @@ export default function Dashboard({ user }: { user: any }) {
                 progress={dashboardData?.stats?.overallProgress || 0}
                 completedSkills={skillValidation.completed}
                 totalSkills={skillValidation.total}
-                targetRole={currentGoal ? {
+                targetRole={targetRole ? {
+                  title: targetRole.title,
+                  timeframe: currentGoal ? `${currentGoal.timelineMonths} months` : '12 months'
+                } : (currentGoal ? {
                   title: currentGoal.title,
                   timeframe: `${currentGoal.timelineMonths} months`
-                } : undefined}
+                } : undefined)}
               />
             </div>
             

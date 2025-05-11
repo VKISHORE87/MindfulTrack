@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { AlertTriangle, ChevronRight, TrendingUp, PieChart } from "lucide-react";
 import { Link } from "wouter";
 import { useCareerGoal } from "@/contexts/CareerGoalContext";
+import { useTargetRole } from '@/contexts/TargetRoleContext';
 import { useState, useEffect } from "react";
 
 interface Skill {
@@ -22,9 +23,10 @@ export default function SkillGapSummary({
   maxDisplayed = 5 
 }: SkillGapSummaryProps) {
   const { targetRoleSkills, currentGoal } = useCareerGoal();
+  const { targetRole } = useTargetRole();
   const [displaySkills, setDisplaySkills] = useState<Skill[]>([]);
   
-  // Update skills when targetRoleSkills or provided skills change
+  // Update skills when targetRole, targetRoleSkills or provided skills change
   useEffect(() => {
     // If skills were provided as props, use them
     if (skills.length > 0) {
@@ -32,14 +34,24 @@ export default function SkillGapSummary({
       return;
     }
     
-    // Otherwise, generate skills from targetRoleSkills in context
-    if (targetRoleSkills.length > 0) {
-      const generatedSkills = targetRoleSkills.map(skill => ({ 
+    // Use targetRole's requiredSkills if available (higher priority)
+    if (targetRole && targetRole.requiredSkills && targetRole.requiredSkills.length > 0) {
+      const generatedSkills = targetRole.requiredSkills.map(skill => ({ 
         name: skill,
         // In a real app, this would come from assessment data
         // For demo purposes, use deterministic values based on skill name length
         status: skill.length % 3 === 0 ? 'missing' : 'improvement',
         percentage: 30 + (skill.length * 5) % 40 // Generate values between 30-70%
+      }));
+      
+      setDisplaySkills(generatedSkills);
+    }
+    // Otherwise, use targetRoleSkills from CareerGoalContext as fallback
+    else if (targetRoleSkills.length > 0) {
+      const generatedSkills = targetRoleSkills.map(skill => ({ 
+        name: skill,
+        status: skill.length % 3 === 0 ? 'missing' : 'improvement',
+        percentage: 30 + (skill.length * 5) % 40
       }));
       
       setDisplaySkills(generatedSkills);
@@ -53,7 +65,7 @@ export default function SkillGapSummary({
         { name: "Project Management", status: "missing", percentage: 25 }
       ]);
     }
-  }, [targetRoleSkills, skills, currentGoal?.id]);
+  }, [targetRole, targetRoleSkills, skills, currentGoal?.id]);
   
   // Sort skills by priority (missing first, then improvement)
   const sortedSkills = [...displaySkills].sort((a, b) => {
