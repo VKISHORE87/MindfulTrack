@@ -13,6 +13,18 @@ export interface ProgressStats {
     percent: number;
   }>;
   legacyProgress?: any[]; // Include legacy data for backward compatibility
+  targetRole?: {
+    id: number;
+    title: string;
+    requiredSkills: string[];
+    [key: string]: any;
+  } | null;
+  careerGoal?: {
+    id: number;
+    title: string;
+    targetRoleId?: number;
+    [key: string]: any;
+  } | null;
 }
 
 interface CompletionData {

@@ -38,7 +38,7 @@ export default function ProgressPage({ user }: { user: any }) {
   const [activeTab, setActiveTab] = useState("overview");
   
   // Use our global target role context
-  const { targetRole } = useTargetRole();
+  const { targetRole, setTargetRole } = useTargetRole();
   
   // Use useUserProgress hook to get progress data with mutations
   const { 
@@ -83,6 +83,14 @@ export default function ProgressPage({ user }: { user: any }) {
     queryKey: [`/api/users/${user.id}/skills`],
   });
   
+  // Sync the target role data with the context when progress data is loaded
+  useEffect(() => {
+    if (progressData?.targetRole && !isLoading) {
+      console.log("[DEBUG] Syncing targetRole from progress data:", progressData.targetRole);
+      setTargetRole(progressData.targetRole);
+    }
+  }, [progressData, isLoading, setTargetRole]);
+
   const isLoadingAll = isLoading || isLoadingResources || isLoadingPaths || isLoadingSkills || isLoadingCurrentGoal;
   
   if (isLoadingAll) {

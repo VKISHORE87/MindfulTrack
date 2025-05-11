@@ -2493,7 +2493,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let targetRole = null;
         
         if (careerGoal && careerGoal.targetRoleId) {
-          targetRole = await storage.getRoleById(careerGoal.targetRoleId);
+          // Use getInterviewRole instead of getRoleById
+          targetRole = await storage.getInterviewRole(careerGoal.targetRoleId);
         }
         
         // Get new detailed progress statistics using the new method
