@@ -8,8 +8,6 @@ import { Eye, EyeOff, Sparkles } from "lucide-react";
 import ProgressTracker from "@/components/dashboard/ProgressTracker";
 import SkillGapSummary from "@/components/dashboard/SkillGapSummary";
 import NextStepsPanel from "@/components/dashboard/NextStepsPanel";
-import CareerPathRecommendations from "@/components/dashboard/CareerPathRecommendations";
-import LearningProgressSummary from "@/components/dashboard/LearningProgressSummary";
 import AIRecommendationsPanel from "@/components/dashboard/AIRecommendationsPanel";
 import SkillRadarChart from "@/components/dashboard/SkillRadarChart";
 import CareerRoadmap from "@/components/dashboard/CareerRoadmap";
@@ -244,34 +242,14 @@ export default function Dashboard({ user }: { user: any }) {
             </div>
           </div>
           
-          {/* C. Learning & Resources Section */}
+          {/* C. Notifications & Recent Activity Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* C1. Learning Progress Summary */}
-            <div>
-              <LearningProgressSummary 
-                completedCount={resourcesCount.completed}
-                totalCount={resourcesCount.total}
-                resources={dashboardData?.inProgressResources || []}
-              />
-            </div>
-            
-            {/* C2. Notifications Panel */}
+            {/* C1. Notifications Panel */}
             <div>
               <NotificationPanel />
             </div>
-          </div>
-          
-          {/* D. Career Path Recommendations & Recent Activity */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* D1. Career Path Recommendations */}
-            <div>
-              <CareerPathRecommendations 
-                alternateRoles={dashboardData?.alternateRoles} 
-                maxDisplayed={3}
-              />
-            </div>
             
-            {/* D2. Recent Activity */}
+            {/* C2. Recent Activity */}
             <div>
               <RecentActivity activities={dashboardData?.recentActivities || []} />
             </div>

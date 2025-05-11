@@ -63,11 +63,15 @@ export default function Sidebar({ user, currentRoute }: SidebarProps) {
                   <p className="font-semibold">{targetRole.title}</p>
                   <p className="text-xs">Required skills:</p>
                   <div className="flex flex-wrap gap-1">
-                    {targetRole.requiredSkills.map((skill, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {skill}
-                      </Badge>
-                    ))}
+                    {targetRole.requiredSkills && targetRole.requiredSkills.length > 0 ? (
+                      targetRole.requiredSkills.map((skill, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {skill}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-xs text-gray-500">No skills specified</span>
+                    )}
                   </div>
                 </div>
               </TooltipContent>
