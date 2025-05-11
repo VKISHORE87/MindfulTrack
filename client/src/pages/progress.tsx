@@ -132,6 +132,16 @@ export default function ProgressPage({ user }: { user: any }) {
         <p className="text-gray-600">Track your skill development journey and learning achievements.</p>
       </div>
       
+      {targetRole && (
+        <div className="flex items-center p-4 mb-6 bg-muted/30 rounded-lg border border-muted">
+          <Target className="h-5 w-5 text-primary mr-3" />
+          <div>
+            <span className="text-sm text-muted-foreground">Progress Tracking For:</span>
+            <h3 className="text-lg font-semibold">{targetRole.title}</h3>
+          </div>
+        </div>
+      )}
+      
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -148,7 +158,7 @@ export default function ProgressPage({ user }: { user: any }) {
                 Overall Progress
               </CardTitle>
               <CardDescription>
-                Your journey toward your career goal
+                Your journey toward {targetRole ? `your ${targetRole.title} role` : 'your career goal'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -226,6 +236,19 @@ export default function ProgressPage({ user }: { user: any }) {
         </TabsContent>
         
         <TabsContent value="skills" className="space-y-4">
+          {/* Skills Header */}
+          <Card className="mb-4">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Target className="mr-2 h-5 w-5 text-primary" />
+                Skills Progress for {targetRole ? targetRole.title : 'Current Career Goal'}
+              </CardTitle>
+              <CardDescription>
+                Track your development in key skills required for {targetRole ? `the ${targetRole.title} role` : 'your career goal'}
+              </CardDescription>
+            </CardHeader>
+          </Card>
+          
           {/* Skills Progress Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {progressData.skills.map((skill) => (
