@@ -7,14 +7,15 @@ channel = "stable-24_05"
 
 [deployment]
 deploymentTarget = "cloudrun"
-run = ["sh", "-c", "npm run dev"]
+run = ["sh", "-c", "NODE_ENV=production node dist/index.js"]
+build = ["sh", "-c", "npm run build"]
 
 [[ports]]
 localPort = 5000
 externalPort = 80
 
 [workflows]
-runButton = "Project"
+runButton = "Start App"
 
 [[workflows.workflow]]
 name = "Project"
@@ -39,3 +40,16 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Start App"
+author = 40562279
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
