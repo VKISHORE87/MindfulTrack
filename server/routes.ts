@@ -10,6 +10,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import crypto from "crypto";
 import OpenAI from "openai";
 import nodemailer from "nodemailer";
+import { registerChatRoutes } from "./routes/chatRoutes";
 
 import {
   insertUserSchema,
@@ -335,6 +336,9 @@ function generateRoleSpecificSkills(roleTitle: string, industry: string): Array<
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup session middleware
   const MemoryStoreSession = MemoryStore(session);
+  
+  // Register AI chatbot routes
+  await registerChatRoutes(app);
   
   // Make it work in development environment
   const isDevEnvironment = process.env.NODE_ENV !== "production";

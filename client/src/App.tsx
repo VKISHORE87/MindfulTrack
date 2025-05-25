@@ -15,6 +15,7 @@ import Profile from "@/pages/profile";
 import Practice from "@/pages/practice";
 import CareerTransitions from "@/pages/career-transitions";
 import SkillAssessments from "@/pages/skill-assessments";
+import SkillAdvisorPage from "@/pages/SkillAdvisorPage";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import ForgotPassword from "@/pages/forgot-password";
