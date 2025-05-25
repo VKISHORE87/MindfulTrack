@@ -193,6 +193,11 @@ function Router() {
           <ProtectedRoute component={SkillAssessments} />
         </AppLayout>
       </Route>
+      <Route path="/skill-advisor">
+        <AppLayout>
+          <ProtectedRoute component={SkillAdvisorPage} />
+        </AppLayout>
+      </Route>
       <Route>
         <AppLayout hideNavigation={true}>
           <NotFound />

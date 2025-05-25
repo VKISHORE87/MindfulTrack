@@ -1,254 +1,326 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, RefreshCw, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { SendHorizonal, Bot, User, Sparkles, Info, ChevronDown, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useUser } from "@/contexts/UserContext";
-import { useCareerGoal } from "@/contexts/CareerGoalContext";
+import { useUser } from "@/lib/hooks/use-user";
+import { useSkills } from "@/contexts/SkillsContext";
 import { useTargetRole } from "@/contexts/TargetRoleContext";
+import { useCareerGoal } from "@/contexts/CareerGoalContext";
+import { Textarea } from "@/components/ui/textarea";
+import { Spinner } from "@/components/ui/spinner";
+
+// Message types
+type MessageRole = 'user' | 'assistant' | 'system';
 
 interface Message {
-  role: "user" | "assistant" | "system";
+  role: MessageRole;
   content: string;
-  timestamp?: Date;
+  timestamp: Date;
 }
 
-interface SkillChatbotProps {
-  initialPrompt?: string;
-  className?: string;
-}
-
-export default function SkillChatbot({ initialPrompt, className }: SkillChatbotProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState(initialPrompt || "");
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+export default function SkillChatbot() {
   const { toast } = useToast();
   const { user } = useUser();
-  const { currentGoal } = useCareerGoal();
-  const { targetRole } = useTargetRole();
   
-  // Set welcome message on first load
-  useEffect(() => {
-    if (messages.length === 0) {
-      const welcomeMessage = {
-        role: "assistant" as const,
-        content: `👋 Hi! I'm your AI skill advisor. I can help with:
-        
-• Recommending skills for your target role
-• Providing learning resources for specific skills
-• Answering questions about career development
-• Creating personalized learning plans
-
-How can I assist your skill development today?`,
-        timestamp: new Date(),
-      };
-      setMessages([welcomeMessage]);
+  // Mock skills for development - in production this would use context
+  const userSkills = [
+    { skillName: "Programming", currentLevel: 3, targetLevel: 5 },
+    { skillName: "System Design", currentLevel: 2, targetLevel: 4 },
+    { skillName: "Problem Solving", currentLevel: 4, targetLevel: 5 }
+  ];
+  
+  // Mock target role - in production this would use context
+  const targetRole = { title: "Artificial Intelligence Engineer" };
+  
+  // Mock career goals - in production this would use context
+  const careerGoals = [
+    { 
+      title: "Become a Artificial Intelligence Engineer", 
+      description: "Transition to an AI engineering role", 
+      timelineMonths: 12,
+      targetRoleTitle: "Artificial Intelligence Engineer"
     }
-  }, [messages.length]);
+  ];
   
-  // Scroll to bottom of chat on new message
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: 'assistant',
+      content: 'Hello! I\'m your personal Skill Advisor. I can help you identify skill gaps, recommend learning resources, and create personalized development plans. How can I assist you today?',
+      timestamp: new Date()
+    }
+  ]);
+  
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [expandedInfo, setExpandedInfo] = useState(true);
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Handle message submission
-  const handleSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  // Auto-scroll to bottom of messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+  
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    }
+  }, [input]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
     if (!input.trim()) return;
     
-    // Add user message to chat
+    // Add user message
     const userMessage: Message = {
-      role: "user",
+      role: 'user',
       content: input,
-      timestamp: new Date(),
+      timestamp: new Date()
     };
     
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
     setIsLoading(true);
     
     try {
-      // Get target role title from context
-      const targetRoleTitle = targetRole?.title || currentGoal?.title || "";
-      
-      // Call API to get response from the AI
-      const response = await fetch("/api/chat/skill-advisor", {
-        method: "POST",
+      const response = await fetch('/api/chat/skill-advisor', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          messages: [...messages, userMessage].map(({ role, content }) => ({ role, content })),
-          userId: user?.id || 1,
-          targetRole: targetRoleTitle,
+          message: input,
+          userId: user?.id,
+          currentSkills: userSkills,
+          targetRole: targetRole?.title,
+          careerGoals: careerGoals,
         }),
       });
       
       if (!response.ok) {
-        throw new Error("Failed to get response from AI advisor");
+        throw new Error('Failed to get a response from the AI advisor');
       }
       
       const data = await response.json();
       
-      // Add AI response to chat
-      const aiMessage: Message = {
-        role: "assistant",
+      // Add assistant response
+      const assistantMessage: Message = {
+        role: 'assistant',
         content: data.response,
-        timestamp: new Date(),
+        timestamp: new Date()
       };
       
-      setMessages((prev) => [...prev, aiMessage]);
+      setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      console.error("Error getting AI response:", error);
+      console.error('Error:', error);
       toast({
-        title: "Error",
-        description: "Failed to get response from AI advisor. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to communicate with the AI advisor. Please try again.',
+        variant: 'destructive',
       });
+      
+      // Add error message from assistant
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: 'I apologize, but I encountered an error while processing your request. Please try again or check your connection.',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
   };
   
-  // Handle predefined prompts
-  const handlePredefinedPrompt = (prompt: string) => {
-    setInput(prompt);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
   };
   
-  // Reset chat
-  const resetChat = () => {
-    setMessages([]);
-    setInput("");
+  const formatTimestamp = (date: Date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
   
+  const renderMessageContent = (content: string) => {
+    // Split content by line breaks and process each line
+    return content.split('\n').map((line, i) => {
+      // Convert markdown-style bullet points to HTML
+      if (line.trim().startsWith('- ')) {
+        return (
+          <li key={i} className="ml-4">
+            {line.trim().substring(2)}
+          </li>
+        );
+      }
+      
+      // Convert markdown-style headers to HTML
+      if (line.trim().startsWith('# ')) {
+        return <h3 key={i} className="text-lg font-bold mt-2 mb-1">{line.trim().substring(2)}</h3>;
+      }
+      
+      if (line.trim().startsWith('## ')) {
+        return <h4 key={i} className="text-md font-bold mt-2 mb-1">{line.trim().substring(3)}</h4>;
+      }
+      
+      // Handle empty lines with a small spacer
+      if (line.trim() === '') {
+        return <div key={i} className="h-2"></div>;
+      }
+      
+      // Regular text
+      return <p key={i}>{line}</p>;
+    });
+  };
+
   return (
-    <Card className={`flex flex-col h-[600px] ${className}`}>
-      <CardHeader className="px-4 py-3 border-b flex flex-row justify-between items-center">
-        <div className="flex items-center">
-          <Bot className="h-5 w-5 text-primary mr-2" />
-          <h3 className="font-medium">Skill Advisor AI</h3>
-        </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={resetChat}
-          title="Reset conversation"
-        >
-          <RefreshCw className="h-4 w-4" />
-        </Button>
-      </CardHeader>
-      
-      <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`flex ${
-              message.role === "user" ? "justify-end" : "justify-start"
-            }`}
-          >
-            <div
-              className={`max-w-[80%] px-4 py-2 rounded-lg ${
-                message.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted"
-              }`}
-            >
-              <div className="flex items-center mb-1">
-                {message.role === "user" ? (
-                  <User className="h-4 w-4 mr-2" />
-                ) : (
-                  <Bot className="h-4 w-4 mr-2" />
-                )}
-                <span className="text-xs opacity-70">
-                  {message.role === "user" ? "You" : "AI Advisor"}
-                  {message.timestamp && 
-                    ` • ${message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-                  }
-                </span>
-              </div>
-              <div className="whitespace-pre-wrap text-sm">{message.content}</div>
-            </div>
+    <div className="flex flex-col h-[calc(100vh-200px)] min-h-[500px]">
+      <Card className="flex-1 flex flex-col overflow-hidden">
+        <div className="p-3 border-b flex items-center justify-between">
+          <div className="flex items-center">
+            <Bot className="h-5 w-5 text-primary mr-2" />
+            <span className="font-semibold">Skill Advisor AI</span>
           </div>
-        ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="max-w-[80%] px-4 py-2 rounded-lg bg-muted">
-              <div className="flex items-center">
-                <Bot className="h-4 w-4 mr-2" />
-                <span className="text-xs opacity-70">AI Advisor</span>
-              </div>
-              <div className="animate-pulse mt-2 flex space-x-1">
-                <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
-                <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
-                <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
-              </div>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </CardContent>
-      
-      <div className="px-4 py-2">
-        <div className="flex flex-wrap gap-2 mb-2">
+          
           <Button 
-            variant="outline" 
+            variant="ghost" 
             size="sm" 
-            className="text-xs h-7"
-            onClick={() => handlePredefinedPrompt("What skills should I learn for my target role?")}
+            onClick={() => setExpandedInfo(!expandedInfo)}
+            className="h-8 px-2"
           >
-            <Plus className="h-3 w-3 mr-1" />
-            Skills for my role
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="text-xs h-7"
-            onClick={() => handlePredefinedPrompt("How can I improve my programming skills?")}
-          >
-            <Plus className="h-3 w-3 mr-1" />
-            Improve programming
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="text-xs h-7"
-            onClick={() => handlePredefinedPrompt("Create a learning path for me")}
-          >
-            <Plus className="h-3 w-3 mr-1" />
-            Learning path
+            <Info className="h-4 w-4 mr-1" />
+            <span className="text-xs">About</span>
+            <ChevronDown className={`h-4 w-4 ml-1 transform transition-transform ${expandedInfo ? 'rotate-180' : ''}`} />
           </Button>
         </div>
         
-        <Separator className="my-2" />
-      </div>
-      
-      <CardFooter className="p-4 pt-0">
-        <form onSubmit={handleSubmit} className="flex w-full gap-2">
-          <Textarea
-            placeholder="Ask about skills, learning resources, or career advice..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="min-h-10 flex-1 resize-none"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit();
-              }
-            }}
-          />
-          <Button 
-            type="submit" 
-            size="icon" 
-            disabled={isLoading || !input.trim()}
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </form>
-      </CardFooter>
-    </Card>
+        {expandedInfo && (
+          <div className="bg-muted/50 p-3 text-sm border-b">
+            <p>I'm your AI-powered Skill Advisor. I can help you:</p>
+            <ul className="list-disc pl-5 mt-1 space-y-1">
+              <li>Analyze your skill gaps based on your target role</li>
+              <li>Recommend learning resources tailored to your needs</li>
+              <li>Create customized learning paths for career growth</li>
+              <li>Provide advice on skill development strategies</li>
+            </ul>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Ask me specific questions about skills you want to develop or general career advice.
+            </p>
+          </div>
+        )}
+        
+        <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.map((message, index) => (
+            <div 
+              key={index} 
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div 
+                className={`flex max-w-[80%] ${
+                  message.role === 'user' 
+                    ? 'flex-row-reverse' 
+                    : 'flex-row'
+                }`}
+              >
+                <div 
+                  className={`flex items-center justify-center h-8 w-8 rounded-full flex-shrink-0 ${
+                    message.role === 'user' 
+                      ? 'bg-primary ml-2' 
+                      : 'bg-secondary mr-2'
+                  }`}
+                >
+                  {message.role === 'user' ? (
+                    <User className="h-4 w-4 text-primary-foreground" />
+                  ) : (
+                    <Bot className="h-4 w-4 text-secondary-foreground" />
+                  )}
+                </div>
+                
+                <div 
+                  className={`rounded-lg p-3 ${
+                    message.role === 'user' 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'bg-card border shadow-sm'
+                  }`}
+                >
+                  <div className="text-sm space-y-1">
+                    {renderMessageContent(message.content)}
+                  </div>
+                  <div 
+                    className={`flex items-center mt-1 text-xs ${
+                      message.role === 'user' 
+                        ? 'text-primary-foreground/70 justify-end' 
+                        : 'text-muted-foreground'
+                    }`}
+                  >
+                    <Clock className="h-3 w-3 mr-1" />
+                    {formatTimestamp(message.timestamp)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="flex flex-row">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-secondary mr-2 flex-shrink-0">
+                  <Bot className="h-4 w-4 text-secondary-foreground" />
+                </div>
+                <div className="rounded-lg p-3 bg-card border shadow-sm">
+                  <Spinner size="sm" />
+                  <span className="ml-2 text-sm">Thinking...</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </CardContent>
+        
+        <Separator />
+        
+        <div className="p-3">
+          <form onSubmit={handleSubmit} className="flex items-end gap-2">
+            <div className="relative flex-1">
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask about skills, learning resources, or career advice..."
+                className="pr-10 min-h-[60px] max-h-[120px] resize-none"
+                disabled={isLoading}
+              />
+              {!isLoading && input.trim() && (
+                <Button
+                  type="submit"
+                  size="icon"
+                  variant="ghost"
+                  className="absolute right-1 bottom-1 h-8 w-8"
+                >
+                  <SendHorizonal className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </form>
+          <div className="mt-2 flex justify-between items-center">
+            <div className="text-xs text-muted-foreground">
+              <Sparkles className="h-3 w-3 inline mr-1" />
+              Powered by AI to provide personalized skill recommendations
+            </div>
+            {isLoading && <Spinner size="sm" className="mr-2" />}
+          </div>
+        </div>
+      </Card>
+    </div>
   );
 }
