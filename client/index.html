@@ -1,34 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upcraft - Personalized Skill Development Platform</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    .path-connector {
-      position: absolute;
-      top: 40px;
-      left: 35px;
-      width: 2px;
-      height: calc(100% - 50px);
-      background-color: #e0e7ff;
-      z-index: 0;
-    }
-
-    @keyframes progressAnimation {
-      from {
-        width: 0;
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/generated-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Upcraft - AI-powered career transition platform helping professionals navigate their career paths through personalized learning and skill development." />
+    <meta name="keywords" content="career development, skill assessment, professional growth, AI career coach, career transition, upskilling, career planning" />
+    <meta property="og:title" content="Upcraft - Your AI Career Development Partner" />
+    <meta property="og:description" content="Transform your career with personalized AI-driven learning paths and skill assessments." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>Upcraft - AI Career Development Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      .path-connector {
+        position: absolute;
+        top: 40px;
+        left: 35px;
+        width: 2px;
+        height: calc(100% - 50px);
+        background-color: #e0e7ff;
+        z-index: 0;
       }
-    }
-    
-    .animate-progress {
-      animation: progressAnimation 1s ease-in-out forwards;
-    }
-  </style>
-</head>
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
-</body>
+
+      @keyframes progressAnimation {
+        from {
+          width: 0;
+        }
+      }
+      
+      .animate-progress {
+        animation: progressAnimation 1s ease-in-out forwards;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
