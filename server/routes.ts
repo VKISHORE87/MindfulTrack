@@ -3645,8 +3645,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }, 0);
 
         // Calculate overall progress
-        const overallProgress = totalUserSkills > 0
-          ? Math.round(userSkills.reduce((sum, skill) => sum + (skill.currentLevel / skill.targetLevel * 100), 0) / totalUserSkills)
+        // Only count skills that have been explicitly validated or upgraded by the user
+        const validatedUserSkills = userSkills.filter(skill => 
+          // Check if this skill has validation records or has been manually upgraded
+          skill.hasBeenValidated || skill.updatedAt !== skill.createdAt
+        );
+        
+        const totalValidatedSkills = validatedUserSkills.length;
+        
+        // If no validated skills, progress should be 0
+        const overallProgress = totalValidatedSkills > 0
+          ? Math.round(validatedUserSkills.reduce((sum, skill) => sum + (skill.currentLevel / skill.targetLevel * 100), 0) / totalValidatedSkills)
           : 0;
 
         // Prepare the dashboard data
