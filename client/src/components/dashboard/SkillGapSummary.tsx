@@ -190,7 +190,7 @@ export default function SkillGapSummary({
         </div>
       </CardContent>
       <CardFooter className="pt-0">
-        <Link href="/assessment?tab=skill-gap" className="text-sm font-medium text-primary hover:text-primary-800 flex items-center">
+        <Link href="/assessment?tab=analysis" className="text-sm font-medium text-primary hover:text-primary-800 flex items-center">
           View detailed skill gap analysis
           <ChevronRight className="h-4 w-4 ml-1" />
         </Link>
