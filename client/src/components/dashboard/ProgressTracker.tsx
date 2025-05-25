@@ -2,6 +2,9 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, TrendingUp, Target, Award } from "lucide-react";
 import { useCareerGoal } from "@/contexts/CareerGoalContext";
+import { useSkills } from "@/contexts/SkillsContext";
+import { useTargetRole } from "@/contexts/TargetRoleContext";
+import { useState, useEffect } from "react";
 
 interface ProgressTrackerProps {
   progress: number;
@@ -20,14 +23,64 @@ export default function ProgressTracker({
   targetRole
 }: ProgressTrackerProps) {
   const { currentGoal, targetRoleSkills } = useCareerGoal();
+  const { targetRole: targetRoleContext } = useTargetRole();
+  const { skills: userSkills } = useSkills();
+  const [calculatedProgress, setCalculatedProgress] = useState(0);
+  const [validatedSkills, setValidatedSkills] = useState(0);
   
-  // Calculate stats based on context data if available
-  const actualProgress = progress || 
-    (completedSkills && totalSkills ? 
-      Math.min(80, Math.max(30, completedSkills / Math.max(1, totalSkills) * 100)) : 
-      0);
+  useEffect(() => {
+    // Get required skills from target role
+    const requiredSkills = targetRoleContext?.requiredSkills || targetRoleSkills || [];
+    
+    if (requiredSkills.length === 0 || !userSkills || userSkills.length === 0) {
+      // If no required skills or user skills, use provided props
+      setCalculatedProgress(progress || 0);
+      setValidatedSkills(completedSkills || 0);
+      return;
+    }
+    
+    // Count user skills that match required skills
+    let matchCount = 0;
+    let progressSum = 0;
+    
+    // Create a map of user skills for easy lookup
+    const userSkillsMap = new Map(
+      userSkills.map(skill => [skill.skillName.toLowerCase(), skill])
+    );
+    
+    // Check each required skill
+    requiredSkills.forEach(requiredSkill => {
+      const skillName = typeof requiredSkill === 'string' ? requiredSkill : requiredSkill.toString();
+      const userSkill = userSkillsMap.get(skillName.toLowerCase());
+      
+      if (userSkill) {
+        // Count as validated if the user has made progress on this skill
+        const hasBeenValidated = userSkill.hasBeenValidated || 
+                               (userSkill.updatedAt && userSkill.createdAt && 
+                                userSkill.updatedAt !== userSkill.createdAt);
+        
+        if (hasBeenValidated) {
+          matchCount++;
+        }
+        
+        // Calculate progress percentage for this skill
+        const skillProgress = Math.round((userSkill.currentLevel / userSkill.targetLevel) * 100);
+        progressSum += skillProgress;
+      }
+    });
+    
+    // Calculate overall progress
+    const overallProgress = requiredSkills.length > 0 
+      ? Math.round(progressSum / requiredSkills.length)
+      : 0;
+    
+    setCalculatedProgress(overallProgress);
+    setValidatedSkills(matchCount);
+  }, [userSkills, targetRoleContext, targetRoleSkills, progress, completedSkills]);
   
-  const actualCompletedSkills = completedSkills || 0;
+  // Use calculated values or fall back to props
+  const actualProgress = calculatedProgress || progress || 0;
+  const actualCompletedSkills = validatedSkills || completedSkills || 0;
   const actualTotalSkills = totalSkills || (targetRoleSkills ? targetRoleSkills.length : 0);
   
   // Safe access to currentGoal properties

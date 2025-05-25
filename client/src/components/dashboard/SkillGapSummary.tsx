@@ -26,45 +26,96 @@ export default function SkillGapSummary({
   const { targetRole } = useTargetRole();
   const [displaySkills, setDisplaySkills] = useState<Skill[]>([]);
   
+  // Fetch actual user skills data
+  const fetchUserSkills = async () => {
+    try {
+      const response = await fetch('/api/users/skills');
+      if (response.ok) {
+        const userSkills = await response.json();
+        return userSkills;
+      }
+      return [];
+    } catch (error) {
+      console.error("Error fetching user skills:", error);
+      return [];
+    }
+  };
+
   // Update skills when targetRole, targetRoleSkills or provided skills change
   useEffect(() => {
-    // If skills were provided as props, use them
-    if (skills.length > 0) {
-      setDisplaySkills(skills);
-      return;
-    }
+    const updateSkillsData = async () => {
+      // If skills were provided as props, use them
+      if (skills.length > 0) {
+        setDisplaySkills(skills);
+        return;
+      }
+      
+      // Get user's actual skills
+      const userSkills = await fetchUserSkills();
+      const userSkillsMap = new Map(
+        userSkills.map((skill: any) => [skill.skillName.toLowerCase(), skill])
+      );
+      
+      // Use targetRole's requiredSkills if available (higher priority)
+      if (targetRole && targetRole.requiredSkills && targetRole.requiredSkills.length > 0) {
+        const skillsWithGaps = targetRole.requiredSkills.map(skillName => {
+          const userSkill = userSkillsMap.get(skillName.toLowerCase());
+          
+          // If user has this skill, use actual data
+          if (userSkill) {
+            const percentage = Math.round((userSkill.currentLevel / userSkill.targetLevel) * 100);
+            return {
+              name: skillName,
+              status: percentage < 50 ? 'improvement' : 'strong',
+              percentage: percentage,
+              hasSkill: true
+            };
+          }
+          
+          // If user doesn't have this skill, mark as missing
+          return {
+            name: skillName,
+            status: 'missing',
+            percentage: 0,
+            hasSkill: false
+          };
+        });
+        
+        setDisplaySkills(skillsWithGaps);
+      }
+      // Otherwise, use targetRoleSkills from CareerGoalContext as fallback
+      else if (targetRoleSkills.length > 0) {
+        const skillsWithGaps = targetRoleSkills.map(skillName => {
+          const userSkill = userSkillsMap.get(skillName.toLowerCase());
+          
+          // If user has this skill, use actual data
+          if (userSkill) {
+            const percentage = Math.round((userSkill.currentLevel / userSkill.targetLevel) * 100);
+            return {
+              name: skillName,
+              status: percentage < 50 ? 'improvement' : 'strong',
+              percentage: percentage,
+              hasSkill: true
+            };
+          }
+          
+          // If user doesn't have this skill, mark as missing
+          return {
+            name: skillName,
+            status: 'missing',
+            percentage: 0,
+            hasSkill: false
+          };
+        });
+        
+        setDisplaySkills(skillsWithGaps);
+      } else {
+        // No target role skills available - show empty state
+        setDisplaySkills([]);
+      }
+    };
     
-    // Use targetRole's requiredSkills if available (higher priority)
-    if (targetRole && targetRole.requiredSkills && targetRole.requiredSkills.length > 0) {
-      const generatedSkills = targetRole.requiredSkills.map(skill => ({ 
-        name: skill,
-        // In a real app, this would come from assessment data
-        // For demo purposes, use deterministic values based on skill name length
-        status: skill.length % 3 === 0 ? 'missing' : 'improvement',
-        percentage: 30 + (skill.length * 5) % 40 // Generate values between 30-70%
-      }));
-      
-      setDisplaySkills(generatedSkills);
-    }
-    // Otherwise, use targetRoleSkills from CareerGoalContext as fallback
-    else if (targetRoleSkills.length > 0) {
-      const generatedSkills = targetRoleSkills.map(skill => ({ 
-        name: skill,
-        status: skill.length % 3 === 0 ? 'missing' : 'improvement',
-        percentage: 30 + (skill.length * 5) % 40
-      }));
-      
-      setDisplaySkills(generatedSkills);
-    } else {
-      // Fallback skills if nothing is available
-      setDisplaySkills([
-        { name: "Programming", status: "improvement", percentage: 65 },
-        { name: "System Design", status: "missing", percentage: 30 },
-        { name: "Problem Solving", status: "improvement", percentage: 50 },
-        { name: "Technical Documentation", status: "improvement", percentage: 45 },
-        { name: "Project Management", status: "missing", percentage: 25 }
-      ]);
-    }
+    updateSkillsData();
   }, [targetRole, targetRoleSkills, skills, currentGoal?.id]);
   
   // Sort skills by priority (missing first, then improvement)
