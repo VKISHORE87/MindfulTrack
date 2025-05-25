@@ -6,9 +6,6 @@ import { Separator } from "@/components/ui/separator";
 import { SendHorizonal, Bot, User, Sparkles, Info, ChevronDown, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/lib/hooks/use-user";
-import { useSkills } from "@/contexts/SkillsContext";
-import { useTargetRole } from "@/contexts/TargetRoleContext";
-import { useCareerGoal } from "@/contexts/CareerGoalContext";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 
