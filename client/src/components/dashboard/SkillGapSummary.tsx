@@ -189,9 +189,13 @@ export default function SkillGapSummary({
           )}
         </div>
       </CardContent>
-      <CardFooter className="pt-0">
+      <CardFooter className="pt-0 flex flex-col space-y-2">
         <Link href="/assessment?tab=analysis" className="text-sm font-medium text-primary hover:text-primary-800 flex items-center">
           View detailed skill gap analysis
+          <ChevronRight className="h-4 w-4 ml-1" />
+        </Link>
+        <Link href="/skill-advisor" className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center">
+          Get AI-powered skill recommendations
           <ChevronRight className="h-4 w-4 ml-1" />
         </Link>
       </CardFooter>

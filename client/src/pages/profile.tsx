@@ -136,8 +136,8 @@ export default function Profile({ user }: { user: any }) {
   const validatedSkillsCount = validations?.length || 0;
   const skillsCount = userSkills?.length || 0;
   
-  const completedResourcesCount = userProgress?.filter(p => p.completed)?.length || 0;
-  const totalResourcesCount = userProgress?.length || 0;
+  const completedResourcesCount = Array.isArray(userProgress) ? userProgress.filter(p => p.completed)?.length || 0 : 0;
+  const totalResourcesCount = Array.isArray(userProgress) ? userProgress.length || 0 : 0;
   
   if (isLoading) {
     return (

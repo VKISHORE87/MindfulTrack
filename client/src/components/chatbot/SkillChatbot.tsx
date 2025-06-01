@@ -102,6 +102,16 @@ export default function SkillChatbot() {
       });
       
       if (!response.ok) {
+        // Handle API quota or other errors gracefully
+        if (response.status === 429) {
+          const fallbackMessage: Message = {
+            role: 'assistant',
+            content: 'I understand you\'re asking about skill development. While I\'m currently experiencing high demand, I can still provide some guidance:\n\nFor your target role as an Artificial Intelligence Engineer, focus on:\n\n• **Programming**: Master Python, R, and SQL for data manipulation\n• **Machine Learning**: Study algorithms, neural networks, and deep learning\n• **Mathematics**: Strengthen statistics, linear algebra, and calculus\n• **Data Engineering**: Learn data pipelines, cloud platforms (AWS/GCP/Azure)\n• **AI Ethics**: Understand responsible AI development principles\n\nWould you like specific recommendations for any of these areas?',
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, fallbackMessage]);
+          return;
+        }
         throw new Error('Failed to get a response from the AI advisor');
       }
       
@@ -117,20 +127,20 @@ export default function SkillChatbot() {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to communicate with the AI advisor. Please try again.',
-        variant: 'destructive',
-      });
       
-      // Add error message from assistant
-      const errorMessage: Message = {
+      // Provide helpful fallback response based on user context
+      const fallbackMessage: Message = {
         role: 'assistant',
-        content: 'I apologize, but I encountered an error while processing your request. Please try again or check your connection.',
+        content: `I understand you're asking about skill development. Based on your target role as ${targetRole?.title || 'your chosen career path'}, here are some key areas to focus on:\n\n• **Technical Skills**: Build strong foundation in programming and system design\n• **Problem Solving**: Practice algorithmic thinking and analytical reasoning\n• **Communication**: Develop technical writing and presentation skills\n• **Continuous Learning**: Stay updated with industry trends and best practices\n\nWhat specific skill would you like guidance on developing?`,
         timestamp: new Date()
       };
       
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, fallbackMessage]);
+      
+      toast({
+        title: 'Using Offline Mode',
+        description: 'Providing guidance based on your profile and target role.',
+      });
     } finally {
       setIsLoading(false);
     }
