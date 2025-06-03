@@ -44,6 +44,8 @@ export default function SkillGapSummary({
   // Update skills when targetRole, targetRoleSkills or provided skills change
   useEffect(() => {
     const updateSkillsData = async () => {
+      console.log('[SkillGapSummary] Updating skills data, targetRole:', targetRole?.title, 'requiredSkills:', targetRole?.requiredSkills);
+      
       // If skills were provided as props, use them
       if (skills.length > 0) {
         setDisplaySkills(skills);
@@ -58,6 +60,7 @@ export default function SkillGapSummary({
       
       // Use targetRole's requiredSkills if available (higher priority)
       if (targetRole && targetRole.requiredSkills && targetRole.requiredSkills.length > 0) {
+        console.log('[SkillGapSummary] Using target role skills:', targetRole.requiredSkills);
         const skillsWithGaps = targetRole.requiredSkills.map(skillName => {
           const userSkill = userSkillsMap.get(skillName.toLowerCase());
           
@@ -85,6 +88,7 @@ export default function SkillGapSummary({
       }
       // Otherwise, use targetRoleSkills from CareerGoalContext as fallback
       else if (targetRoleSkills.length > 0) {
+        console.log('[SkillGapSummary] Using career goal skills:', targetRoleSkills);
         const skillsWithGaps = targetRoleSkills.map(skillName => {
           const userSkill = userSkillsMap.get(skillName.toLowerCase());
           
@@ -110,13 +114,14 @@ export default function SkillGapSummary({
         
         setDisplaySkills(skillsWithGaps);
       } else {
+        console.log('[SkillGapSummary] No target role skills available');
         // No target role skills available - show empty state
         setDisplaySkills([]);
       }
     };
     
     updateSkillsData();
-  }, [targetRole, targetRoleSkills, skills, currentGoal?.id]);
+  }, [targetRole, targetRoleSkills, skills, currentGoal?.id, currentGoal?.targetRoleId]);
   
   // Sort skills by priority (missing first, then improvement)
   const sortedSkills = [...displaySkills].sort((a, b) => {
