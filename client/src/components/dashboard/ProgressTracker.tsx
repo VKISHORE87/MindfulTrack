@@ -2,8 +2,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, TrendingUp, Target, Award } from "lucide-react";
 import { useCareerGoal } from "@/contexts/CareerGoalContext";
-import { useSkills } from "@/contexts/SkillsContext";
 import { useTargetRole } from "@/contexts/TargetRoleContext";
+import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 
 interface ProgressTrackerProps {
@@ -16,6 +16,18 @@ interface ProgressTrackerProps {
   };
 }
 
+interface UserSkill {
+  id: number;
+  userId: number;
+  skillId: number;
+  skillName: string;
+  currentLevel: number;
+  targetLevel: number;
+  hasBeenValidated?: boolean;
+  updatedAt?: Date;
+  createdAt?: Date;
+}
+
 export default function ProgressTracker({
   progress,
   completedSkills,
@@ -24,9 +36,20 @@ export default function ProgressTracker({
 }: ProgressTrackerProps) {
   const { currentGoal, targetRoleSkills } = useCareerGoal();
   const { targetRole: targetRoleContext } = useTargetRole();
-  const { skills: userSkills } = useSkills();
   const [calculatedProgress, setCalculatedProgress] = useState(0);
   const [validatedSkills, setValidatedSkills] = useState(0);
+
+  // Fetch user skills data
+  const { data: userSkills = [] } = useQuery<UserSkill[]>({
+    queryKey: ['/api/users/1/skills'],
+    queryFn: async () => {
+      const response = await fetch('/api/users/1/skills');
+      if (!response.ok) {
+        throw new Error('Failed to fetch user skills');
+      }
+      return response.json();
+    }
+  });
   
   useEffect(() => {
     // Get required skills from target role
@@ -54,12 +77,14 @@ export default function ProgressTracker({
       const userSkill = userSkillsMap.get(skillName.toLowerCase());
       
       if (userSkill) {
-        // Count as validated if the user has made progress on this skill
+        // Count as acquired if the user has completed assessment and has meaningful progress
+        const hasCompletedAssessment = userSkill.currentLevel > 1; // More than beginner level
         const hasBeenValidated = userSkill.hasBeenValidated || 
                                (userSkill.updatedAt && userSkill.createdAt && 
                                 userSkill.updatedAt !== userSkill.createdAt);
         
-        if (hasBeenValidated) {
+        // Count skill as "acquired" if user has done assessment or made progress
+        if (hasCompletedAssessment || hasBeenValidated) {
           matchCount++;
         }
         
@@ -81,7 +106,10 @@ export default function ProgressTracker({
   // Use calculated values or fall back to props
   const actualProgress = calculatedProgress || progress || 0;
   const actualCompletedSkills = validatedSkills || completedSkills || 0;
-  const actualTotalSkills = totalSkills || (targetRoleSkills ? targetRoleSkills.length : 0);
+  
+  // Get total skills from target role context first, then fall back to other sources
+  const requiredSkills = targetRoleContext?.requiredSkills || targetRoleSkills || [];
+  const actualTotalSkills = requiredSkills.length > 0 ? requiredSkills.length : (totalSkills || 5);
   
   // Safe access to currentGoal properties
   const goalTitle = currentGoal?.title || '';
