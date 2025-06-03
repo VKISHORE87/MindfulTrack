@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCareerGoal } from '@/contexts/CareerGoalContext';
 import { useTargetRole } from '@/contexts/TargetRoleContext';
@@ -61,13 +61,28 @@ export const RoleSelectionForm: React.FC<RoleSelectionFormProps> = ({
   // Mutation to save the target role
   const saveTargetRoleMutation = useMutation({
     mutationFn: async ({ currentRoleId, targetRoleId }: { currentRoleId: number, targetRoleId: number }) => {
-      return await apiRequest('POST', `/api/users/${userId}/career-goals`, {
-        currentRoleId,
-        targetRoleId,
-        timelineMonths: 12, // Default timeline
-      });
+      // Check if user has an existing career goal
+      if (currentGoal?.id) {
+        // Update existing career goal
+        return await apiRequest('PATCH', `/api/users/${userId}/career-goals/${currentGoal.id}`, {
+          targetRoleId,
+        });
+      } else {
+        // Create new career goal if none exists
+        return await apiRequest('POST', `/api/users/${userId}/career-goals`, {
+          currentRoleId,
+          targetRoleId,
+          timelineMonths: 12, // Default timeline
+        });
+      }
     },
     onSuccess: () => {
+      // Invalidate all related queries to ensure data consistency
+      queryClient.invalidateQueries({ queryKey: ['/api/users/career-goals/current'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/career-goals`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/dashboard`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/interview/roles'] });
+      
       refetchGoal();
       toast({
         title: 'Target Role Saved',

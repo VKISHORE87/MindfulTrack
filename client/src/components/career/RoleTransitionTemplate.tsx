@@ -131,7 +131,7 @@ const RoleTransitionTemplateCard: React.FC<RoleTransitionTemplateCardProps> = ({
       difficulty: difficultyRating
     });
     
-  }, [currentRole, targetRole, newSkillsNeeded, sharedSkills.length, targetSkills.length]);
+  }, [currentRole, targetRole]);
   
   const getDifficultyColor = (difficulty: string): string => {
     switch (difficulty) {
