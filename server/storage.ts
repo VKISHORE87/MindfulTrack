@@ -2094,27 +2094,54 @@ export class DatabaseStorage implements IStorage {
     // Get all learning resources
     const allResources = await this.getAllLearningResources();
     
+    // Get user's current career goal and target role
+    const careerGoal = await this.getLatestCareerGoalByUserId(userId);
+    let targetRoleSkills: string[] = [];
+    
+    if (careerGoal && careerGoal.targetRoleId) {
+      const targetRole = await this.getInterviewRole(careerGoal.targetRoleId);
+      if (targetRole && targetRole.requiredSkills) {
+        targetRoleSkills = targetRole.requiredSkills;
+      }
+    }
+    
     // Get all skills for this user
     const userSkills = await this.getUserSkillsByUserId(userId);
     
     // Get skill details to map IDs to names
     const skillDetails = await this.getAllSkills();
     const skillMap = new Map(skillDetails.map(skill => [skill.id, skill]));
+    const skillNameMap = new Map(skillDetails.map(skill => [skill.name.toLowerCase(), skill]));
     
     // Create a map of skill IDs to resource counts and completions
     const skillStats = new Map<number, { completed: number, total: number, skillName: string }>();
     
-    // Initialize skill stats for all user skills
-    userSkills.forEach(userSkill => {
-      const skill = skillMap.get(userSkill.skillId);
-      if (skill) {
-        skillStats.set(userSkill.skillId, {
-          completed: 0,
-          total: 0,
-          skillName: skill.name
-        });
-      }
-    });
+    // Prioritize target role skills if available
+    if (targetRoleSkills.length > 0) {
+      // Initialize skill stats for target role skills
+      targetRoleSkills.forEach(skillName => {
+        const skill = skillNameMap.get(skillName.toLowerCase());
+        if (skill) {
+          skillStats.set(skill.id, {
+            completed: 0,
+            total: 0,
+            skillName: skill.name
+          });
+        }
+      });
+    } else {
+      // Fallback to user skills if no target role
+      userSkills.forEach(userSkill => {
+        const skill = skillMap.get(userSkill.skillId);
+        if (skill) {
+          skillStats.set(userSkill.skillId, {
+            completed: 0,
+            total: 0,
+            skillName: skill.name
+          });
+        }
+      });
+    }
     
     // Track which resources are completed
     const completedResourceIds = new Set(completedResources.map(res => res.resourceId));
@@ -2128,7 +2155,7 @@ export class DatabaseStorage implements IStorage {
       resource.skillIds.forEach(skillIdStr => {
         const skillId = parseInt(skillIdStr, 10);
         
-        // Only count resources for skills the user has
+        // Only count resources for skills we're tracking (target role skills or user skills)
         if (skillStats.has(skillId)) {
           const stats = skillStats.get(skillId)!;
           stats.total += 1;
