@@ -21,8 +21,13 @@ import RecentActivity from "@/components/dashboard/RecentActivity";
 
 import { useCareerGoal } from "@/contexts/CareerGoalContext";
 import { useTargetRole } from "@/contexts/TargetRoleContext";
+import { useUserJourney } from "@/contexts/UserJourneyContext";
 import { queryClient } from "@/lib/queryClient";
 import { LearningResource } from "@shared/schema";
+
+// Journey components
+import { JourneyProgress } from "@/components/journey/JourneyProgress";
+import { NextStepCard } from "@/components/journey/NextStepCard";
 
 // Dashboard data types 
 interface DashboardData {
@@ -179,6 +184,16 @@ export default function Dashboard({ user }: { user: any }) {
         />
       </div>
       
+      {/* Journey Progress Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="lg:col-span-2">
+          <JourneyProgress />
+        </div>
+        <div>
+          <NextStepCard />
+        </div>
+      </div>
+
       {/* Main Dashboard Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
         <TabsList className="grid w-full grid-cols-2 md:w-auto md:inline-flex">

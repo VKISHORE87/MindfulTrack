@@ -15,16 +15,18 @@ export default function AppProvider({
   userId: number;
 }) {
   return (
-    <CareerGoalProvider userId={userId}>
-      <TargetRoleProvider userId={userId}>
-        <SkillsProvider userId={userId}>
-          <ProgressProvider userId={userId}>
-            <LearningPathProvider userId={userId}>
-              {children}
-            </LearningPathProvider>
-          </ProgressProvider>
-        </SkillsProvider>
-      </TargetRoleProvider>
-    </CareerGoalProvider>
+    <UserJourneyProvider>
+      <CareerGoalProvider userId={userId}>
+        <TargetRoleProvider userId={userId}>
+          <SkillsProvider userId={userId}>
+            <ProgressProvider userId={userId}>
+              <LearningPathProvider userId={userId}>
+                {children}
+              </LearningPathProvider>
+            </ProgressProvider>
+          </SkillsProvider>
+        </TargetRoleProvider>
+      </CareerGoalProvider>
+    </UserJourneyProvider>
   );
 }
