@@ -1593,8 +1593,42 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined> {
+    // Get current user data to check what actually needs updating
+    const currentUser = await this.getUser(id);
+    if (!currentUser) {
+      throw new Error('User not found');
+    }
+
+    // Filter out unchanged fields to prevent unnecessary constraint violations
+    const fieldsToUpdate: Partial<InsertUser> = {};
+    
+    if (userData.name !== undefined && userData.name !== currentUser.name) {
+      fieldsToUpdate.name = userData.name;
+    }
+    
+    if (userData.email !== undefined && userData.email !== currentUser.email) {
+      fieldsToUpdate.email = userData.email;
+    }
+    
+    if (userData.experience !== undefined && userData.experience !== currentUser.experience) {
+      fieldsToUpdate.experience = userData.experience;
+    }
+    
+    if (userData.location !== undefined && userData.location !== currentUser.location) {
+      fieldsToUpdate.location = userData.location;
+    }
+    
+    if (userData.industry !== undefined && userData.industry !== currentUser.industry) {
+      fieldsToUpdate.industry = userData.industry;
+    }
+
+    // If no fields need updating, return current user
+    if (Object.keys(fieldsToUpdate).length === 0) {
+      return currentUser;
+    }
+
     const [updatedUser] = await db.update(users)
-      .set(userData)
+      .set(fieldsToUpdate)
       .where(eq(users.id, id))
       .returning();
     return updatedUser || undefined;
