@@ -53,7 +53,7 @@ const INITIAL_STEPS: JourneyStep[] = [
     icon: '🧠',
     path: '/skill-assessments',
     isCompleted: false,
-    isUnlocked: false,
+    isUnlocked: true,
     isRequired: true
   },
   {
@@ -63,7 +63,7 @@ const INITIAL_STEPS: JourneyStep[] = [
     icon: '🎯',
     path: '/career-options',
     isCompleted: false,
-    isUnlocked: false,
+    isUnlocked: true,
     isRequired: true
   },
   {
@@ -73,7 +73,7 @@ const INITIAL_STEPS: JourneyStep[] = [
     icon: '📈',
     path: '/skills',
     isCompleted: false,
-    isUnlocked: false,
+    isUnlocked: true,
     isRequired: true
   },
   {
@@ -83,7 +83,7 @@ const INITIAL_STEPS: JourneyStep[] = [
     icon: '📚',
     path: '/resources',
     isCompleted: false,
-    isUnlocked: false,
+    isUnlocked: true,
     isRequired: true
   },
   {
@@ -93,7 +93,7 @@ const INITIAL_STEPS: JourneyStep[] = [
     icon: '📊',
     path: '/progress',
     isCompleted: false,
-    isUnlocked: false,
+    isUnlocked: true,
     isRequired: true
   },
   {
@@ -103,7 +103,7 @@ const INITIAL_STEPS: JourneyStep[] = [
     icon: '✅',
     path: '/validation',
     isCompleted: false,
-    isUnlocked: false,
+    isUnlocked: true,
     isRequired: true
   }
 ];
