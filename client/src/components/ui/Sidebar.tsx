@@ -8,9 +8,12 @@ import {
   LightbulbIcon,
   Briefcase,
   Brain,
-  Target
+  Target,
+  Lock,
+  CheckCircle2
 } from "lucide-react";
 import { useTargetRole } from "@/contexts/TargetRoleContext";
+import { useUserJourney } from "@/contexts/UserJourneyContext";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -21,15 +24,21 @@ interface SidebarProps {
 
 export default function Sidebar({ user, currentRoute }: SidebarProps) {
   const { targetRole } = useTargetRole();
-  
-  const navItems = [
-    { href: '/dashboard', label: 'Dashboard', icon: <Home className="h-5 w-5 mr-3" /> },
-    { href: '/career-transitions', label: 'Career Options', icon: <Briefcase className="h-5 w-5 mr-3" /> },
-    { href: '/resources', label: 'Resources', icon: <BookOpen className="h-5 w-5 mr-3" /> },
-    { href: '/skill-assessments', label: 'Skill Assessments', icon: <Brain className="h-5 w-5 mr-3" /> },
-    { href: '/progress', label: 'Progress', icon: <TrendingUp className="h-5 w-5 mr-3" /> },
-    { href: '/validation', label: 'Validation', icon: <CheckCircle className="h-5 w-5 mr-3" /> },
-  ];
+  const { steps, currentStep, setCurrentStep, isStepAccessible } = useUserJourney();
+
+  const getIconForStep = (stepId: string) => {
+    const iconMap = {
+      'dashboard': <Home className="h-5 w-5 mr-3" />,
+      'profile': <Target className="h-5 w-5 mr-3" />,
+      'assessment': <Brain className="h-5 w-5 mr-3" />,
+      'goals': <Briefcase className="h-5 w-5 mr-3" />,
+      'gap-analysis': <TrendingUp className="h-5 w-5 mr-3" />,
+      'learning': <BookOpen className="h-5 w-5 mr-3" />,
+      'progress': <TrendingUp className="h-5 w-5 mr-3" />,
+      'validation': <CheckCircle className="h-5 w-5 mr-3" />
+    };
+    return iconMap[stepId] || <Home className="h-5 w-5 mr-3" />;
+  };
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 min-h-screen">

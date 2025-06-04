@@ -4,6 +4,7 @@ import { SkillsProvider } from './SkillsContext';
 import { ProgressProvider } from './ProgressContext';
 import { LearningPathProvider } from './LearningPathContext';
 import { TargetRoleProvider } from './TargetRoleContext';
+import { UserJourneyProvider } from './UserJourneyContext';
 
 // Combined provider component that wraps all the individual providers
 export default function AppProvider({
