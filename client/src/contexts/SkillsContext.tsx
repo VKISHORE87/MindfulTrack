@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequestMutation } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
 // Define the UserSkill type
@@ -48,7 +48,7 @@ export function SkillsProvider({ children, userId }: { children: ReactNode; user
       currentLevel: number; 
       targetLevel: number; 
     }) => {
-      return apiRequest(`/api/users/${userId}/skills/${skillId}`, {
+      return apiRequestMutation(`/api/users/${userId}/skills/${skillId}`, {
         method: 'PUT',
         body: {
           currentLevel,

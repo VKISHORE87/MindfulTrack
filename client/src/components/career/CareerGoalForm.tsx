@@ -5,7 +5,7 @@ import * as z from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequestMutation } from '@/lib/queryClient';
 import { useLocation } from 'wouter';
 
 import {
@@ -125,13 +125,10 @@ export default function CareerGoalForm({ existingGoal, onSuccess }: CareerGoalFo
         timelineMonths: convertTimelineToMonths(data.timeline)
       };
       
-      const res = await apiRequest(method, endpoint, processedData);
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Failed to save career goal');
-      }
-      
-      return res.json();
+      return apiRequestMutation(endpoint, {
+        method,
+        body: processedData
+      });
     },
     onSuccess: async (data) => {
       toast({
