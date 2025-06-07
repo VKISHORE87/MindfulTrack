@@ -91,9 +91,17 @@ export default function Dashboard({ user }: { user: any }) {
     console.log("[DEBUG] Dashboard - Current goal changed, refetching data:", 
       currentGoal ? { id: currentGoal.id, title: currentGoal.title, targetRoleId: currentGoal.targetRoleId } : null
     );
-    refetch();
-    queryClient.invalidateQueries({ queryKey: ['/api/learning-resources'] });
-  }, [refetch, currentGoal, currentGoal?.id, currentGoal?.targetRoleId]);
+    if (currentGoal) {
+      // Invalidate all related queries to ensure fresh data
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${user.id}/dashboard`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/learning-resources'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/interview/roles'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${user.id}/skills`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${user.id}/progress`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${user.id}/learning-paths`] });
+      refetch();
+    }
+  }, [refetch, currentGoal, currentGoal?.id, currentGoal?.targetRoleId, user.id]);
 
   // Query for learning resources 
   const { data: learningResources, isLoading: isLoadingResources } = useQuery<LearningResource[]>({

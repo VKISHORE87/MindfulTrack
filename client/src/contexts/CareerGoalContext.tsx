@@ -28,7 +28,7 @@ export function CareerGoalProvider({ children, userId }: { children: React.React
   
   const { data, isLoading, error, refetch } = useQuery<CareerGoal, Error>({
     queryKey: ['/api/users/career-goals/current'],
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 2, // 2 minutes - more frequent updates for career goals
   });
   
   // Query target role data from API

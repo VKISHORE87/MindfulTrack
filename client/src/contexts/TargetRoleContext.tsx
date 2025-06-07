@@ -84,9 +84,16 @@ export function TargetRoleProvider({ children, userId }: { children: React.React
         requiredSkills: requiredSkills,
       });
       
-      // Invalidate related queries to ensure data consistency
+      // Invalidate all related queries to ensure comprehensive data consistency
       queryClient.invalidateQueries({ queryKey: ['/api/users/career-goals/current'] });
       queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/dashboard`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/learning-resources'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/interview/roles'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/skills`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/progress`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/learning-paths`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/activities`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/validations`] });
       
       toast({
         title: 'Target Role Updated',
