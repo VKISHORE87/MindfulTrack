@@ -5,14 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Clock, ArrowRight, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
-// Define type for target role
-interface TargetRole {
-  id: number;
-  title: string;
-  requiredSkills: string[];
-  [key: string]: any; // Allow for additional properties
-}
-
 // Define milestone type
 interface Task {
   title: string;
@@ -35,162 +27,174 @@ export default function CareerRoadmap() {
   // Get the target role name from targetRole context or fall back to current goal
   const targetRoleName = targetRole?.title || currentGoal?.title || 'Not set';
   
-  // Generate appropriate milestones based on targetRoleSkills
+  // Generate milestones based on actual target role skills
   useEffect(() => {
     setIsLoading(true);
     
-    // Default milestone structure
-    const defaultMilestones: Milestone[] = [
-      {
-        title: "Foundation Building",
-        timeframe: "Months 1-3",
-        tasks: [
-          { title: "Complete initial skill assessment", completed: true },
-          { title: "Identify priority learning resources", completed: true },
-          { title: "Finish core technical skills training", completed: false }
-        ],
-        current: false
-      },
-      {
-        title: "Skill Development",
-        timeframe: "Months 4-6",
-        tasks: [
-          { title: "Complete System Design fundamentals", completed: false },
-          { title: "Build portfolio projects", completed: false },
-          { title: "Obtain technical certifications", completed: false }
-        ],
-        current: true
-      },
-      {
-        title: "Role-Specific Practice",
-        timeframe: "Months 7-9",
-        tasks: [
-          { title: "Tackle real-world problems", completed: false },
-          { title: "Participate in industry events", completed: false },
-          { title: "Network with professionals", completed: false }
-        ],
-        current: false
-      },
-      {
-        title: "Final Preparation",
-        timeframe: "Months 10-12",
-        tasks: [
-          { title: "Mock interviews and assessments", completed: false },
-          { title: "Resume and profile refinement", completed: false },
-          { title: "Job application strategy", completed: false }
-        ],
-        current: false
+    const generateMilestones = () => {
+      // Get skills from target role or fallback to context skills
+      const skills = targetRole?.requiredSkills || targetRoleSkills || [];
+      
+      if (skills.length === 0) {
+        // If no skills available, use basic structure
+        return [
+          {
+            title: "Initial Assessment",
+            timeframe: "Month 1",
+            tasks: [
+              { title: "Complete skill assessment", completed: true },
+              { title: "Set career goals", completed: true }
+            ],
+            current: true
+          }
+        ];
       }
-    ];
-    
-    // First check targetRole's requiredSkills, then fall back to targetRoleSkills
-    let skillsToUse: string[] = [];
-    if (targetRole && targetRole.requiredSkills && targetRole.requiredSkills.length > 0) {
-      skillsToUse = targetRole.requiredSkills;
-    } else if (targetRoleSkills.length > 0) {
-      skillsToUse = targetRoleSkills;
-    }
-    
-    // If we have skills, customize the middle milestone tasks
-    if (skillsToUse.length > 0) {
-      const middleMilestone = { ...defaultMilestones[1] };
       
-      // Update the tasks to reflect the first 3 skills from available skills
-      middleMilestone.tasks = skillsToUse.slice(0, 3).map(skill => ({
-        title: `Master ${skill}`,
-        completed: false
-      }));
-      
-      defaultMilestones[1] = middleMilestone;
-    }
-    
-    // Get role-specific preparation tasks in Final Preparation
-    if (targetRoleName !== 'Not set') {
-      // Build final preparation tasks based on the target role
-      const finalMilestone = { ...defaultMilestones[3] };
-      finalMilestone.tasks = [
-        { title: `${targetRoleName} mock interviews`, completed: false },
-        { title: "Portfolio showcasing required skills", completed: false },
-        { title: `${targetRoleName} application strategy`, completed: false }
+      // Group skills into learning phases
+      const skillsPerPhase = Math.ceil(skills.length / 3);
+      const phases = [
+        {
+          title: "Foundation Skills",
+          timeframe: "Months 1-4",
+          skills: skills.slice(0, skillsPerPhase),
+          current: true
+        },
+        {
+          title: "Advanced Skills",
+          timeframe: "Months 5-8", 
+          skills: skills.slice(skillsPerPhase, skillsPerPhase * 2),
+          current: false
+        },
+        {
+          title: "Mastery & Application",
+          timeframe: "Months 9-12",
+          skills: skills.slice(skillsPerPhase * 2),
+          current: false
+        }
       ];
       
-      defaultMilestones[3] = finalMilestone;
-    }
+      // Convert phases to milestones with skill-specific tasks
+      return phases.map(phase => ({
+        title: phase.title,
+        timeframe: phase.timeframe,
+        tasks: [
+          ...phase.skills.map(skill => ({
+            title: `Master ${skill}`,
+            completed: false
+          })),
+          {
+            title: `Complete ${phase.title.toLowerCase()} projects`,
+            completed: false
+          }
+        ],
+        current: phase.current
+      }));
+    };
     
-    setMilestones(defaultMilestones);
+    const generatedMilestones = generateMilestones();
+    setMilestones(generatedMilestones);
     setIsLoading(false);
-  }, [targetRole, targetRoleSkills, targetRoleName]);
+  }, [targetRole, targetRoleSkills, currentGoal]);
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Career Roadmap</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
       <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-lg font-medium">
-            Career Roadmap
-          </CardTitle>
-          <Badge variant="outline" className="text-xs">
-            Target: {targetRoleName}
-          </Badge>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-lg font-medium">Career Roadmap</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Path to {targetRoleName}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-gray-500">Timeline</p>
+            <p className="text-sm font-medium">{currentGoal?.timelineMonths || 12} months</p>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-sm text-muted-foreground mb-4">
-          Your 12-month journey to {targetRoleName}
-        </div>
-        
-        <div className="relative">
-          {/* Timeline line */}
-          <div className="absolute left-2.5 top-0 h-full w-0.5 bg-gray-200 z-0"></div>
-          
-          {/* Milestones */}
-          <div className="space-y-5">
-            {milestones.map((milestone, idx) => (
-              <div key={idx} className="relative z-10">
-                <div className="flex items-start">
-                  {/* Status indicator */}
-                  <div className={`rounded-full h-5 w-5 flex-shrink-0 mr-3 flex items-center justify-center ${
-                    milestone.current ? 'bg-amber-500' : 
-                    (idx < milestones.findIndex(m => m.current) ? 'bg-green-500' : 'bg-gray-200')
-                  }`}>
-                    {idx < milestones.findIndex(m => m.current) && (
-                      <CheckCircle className="h-3 w-3 text-white" />
-                    )}
-                    {milestone.current && (
-                      <Clock className="h-3 w-3 text-white" />
-                    )}
+        <div className="space-y-4">
+          {milestones.map((milestone, index) => (
+            <div key={index} className="relative">
+              {/* Timeline connector */}
+              {index < milestones.length - 1 && (
+                <div className="absolute left-4 top-8 w-0.5 h-16 bg-gray-200"></div>
+              )}
+              
+              <div className="flex items-start space-x-3">
+                {/* Milestone indicator */}
+                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                  milestone.current 
+                    ? 'bg-primary text-white' 
+                    : 'bg-gray-100 text-gray-400'
+                }`}>
+                  {milestone.current ? (
+                    <Clock className="h-4 w-4" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4" />
+                  )}
+                </div>
+                
+                {/* Milestone content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <h4 className={`font-medium ${
+                      milestone.current ? 'text-primary' : 'text-gray-700'
+                    }`}>
+                      {milestone.title}
+                    </h4>
+                    <Badge variant={milestone.current ? 'default' : 'secondary'} className="text-xs">
+                      {milestone.timeframe}
+                    </Badge>
                   </div>
                   
-                  {/* Milestone content */}
-                  <div className={`bg-${milestone.current ? 'primary/5' : 'white'} p-3 rounded-lg border w-full ${
-                    milestone.current ? 'border-primary/20' : 'border-gray-100'
-                  }`}>
-                    <div className="flex justify-between mb-1">
-                      <h4 className="font-medium text-sm">{milestone.title}</h4>
-                      <span className="text-xs text-gray-500">{milestone.timeframe}</span>
-                    </div>
-                    
-                    <div className="space-y-1 mt-2">
-                      {milestone.tasks.map((task, taskIdx) => (
-                        <div key={taskIdx} className="flex items-center text-xs">
-                          {task.completed ? (
-                            <CheckCircle className="h-3 w-3 text-green-500 mr-1" />
-                          ) : (
-                            milestone.current ? (
-                              <ArrowRight className="h-3 w-3 text-amber-500 mr-1" />
-                            ) : (
-                              <div className="h-3 w-3 border border-gray-300 rounded-full mr-1"></div>
-                            )
-                          )}
-                          <span className={task.completed ? 'text-gray-500 line-through' : ''}>
-                            {task.title}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="space-y-1">
+                    {milestone.tasks.slice(0, 3).map((task, taskIndex) => (
+                      <div key={taskIndex} className="flex items-center text-sm text-gray-600">
+                        <div className={`w-3 h-3 rounded-full mr-2 flex-shrink-0 ${
+                          task.completed ? 'bg-green-400' : 'bg-gray-200'
+                        }`}></div>
+                        <span className={task.completed ? 'line-through' : ''}>
+                          {task.title}
+                        </span>
+                      </div>
+                    ))}
+                    {milestone.tasks.length > 3 && (
+                      <div className="text-xs text-gray-400 ml-5">
+                        +{milestone.tasks.length - 3} more tasks
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
+        </div>
+        
+        <div className="mt-6 pt-4 border-t">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-500">
+              Progress towards {targetRoleName}
+            </span>
+            <span className="font-medium">
+              {Math.round((milestones.filter(m => m.current).length / milestones.length) * 100)}% planned
+            </span>
           </div>
         </div>
       </CardContent>

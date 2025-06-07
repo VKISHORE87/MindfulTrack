@@ -21,40 +21,75 @@ export default function SkillRadarChart({ width, height }: SkillRadarChartProps)
   const { targetRole } = useTargetRole();
   const [skills, setSkills] = useState<SkillData[]>([]);
   
-  // Update skills data when targetRole or targetRoleSkills changes
-  useEffect(() => {
-    // First priority: Use targetRole's requiredSkills if available
-    if (targetRole && targetRole.requiredSkills && targetRole.requiredSkills.length > 0) {
-      // Map the skills from targetRole to the format needed for the chart
-      const updatedSkills = targetRole.requiredSkills.map(skill => ({
-        name: skill,
-        // In a real implementation, these values would come from user assessment
-        current: Math.floor(Math.random() * 60) + 20, // 20-80 range for demo
-        target: Math.floor(Math.random() * 20) + 80, // 80-100 range for demo
-      }));
-      
-      setSkills(updatedSkills);
-    } 
-    // Second priority: Fall back to targetRoleSkills from CareerGoalContext
-    else if (targetRoleSkills && targetRoleSkills.length > 0) {
-      // Map the skills from context to the format needed for the chart
-      const updatedSkills = targetRoleSkills.map(skill => ({
-        name: skill,
-        current: Math.floor(Math.random() * 60) + 20, // 20-80 range for demo
-        target: Math.floor(Math.random() * 20) + 80, // 80-100 range for demo
-      }));
-      
-      setSkills(updatedSkills);
-    } else {
-      // Default skills if none are available from context
-      setSkills([
-        { name: "Programming", current: 75, target: 90 },
-        { name: "System Design", current: 50, target: 80 },
-        { name: "Problem Solving", current: 65, target: 70 },
-        { name: "Technical Documentation", current: 45, target: 85 },
-        { name: "Project Management", current: 60, target: 75 }
-      ]);
+  // Fetch real user skills data to compare with target role
+  const fetchUserSkills = async () => {
+    try {
+      const response = await fetch('/api/users/1/skills');
+      if (response.ok) {
+        const userSkills = await response.json();
+        return userSkills;
+      }
+      return [];
+    } catch (error) {
+      console.error("Error fetching user skills:", error);
+      return [];
     }
+  };
+
+  // Update skills data when targetRole changes
+  useEffect(() => {
+    const updateRadarData = async () => {
+      if (targetRole && targetRole.requiredSkills && targetRole.requiredSkills.length > 0) {
+        // Get user's actual skills
+        const userSkills = await fetchUserSkills();
+        const userSkillsMap = new Map(
+          userSkills.map((skill: any) => [skill.skillName?.toLowerCase() || skill.name?.toLowerCase(), skill])
+        );
+        
+        // Map the skills from targetRole with real user data
+        const updatedSkills = targetRole.requiredSkills.slice(0, 6).map((skillName: string) => {
+          const userSkill = userSkillsMap.get(skillName.toLowerCase()) as any;
+          
+          return {
+            name: skillName,
+            current: userSkill ? (userSkill.currentLevel || 20) : 20, // Use actual current level or 20 for missing skills
+            target: 85, // Standard target level for role requirements
+          };
+        });
+        
+        setSkills(updatedSkills);
+      } 
+      // Fall back to targetRoleSkills from CareerGoalContext
+      else if (targetRoleSkills && targetRoleSkills.length > 0) {
+        const userSkills = await fetchUserSkills();
+        const userSkillsMap = new Map(
+          userSkills.map((skill: any) => [skill.skillName?.toLowerCase() || skill.name?.toLowerCase(), skill])
+        );
+        
+        const updatedSkills = targetRoleSkills.slice(0, 6).map((skillName: string) => {
+          const userSkill = userSkillsMap.get(skillName.toLowerCase()) as any;
+          
+          return {
+            name: skillName,
+            current: userSkill ? (userSkill.currentLevel || 20) : 20,
+            target: 85,
+          };
+        });
+        
+        setSkills(updatedSkills);
+      } else {
+        // Default skills if none are available from context
+        setSkills([
+          { name: "Programming", current: 75, target: 90 },
+          { name: "System Design", current: 50, target: 80 },
+          { name: "Problem Solving", current: 65, target: 70 },
+          { name: "Technical Documentation", current: 45, target: 85 },
+          { name: "Project Management", current: 60, target: 75 }
+        ]);
+      }
+    };
+    
+    updateRadarData();
   }, [targetRole, targetRoleSkills]);
 
   useEffect(() => {

@@ -22,25 +22,9 @@ export default function SkillGapSummary({
   skills = [], 
   maxDisplayed = 5 
 }: SkillGapSummaryProps) {
-  const { targetRoleSkills, currentGoal } = useCareerGoal();
   const { targetRole } = useTargetRole();
   const [displaySkills, setDisplaySkills] = useState<Skill[]>([]);
   
-  // Fetch actual user skills data
-  const fetchUserSkills = async () => {
-    try {
-      const response = await fetch('/api/users/skills');
-      if (response.ok) {
-        const userSkills = await response.json();
-        return userSkills;
-      }
-      return [];
-    } catch (error) {
-      console.error("Error fetching user skills:", error);
-      return [];
-    }
-  };
-
   // Use the skills data provided from the dashboard API
   useEffect(() => {
     if (skills && Array.isArray(skills) && skills.length > 0) {
@@ -98,7 +82,7 @@ export default function SkillGapSummary({
                 ? 'text-red-700' 
                 : 'text-amber-700';
               
-              const iconColor = skill.status === 'missing' 
+              const iconColor = skill.status === 'missing'
                 ? 'text-red-500' 
                 : 'text-amber-500';
               
