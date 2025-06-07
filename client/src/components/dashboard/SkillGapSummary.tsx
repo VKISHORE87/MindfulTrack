@@ -41,82 +41,16 @@ export default function SkillGapSummary({
     }
   };
 
-  // Update skills when targetRole, targetRoleSkills or provided skills change
+  // Use the skills data provided from the dashboard API
   useEffect(() => {
-    const updateSkillsData = async () => {
-      // If skills were provided as props, use them
-      if (skills.length > 0) {
-        setDisplaySkills(skills);
-        return;
-      }
-      
-      // Get user's actual skills
-      const userSkills = await fetchUserSkills();
-      const userSkillsMap = new Map(
-        userSkills.map((skill: any) => [skill.skillName.toLowerCase(), skill])
-      );
-      
-      // Use targetRole's requiredSkills if available (higher priority)
-      if (targetRole && targetRole.requiredSkills && targetRole.requiredSkills.length > 0) {
-        const skillsWithGaps = targetRole.requiredSkills.map(skillName => {
-          const userSkill = userSkillsMap.get(skillName.toLowerCase());
-          
-          // If user has this skill, use actual data
-          if (userSkill) {
-            const percentage = Math.round((userSkill.currentLevel / userSkill.targetLevel) * 100);
-            return {
-              name: skillName,
-              status: percentage < 50 ? 'improvement' : 'strong',
-              percentage: percentage,
-              hasSkill: true
-            };
-          }
-          
-          // If user doesn't have this skill, mark as missing
-          return {
-            name: skillName,
-            status: 'missing',
-            percentage: 0,
-            hasSkill: false
-          };
-        });
-        
-        setDisplaySkills(skillsWithGaps);
-      }
-      // Otherwise, use targetRoleSkills from CareerGoalContext as fallback
-      else if (targetRoleSkills.length > 0) {
-        const skillsWithGaps = targetRoleSkills.map(skillName => {
-          const userSkill = userSkillsMap.get(skillName.toLowerCase());
-          
-          // If user has this skill, use actual data
-          if (userSkill) {
-            const percentage = Math.round((userSkill.currentLevel / userSkill.targetLevel) * 100);
-            return {
-              name: skillName,
-              status: percentage < 50 ? 'improvement' : 'strong',
-              percentage: percentage,
-              hasSkill: true
-            };
-          }
-          
-          // If user doesn't have this skill, mark as missing
-          return {
-            name: skillName,
-            status: 'missing',
-            percentage: 0,
-            hasSkill: false
-          };
-        });
-        
-        setDisplaySkills(skillsWithGaps);
-      } else {
-        // No target role skills available - show empty state
-        setDisplaySkills([]);
-      }
-    };
-    
-    updateSkillsData();
-  }, [targetRole, targetRoleSkills, skills, currentGoal?.id]);
+    if (skills && Array.isArray(skills) && skills.length > 0) {
+      console.log("[SkillGapSummary] Using dashboard API skills data:", skills);
+      setDisplaySkills(skills);
+    } else {
+      console.log("[SkillGapSummary] No skills data from dashboard API");
+      setDisplaySkills([]);
+    }
+  }, [skills]);
   
   // Sort skills by priority (missing first, then improvement)
   const sortedSkills = [...displaySkills].sort((a, b) => {
