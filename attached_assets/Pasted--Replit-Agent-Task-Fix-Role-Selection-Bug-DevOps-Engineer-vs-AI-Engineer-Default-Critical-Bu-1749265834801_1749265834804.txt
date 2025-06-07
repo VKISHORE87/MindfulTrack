@@ -1,0 +1,149 @@
+# Replit Agent Task: Fix Role Selection Bug (DevOps Engineer vs AI Engineer Default)
+
+## Critical Bug Description
+**ISSUE**: The application is hardcoded to always display "Artificial Intelligence Engineer" data across all dashboard components, even when the user has explicitly selected and saved "DevOps Engineer" as their target role in the career options menu.
+
+**EXPECTED BEHAVIOR**: When user selects "DevOps Engineer" as target role, ALL pages and components should reflect DevOps Engineer data, not AI Engineer data.
+
+## Root Cause Analysis Required
+
+### 1. Investigate Default Role Configuration
+- **Check for hardcoded values**: Search entire codebase for "artificial intelligence engineer" or "AI engineer" hardcoded strings
+- **Identify default role settings**: Find where the default role is being set to AI Engineer instead of reading from user selection
+- **Locate configuration files**: Check for any config files that might have AI Engineer as default
+
+### 2. Trace Role Selection Flow
+- **Career Options Menu**: Verify the role selection and save functionality works correctly
+- **Data Persistence**: Confirm that "DevOps Engineer" selection is actually being saved to database/storage
+- **Data Retrieval**: Check if the saved role is being properly retrieved and used across the application
+
+## Specific Fixes Required
+
+### 1. Database/Storage Layer
+```sql
+-- Verify user's saved target role
+SELECT user_id, target_role, updated_at FROM user_profiles WHERE user_id = ?;
+
+-- Expected result should show "DevOps Engineer" not "AI Engineer"
+```
+
+**Fix Requirements:**
+- Ensure role selection saves correctly to database
+- Verify database schema allows proper role storage
+- Check for any database triggers or defaults overriding user selection
+
+### 2. Backend API Layer
+**Check these endpoints:**
+- `GET /api/user/profile` - Should return correct target_role
+- `GET /api/user/target-role` - Should return "DevOps Engineer"
+- `PUT/POST /api/user/target-role` - Should save DevOps Engineer correctly
+
+**Required Fixes:**
+- Remove any hardcoded AI Engineer returns
+- Ensure API reads from user's actual saved preferences
+- Add logging to track what role is being returned vs what's saved
+
+### 3. Frontend State Management
+**Identify and fix:**
+- **State initialization**: Check if frontend state defaults to AI Engineer
+- **Role context/store**: Verify user role is properly loaded into global state
+- **Component props**: Ensure all dashboard components receive correct role data
+
+### 4. Dashboard Components Fix
+**Each component must be fixed to use dynamic role data:**
+
+#### Priority Skills Gaps Component
+```javascript
+// WRONG (current behavior)
+const roleData = getRoleData('artificial-intelligence-engineer');
+
+// CORRECT (required fix)
+const userTargetRole = getUserTargetRole(); // Should return 'devops-engineer'
+const roleData = getRoleData(userTargetRole);
+```
+
+#### Career Progress Component
+```javascript
+// WRONG
+const progressData = getProgressData('ai-engineer');
+
+// CORRECT
+const userRole = getUserSelectedRole();
+const progressData = getProgressData(userRole);
+```
+
+#### Skills Radar Component
+```javascript
+// WRONG
+const skillsData = getSkillsRadarData('artificial-intelligence-engineer');
+
+// CORRECT
+const targetRole = getUserTargetRole();
+const skillsData = getSkillsRadarData(targetRole);
+```
+
+## Implementation Steps
+
+### Step 1: Debug Current State
+1. **Add logging** to track role selection flow from career menu to dashboard
+2. **Check database** to confirm DevOps Engineer is actually saved
+3. **Verify API responses** to see what role data is being returned
+4. **Inspect frontend state** to identify where AI Engineer is getting injected
+
+### Step 2: Remove Hardcoded Values
+1. **Search and replace** all hardcoded "artificial-intelligence-engineer" references
+2. **Replace with dynamic role retrieval** from user preferences
+3. **Update any default configurations** that might be overriding user selection
+
+### Step 3: Fix Data Flow
+1. **Career Menu → Save Function**: Ensure DevOps Engineer saves correctly
+2. **Database → API**: Ensure API reads saved role correctly
+3. **API → Frontend**: Ensure frontend receives correct role data
+4. **Frontend → Components**: Ensure all dashboard components use dynamic role
+
+### Step 4: Update All Pages
+**Ensure these pages reflect DevOps Engineer when selected:**
+- Dashboard main page
+- Skills assessment page
+- Career progress page
+- Learning recommendations page
+- Any other role-dependent pages
+
+## Testing Requirements
+
+### 1. End-to-End Test Scenario
+```
+1. User logs in
+2. Goes to Career Options menu
+3. Selects "DevOps Engineer" as target role
+4. Saves the selection
+5. Navigates to Dashboard
+6. VERIFY: All components show DevOps Engineer data
+7. VERIFY: No AI Engineer data appears anywhere
+8. Refresh page and verify data persists
+9. Logout and login again - verify role persists
+```
+
+### 2. Multiple Role Testing
+- Test with other roles (Frontend Developer, Backend Developer, etc.)
+- Ensure each role displays correctly without defaulting to AI Engineer
+- Test role switching functionality
+
+### 3. Data Consistency Check
+- Verify database shows correct saved role
+- Verify API returns correct role data
+- Verify frontend state matches saved role
+- Verify all components receive same role data
+
+## Success Criteria
+✅ **DevOps Engineer selection in career menu correctly saves to database**
+✅ **All dashboard components display DevOps Engineer specific data**
+✅ **No hardcoded AI Engineer data appears when DevOps Engineer is selected**
+✅ **Role selection persists across page refreshes and login sessions**
+✅ **All application pages consistently show selected role data**
+✅ **Role switching works correctly for all available roles**
+
+## Priority Level: CRITICAL
+This is a core functionality bug that breaks the entire role-based customization feature of the application. Fix this as the highest priority to ensure user role selections are properly respected throughout the application.
+
+Please implement these fixes systematically, starting with identifying where the hardcoded AI Engineer default is being set, then tracing the complete data flow to ensure DevOps Engineer (or any selected role) is properly reflected across all application components.
