@@ -54,11 +54,17 @@ export const learningResources = pgTable("learning_resources", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
-  resourceType: text("resource_type").notNull(), // e.g., 'course', 'workshop', 'assessment'
+  resourceType: text("resource_type").notNull(), // e.g., 'video', 'course', 'documentation', 'practice', 'book'
   url: text("url"),
   duration: integer("duration_minutes"), // in minutes
   provider: text("provider"),
   skillIds: text("skill_ids").array(), // Array of skill IDs this resource helps develop
+  difficulty: text("difficulty"), // 'beginner', 'intermediate', 'advanced'
+  rating: decimal("rating", { precision: 2, scale: 1 }), // 0.0 to 5.0
+  isFree: boolean("is_free").default(true),
+  prerequisites: text("prerequisites").array(), // Array of prerequisite skills
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
 });
 
 // Learning path model
@@ -160,7 +166,11 @@ export const insertLearningResourceSchema = createInsertSchema(learningResources
   url: true,
   duration: true,
   provider: true,
-  skillIds: true
+  skillIds: true,
+  difficulty: true,
+  rating: true,
+  isFree: true,
+  prerequisites: true
 });
 
 export const insertLearningPathSchema = createInsertSchema(learningPaths).pick({
