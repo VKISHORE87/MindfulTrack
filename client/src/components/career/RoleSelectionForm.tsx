@@ -4,6 +4,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCareerGoal } from '@/contexts/CareerGoalContext';
 import { useTargetRole } from '@/contexts/TargetRoleContext';
+import { CareerGoal } from '../../../../shared/schema';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -69,6 +70,13 @@ export const RoleSelectionForm: React.FC<RoleSelectionFormProps> = ({
       }
     }
   }, [currentGoal, targetRole]);
+
+  // CRITICAL FIX: Auto-show transition path when both roles are loaded from saved data
+  useEffect(() => {
+    if (currentRoleTitle && targetRoleTitle) {
+      setShowTemplate(true);
+    }
+  }, [currentRoleTitle, targetRoleTitle]);
   
   // Mutation to save the target role
   const saveTargetRoleMutation = useMutation({

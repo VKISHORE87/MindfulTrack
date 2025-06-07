@@ -8,6 +8,7 @@ interface CareerGoal {
   description?: string;
   timelineMonths: number;
   targetDate?: string;
+  currentRoleId?: number;
   targetRoleId?: number;
   createdAt: string;
 }

@@ -977,7 +977,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const goalData = {
           ...req.body,
           userId,
-          // Convert string targetRoleId to number if it exists
+          // Convert string IDs to numbers if they exist
+          currentRoleId: req.body.currentRoleId ? parseInt(req.body.currentRoleId) : undefined,
           targetRoleId: req.body.targetRoleId ? parseInt(req.body.targetRoleId) : undefined,
           readiness: req.body.readiness || 0 // Default readiness to 0 if not provided
         };
@@ -1055,7 +1056,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Update the goal
         const updateData = {
           ...req.body,
-          // Convert string targetRoleId to number if it exists
+          // Convert string IDs to numbers if they exist
+          currentRoleId: req.body.currentRoleId ? parseInt(req.body.currentRoleId) : undefined,
           targetRoleId: req.body.targetRoleId ? parseInt(req.body.targetRoleId) : undefined
         };
         const updatedGoal = await storage.updateCareerGoal(goalId, updateData);
