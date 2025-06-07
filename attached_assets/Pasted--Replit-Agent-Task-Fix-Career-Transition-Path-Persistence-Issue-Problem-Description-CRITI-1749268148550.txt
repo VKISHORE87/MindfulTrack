@@ -1,0 +1,203 @@
+# Replit Agent Task: Fix Career Transition Path Persistence Issue
+
+## Problem Description
+**CRITICAL BUG**: The Career Transition Path section on the Career Options page only shows the transition details when a user initially selects and saves their target role. After page refresh or revisiting the page, the transition path resets to default view instead of displaying the persistent transition path for the user's saved target role (Full Stack Developer).
+
+**CURRENT BROKEN BEHAVIOR**:
+1. User selects target role → Transition path shows correctly
+2. User saves target role → Transition path visible
+3. Page refresh OR navigate away and back → Transition path disappears/resets to default
+4. User has to re-select role to see transition path again
+
+**REQUIRED BEHAVIOR**:
+- Transition path should ALWAYS be visible for the user's saved target role
+- Should persist across page refreshes and navigation
+- Should load automatically when page opens based on user's saved target role
+
+## Root Cause Analysis Required
+
+### 1. Data Persistence Check
+**Investigate:**
+- Is the user's target role properly saved to database/storage?
+- Is the current role selection being saved and retrieved?
+- Are both current and target roles persisting correctly?
+
+### 2. Page Load Logic Issue
+**Check page initialization:**
+- Does the page load the user's saved target role on mount?
+- Is the transition path component checking for existing saved role data?
+- Are the dropdowns defaulting instead of loading saved values?
+
+## Specific Fixes Required
+
+### 1. Page Load/Mount Behavior
+**Fix the Career Options page to:**
+```javascript
+// ON PAGE LOAD - Required Implementation
+async function initializeCareerOptionsPage() {
+    // Get user's saved target role
+    const savedTargetRole = await getUserTargetRole(); // Should return "Full Stack Developer"
+    const savedCurrentRole = await getUserCurrentRole();
+    
+    // Pre-populate dropdowns with saved values
+    setTargetRoleDropdown(savedTargetRole);
+    setCurrentRoleDropdown(savedCurrentRole);
+    
+    // CRITICAL: Automatically show transition path if both roles are saved
+    if (savedCurrentRole && savedTargetRole) {
+        await loadAndDisplayTransitionPath(savedCurrentRole, savedTargetRole);
+    }
+}
+```
+
+### 2. Transition Path Component Persistence
+**Fix the transition path section to:**
+- **Auto-load on page mount** if user has saved roles
+- **Display transition details** without requiring re-selection
+- **Show required skills** for the saved target role
+- **Maintain visibility** across page refreshes
+
+### 3. Dropdown State Management
+**Fix dropdown behavior:**
+```javascript
+// WRONG (current behavior)
+// Dropdowns reset to default "Select your current role" and show target role
+
+// CORRECT (required fix)
+// Dropdowns should show:
+// Current Role: [User's saved current role]
+// Target Role: Full Stack Developer (pre-selected from saved data)
+```
+
+### 4. Data Flow Architecture Fix
+**Ensure proper data flow:**
+1. **Page Load** → Fetch user's saved roles from database
+2. **UI Population** → Set dropdowns to saved values
+3. **Transition Path** → Automatically display based on saved roles
+4. **Persistence** → Maintain state across navigation and refreshes
+
+## Implementation Steps
+
+### Step 1: Fix Data Retrieval on Page Load
+```javascript
+// Add to Career Options page initialization
+useEffect(() => {
+    async function loadUserRoleData() {
+        try {
+            const userProfile = await fetchUserProfile();
+            
+            // Set saved target role (Full Stack Developer)
+            if (userProfile.targetRole) {
+                setSelectedTargetRole(userProfile.targetRole);
+            }
+            
+            // Set saved current role if exists
+            if (userProfile.currentRole) {
+                setSelectedCurrentRole(userProfile.currentRole);
+            }
+            
+            // Auto-show transition path if both roles exist
+            if (userProfile.currentRole && userProfile.targetRole) {
+                await generateTransitionPath(userProfile.currentRole, userProfile.targetRole);
+                setShowTransitionPath(true);
+            }
+        } catch (error) {
+            console.error('Failed to load user role data:', error);
+        }
+    }
+    
+    loadUserRoleData();
+}, []); // Run on component mount
+```
+
+### Step 2: Fix Transition Path Visibility Logic
+```javascript
+// Ensure transition path shows for saved roles
+const shouldShowTransitionPath = () => {
+    return (selectedCurrentRole && selectedTargetRole) || 
+           (savedCurrentRole && savedTargetRole);
+};
+```
+
+### Step 3: Update Required Skills Display
+```javascript
+// Show required skills for saved target role on page load
+useEffect(() => {
+    if (savedTargetRole || selectedTargetRole) {
+        const targetRole = savedTargetRole || selectedTargetRole;
+        loadRequiredSkills(targetRole);
+    }
+}, [savedTargetRole, selectedTargetRole]);
+```
+
+### Step 4: Fix Save Button Behavior
+```javascript
+// After saving, maintain the transition path visibility
+const handleSaveTargetRole = async () => {
+    await saveUserTargetRole(selectedTargetRole);
+    // Don't reset the UI - keep transition path visible
+    setShowTransitionPath(true);
+};
+```
+
+## UI/UX Requirements
+
+### 1. Page Load State
+- **Target Role Badge**: Should show "Full Stack Developer" immediately on page load
+- **Dropdowns**: Should be pre-populated with saved values
+- **Transition Path**: Should be visible immediately if user has saved roles
+- **Required Skills**: Should display for the saved target role
+
+### 2. Visual Indicators
+- Show loading state while fetching saved role data
+- Clear indication that transition path is based on saved preferences
+- Consistent role display across all sections
+
+### 3. Error Handling
+- Handle cases where saved role data is missing
+- Graceful fallback to selection mode if no saved data exists
+- Clear error messages if data loading fails
+
+## Testing Requirements
+
+### Test Scenario 1: Existing User with Saved Target Role
+```
+1. User has "Full Stack Developer" saved as target role
+2. User navigates to Career Options page
+3. VERIFY: Page loads with "Full Stack Developer" in target role badge
+4. VERIFY: Target role dropdown shows "Full Stack Developer" pre-selected
+5. VERIFY: Transition path section is visible with role-specific data
+6. VERIFY: Required skills show Full Stack Developer skills
+7. Refresh page
+8. VERIFY: All above elements persist and remain visible
+```
+
+### Test Scenario 2: Complete Transition Path
+```
+1. User has both current role and target role saved
+2. Navigate to Career Options page
+3. VERIFY: Both dropdowns pre-populated
+4. VERIFY: Full transition path visible immediately
+5. VERIFY: All transition details persist across page refreshes
+```
+
+### Test Scenario 3: New User
+```
+1. User with no saved roles
+2. Navigate to Career Options page
+3. VERIFY: Shows default selection state
+4. VERIFY: No transition path until roles selected
+```
+
+## Success Criteria
+✅ **Career Options page loads with saved target role data pre-populated**
+✅ **Transition path section visible immediately for users with saved target roles**
+✅ **Page refresh maintains transition path visibility**
+✅ **Navigation away and back preserves transition path state**
+✅ **Required skills section shows correct data for saved target role**
+✅ **No need to re-select roles to view transition path**
+
+## Priority: HIGH
+This affects user experience significantly as users lose their transition planning data every time they refresh or navigate, forcing them to repeatedly re-select their roles to view their career path.
+
+Please implement these fixes to ensure the Career Transition Path persists and displays correctly based on the user's saved target role preferences.
