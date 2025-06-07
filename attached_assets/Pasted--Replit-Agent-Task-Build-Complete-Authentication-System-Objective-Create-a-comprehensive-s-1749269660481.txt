@@ -1,0 +1,506 @@
+# Replit Agent Task: Build Complete Authentication System
+
+## Objective
+Create a comprehensive, secure authentication system with all essential pages and features including user registration, login, password management, email verification, and advanced security features.
+
+## Required Authentication Pages & Features
+
+### 1. User Registration Page
+**Features:**
+- Full name, email, password, confirm password fields
+- Password strength indicator
+- Terms of service and privacy policy checkboxes
+- Email verification requirement
+- Social login options (Google, GitHub, LinkedIn)
+- Form validation with real-time feedback
+- Loading states and success/error messages
+
+**Implementation:**
+```javascript
+// Registration form structure
+<RegistrationForm>
+  <FormField>
+    <label>Full Name</label>
+    <input type="text" required minLength="2" />
+    <ValidationMessage />
+  </FormField>
+  
+  <FormField>
+    <label>Email Address</label>
+    <input type="email" required />
+    <ValidationMessage />
+  </FormField>
+  
+  <FormField>
+    <label>Password</label>
+    <input type="password" required minLength="8" />
+    <PasswordStrengthIndicator />
+    <PasswordRequirements />
+  </FormField>
+  
+  <FormField>
+    <label>Confirm Password</label>
+    <input type="password" required />
+    <ValidationMessage />
+  </FormField>
+  
+  <FormField>
+    <label>
+      <input type="checkbox" required />
+      I agree to the Terms of Service and Privacy Policy
+    </label>
+  </FormField>
+  
+  <SocialLoginButtons>
+    <GoogleLoginButton />
+    <GitHubLoginButton />
+    <LinkedInLoginButton />
+  </SocialLoginButtons>
+  
+  <SubmitButton>Create Account</SubmitButton>
+  
+  <LoginLink>Already have an account? Sign in</LoginLink>
+</RegistrationForm>
+```
+
+### 2. Login Page
+**Features:**
+- Email/username and password fields
+- Remember me checkbox
+- Forgot password link
+- Social login options
+- Account lockout protection
+- CAPTCHA after failed attempts
+- Loading states and error messages
+
+**Implementation:**
+```javascript
+<LoginForm>
+  <FormField>
+    <label>Email or Username</label>
+    <input type="text" required />
+  </FormField>
+  
+  <FormField>
+    <label>Password</label>
+    <input type="password" required />
+    <ShowPasswordToggle />
+  </FormField>
+  
+  <FormOptions>
+    <RememberMeCheckbox />
+    <ForgotPasswordLink />
+  </FormOptions>
+  
+  <CaptchaField showIf="failedAttempts >= 3" />
+  
+  <SubmitButton>Sign In</SubmitButton>
+  
+  <SocialLoginButtons />
+  
+  <RegisterLink>Don't have an account? Sign up</RegisterLink>
+</LoginForm>
+```
+
+### 3. Forgot Password Page
+**Features:**
+- Email input for password reset
+- Security questions (optional)
+- Rate limiting for reset requests
+- Clear instructions and feedback
+- Resend functionality with countdown timer
+
+**Implementation:**
+```javascript
+<ForgotPasswordForm>
+  <Instructions>
+    Enter your email address and we'll send you a link to reset your password.
+  </Instructions>
+  
+  <FormField>
+    <label>Email Address</label>
+    <input type="email" required />
+  </FormField>
+  
+  <SecurityQuestions showIf="enabled">
+    <SecurityQuestion />
+  </SecurityQuestions>
+  
+  <SubmitButton disabled={isRateLimited}>
+    {isRateLimited ? `Resend in ${countdown}s` : 'Send Reset Link'}
+  </SubmitButton>
+  
+  <BackToLoginLink />
+</ForgotPasswordForm>
+```
+
+### 4. Reset Password Page
+**Features:**
+- New password and confirm password fields
+- Password strength requirements
+- Token validation
+- Expiration handling
+- Success confirmation
+
+**Implementation:**
+```javascript
+<ResetPasswordForm>
+  <FormField>
+    <label>New Password</label>
+    <input type="password" required minLength="8" />
+    <PasswordStrengthIndicator />
+  </FormField>
+  
+  <FormField>
+    <label>Confirm New Password</label>
+    <input type="password" required />
+  </FormField>
+  
+  <PasswordRequirements />
+  
+  <SubmitButton>Reset Password</SubmitButton>
+</ResetPasswordForm>
+```
+
+### 5. Email Verification Page
+**Features:**
+- Automatic verification on page load
+- Manual verification button
+- Resend verification email
+- Clear status messages
+- Redirect after successful verification
+
+### 6. Account Settings/Profile Page
+**Features:**
+- Change password functionality
+- Update email address
+- Two-factor authentication setup
+- Session management
+- Account deactivation option
+
+### 7. Two-Factor Authentication (2FA) Setup
+**Features:**
+- QR code generation for authenticator apps
+- Backup codes generation
+- SMS verification option
+- Recovery methods setup
+
+## Backend Implementation Requirements
+
+### 1. Database Schema
+```sql
+-- Users table
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  username VARCHAR(50) UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  full_name VARCHAR(100) NOT NULL,
+  email_verified BOOLEAN DEFAULT FALSE,
+  is_active BOOLEAN DEFAULT TRUE,
+  failed_login_attempts INTEGER DEFAULT 0,
+  account_locked_until TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Email verification tokens
+CREATE TABLE email_verification_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  token VARCHAR(255) UNIQUE NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Password reset tokens
+CREATE TABLE password_reset_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  token VARCHAR(255) UNIQUE NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  used BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- User sessions
+CREATE TABLE user_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  session_token VARCHAR(255) UNIQUE NOT NULL,
+  ip_address INET,
+  user_agent TEXT,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Two-factor authentication
+CREATE TABLE user_2fa (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  secret VARCHAR(255) NOT NULL,
+  backup_codes TEXT[],
+  is_enabled BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+### 2. API Endpoints
+```javascript
+// Authentication endpoints
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/logout
+POST /api/auth/refresh-token
+
+// Password management
+POST /api/auth/forgot-password
+POST /api/auth/reset-password
+POST /api/auth/change-password
+
+// Email verification
+POST /api/auth/verify-email
+POST /api/auth/resend-verification
+
+// Two-factor authentication
+POST /api/auth/2fa/setup
+POST /api/auth/2fa/verify
+POST /api/auth/2fa/disable
+GET /api/auth/2fa/backup-codes
+
+// Social authentication
+GET /api/auth/google
+GET /api/auth/github
+GET /api/auth/linkedin
+GET /api/auth/callback/{provider}
+
+// User management
+GET /api/user/profile
+PUT /api/user/profile
+DELETE /api/user/account
+GET /api/user/sessions
+DELETE /api/user/sessions/{sessionId}
+```
+
+### 3. Security Implementation
+
+#### Password Security
+```javascript
+// Password hashing with bcrypt
+const bcrypt = require('bcrypt');
+const saltRounds = 12;
+
+const hashPassword = async (password) => {
+  return await bcrypt.hash(password, saltRounds);
+};
+
+const verifyPassword = async (password, hash) => {
+  return await bcrypt.compare(password, hash);
+};
+```
+
+#### JWT Token Management
+```javascript
+// JWT token generation and validation
+const jwt = require('jsonwebtoken');
+
+const generateTokens = (userId) => {
+  const accessToken = jwt.sign(
+    { userId, type: 'access' },
+    process.env.JWT_ACCESS_SECRET,
+    { expiresIn: '15m' }
+  );
+  
+  const refreshToken = jwt.sign(
+    { userId, type: 'refresh' },
+    process.env.JWT_REFRESH_SECRET,
+    { expiresIn: '7d' }
+  );
+  
+  return { accessToken, refreshToken };
+};
+```
+
+#### Rate Limiting
+```javascript
+// Rate limiting for authentication endpoints
+const rateLimit = require('express-rate-limit');
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 attempts per window
+  message: 'Too many authentication attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+```
+
+## Frontend Implementation Requirements
+
+### 1. Form Validation
+```javascript
+// Real-time form validation
+const useFormValidation = (initialState, validationRules) => {
+  const [values, setValues] = useState(initialState);
+  const [errors, setErrors] = useState({});
+  const [isValid, setIsValid] = useState(false);
+  
+  const validateField = (name, value) => {
+    const rule = validationRules[name];
+    if (!rule) return '';
+    
+    // Implement validation logic
+    return rule(value);
+  };
+  
+  // Return validation state and handlers
+  return { values, errors, isValid, handleChange, handleSubmit };
+};
+```
+
+### 2. Password Strength Indicator
+```javascript
+<PasswordStrengthIndicator>
+  <StrengthBar strength={passwordStrength} />
+  <StrengthText>
+    {getStrengthText(passwordStrength)}
+  </StrengthText>
+  <RequirementsList>
+    <Requirement met={hasMinLength}>At least 8 characters</Requirement>
+    <Requirement met={hasUppercase}>One uppercase letter</Requirement>
+    <Requirement met={hasLowercase}>One lowercase letter</Requirement>
+    <Requirement met={hasNumber}>One number</Requirement>
+    <Requirement met={hasSpecialChar}>One special character</Requirement>
+  </RequirementsList>
+</PasswordStrengthIndicator>
+```
+
+### 3. Social Login Integration
+```javascript
+// Google OAuth integration
+const handleGoogleLogin = () => {
+  window.location.href = `${API_BASE_URL}/auth/google`;
+};
+
+// Handle OAuth callback
+useEffect(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+  const error = urlParams.get('error');
+  
+  if (token) {
+    // Store token and redirect to dashboard
+    localStorage.setItem('accessToken', token);
+    navigate('/dashboard');
+  } else if (error) {
+    // Handle OAuth error
+    setError('Authentication failed. Please try again.');
+  }
+}, []);
+```
+
+## Security Features
+
+### 1. Account Protection
+- **Account lockout** after multiple failed login attempts
+- **CAPTCHA** verification after suspicious activity
+- **IP-based rate limiting**
+- **Session management** with automatic logout
+- **Device tracking** and notification for new logins
+
+### 2. Email Security
+- **Email verification** required for new accounts
+- **Secure password reset** with time-limited tokens
+- **Email notifications** for security events
+- **Anti-phishing** measures in email templates
+
+### 3. Advanced Security
+- **Two-factor authentication** support
+- **Backup codes** for 2FA recovery
+- **Session timeout** and concurrent session limits
+- **Security headers** implementation
+- **CSRF protection**
+
+## User Experience Features
+
+### 1. Progressive Enhancement
+- **Loading states** for all async operations
+- **Offline support** with service workers
+- **Progressive web app** capabilities
+- **Accessibility** compliance (WCAG 2.1)
+
+### 2. Responsive Design
+- **Mobile-first** approach
+- **Touch-friendly** interfaces
+- **Adaptive layouts** for different screen sizes
+- **Dark mode** support
+
+### 3. User Feedback
+- **Clear error messages** with actionable advice
+- **Success confirmations** with next steps
+- **Progress indicators** for multi-step processes
+- **Help tooltips** and contextual guidance
+
+## Testing Requirements
+
+### 1. Security Testing
+- **Penetration testing** for common vulnerabilities
+- **SQL injection** and XSS prevention
+- **CSRF token** validation
+- **Rate limiting** effectiveness
+
+### 2. Functional Testing
+- **End-to-end** authentication flows
+- **Password reset** process
+- **Email verification** workflow
+- **Social login** integration
+
+### 3. Performance Testing
+- **Load testing** for authentication endpoints
+- **Database query** optimization
+- **Frontend performance** metrics
+- **Mobile responsiveness** testing
+
+## Configuration Requirements
+
+### 1. Environment Variables
+```bash
+# Database
+DATABASE_URL=postgresql://username:password@localhost:5432/appname
+
+# JWT Secrets
+JWT_ACCESS_SECRET=your-super-secret-access-key
+JWT_REFRESH_SECRET=your-super-secret-refresh-key
+
+# Email Service
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+
+# OAuth Providers
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+
+# Security
+BCRYPT_ROUNDS=12
+SESSION_SECRET=your-session-secret
+RATE_LIMIT_WINDOW=900000
+RATE_LIMIT_MAX=5
+```
+
+## Success Criteria
+✅ **Complete user registration with email verification**
+✅ **Secure login with account protection features**
+✅ **Password reset functionality with secure tokens**
+✅ **Two-factor authentication setup and verification**
+✅ **Social login integration (Google, GitHub, LinkedIn)**
+✅ **Session management with automatic timeout**
+✅ **Mobile-responsive design across all auth pages**
+✅ **Comprehensive security measures implemented**
+✅ **Email notifications for security events**
+✅ **Account settings page with password change**
+
+Please implement this complete authentication system with all security best practices, ensuring a seamless and secure user experience across all authentication flows.
