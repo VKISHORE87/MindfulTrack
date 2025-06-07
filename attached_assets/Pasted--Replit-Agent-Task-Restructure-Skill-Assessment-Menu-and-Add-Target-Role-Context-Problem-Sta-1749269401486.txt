@@ -1,0 +1,284 @@
+# Replit Agent Task: Restructure Skill Assessment Menu and Add Target Role Context
+
+## Problem Statement
+**CURRENT ISSUES**:
+1. **Unnecessary Component**: Skill Assessment menu has a "Skill Dashboard" sub-component that needs to be removed
+2. **Lack of Context**: Skill Assessment only shows a dropdown without context about which skills are relevant
+3. **Missing Target Role Integration**: Skills displayed should be specific to user's latest chosen target role
+4. **Poor User Experience**: Users don't understand which skills they should assess for their career goals
+
+## Required Changes
+
+### 1. Menu Structure Cleanup
+**REMOVE**:
+- Skill Dashboard sub-component from Skill Assessment menu
+- Any references to skill dashboard in navigation
+- Related dashboard components and routes
+
+**RETAIN**:
+- Skill Assessment option as the main/only component under this menu
+
+### 2. Target Role Context Integration
+**IMPLEMENT**:
+- Display user's current target role prominently
+- Show skills specifically required for that target role
+- Provide context about why these skills matter for their career path
+
+## Implementation Requirements
+
+### 1. Page Header Enhancement
+```javascript
+// Add contextual header to Skill Assessment page
+<SkillAssessmentHeader>
+  <div className="target-role-context">
+    <h2>Skill Assessment</h2>
+    <div className="role-context-banner">
+      <span className="role-label">Target Role:</span>
+      <span className="role-name">{userTargetRole}</span> {/* e.g., "Full Stack Developer" */}
+    </div>
+    <p className="assessment-purpose">
+      Assess your current skill levels for the {userTargetRole} role to identify areas for improvement
+    </p>
+  </div>
+</SkillAssessmentHeader>
+```
+
+### 2. Role-Specific Skills Display
+**Replace generic dropdown with targeted skills list**:
+
+```javascript
+// CURRENT (problematic): Generic dropdown without context
+<select>
+  <option>Select a skill to assess</option>
+  <option>JavaScript</option>
+  <option>Python</option>
+  {/* All skills without context */}
+</select>
+
+// REQUIRED: Role-specific skills with context
+<RoleSpecificSkillsSection>
+  <h3>Required Skills for {userTargetRole}</h3>
+  <div className="skills-grid">
+    {targetRoleSkills.map(skill => (
+      <SkillAssessmentCard key={skill.id}>
+        <div className="skill-header">
+          <h4>{skill.name}</h4>
+          <span className="importance-level">{skill.importance}</span> {/* Critical, Important, Nice-to-have */}
+        </div>
+        <div className="skill-description">
+          <p>{skill.roleRelevance}</p> {/* Why this skill matters for the target role */}
+        </div>
+        <div className="current-assessment">
+          <span>Current Level: {getUserSkillLevel(skill.id)}</span>
+          <span>Required Level: {skill.requiredLevel}</span>
+        </div>
+        <button className="assess-skill-btn" onClick={() => startAssessment(skill.id)}>
+          {getUserSkillLevel(skill.id) ? 'Re-assess Skill' : 'Assess Skill'}
+        </button>
+      </SkillAssessmentCard>
+    ))}
+  </div>
+</RoleSpecificSkillsSection>
+```
+
+### 3. Skills Categorization
+**Organize skills by importance for the target role**:
+
+```javascript
+const skillCategories = {
+  critical: {
+    title: "Critical Skills",
+    description: "Essential skills required for this role",
+    skills: [] // High priority skills
+  },
+  important: {
+    title: "Important Skills", 
+    description: "Skills that significantly impact your effectiveness",
+    skills: [] // Medium priority skills
+  },
+  beneficial: {
+    title: "Beneficial Skills",
+    description: "Skills that provide additional value",
+    skills: [] // Nice-to-have skills
+  }
+};
+```
+
+### 4. Assessment Progress Overview
+**Add progress tracking for role-specific skills**:
+
+```javascript
+<AssessmentProgress>
+  <div className="progress-summary">
+    <h3>Assessment Progress for {userTargetRole}</h3>
+    <div className="progress-stats">
+      <div className="stat">
+        <span className="number">{assessedSkills.length}</span>
+        <span className="label">Skills Assessed</span>
+      </div>
+      <div className="stat">
+        <span className="number">{totalRequiredSkills}</span>
+        <span className="label">Total Required</span>
+      </div>
+      <div className="stat">
+        <span className="number">{completionPercentage}%</span>
+        <span className="label">Assessment Complete</span>
+      </div>
+    </div>
+    <div className="progress-bar">
+      <div className="progress-fill" style={{width: `${completionPercentage}%`}}></div>
+    </div>
+  </div>
+</AssessmentProgress>
+```
+
+## Technical Implementation Steps
+
+### Step 1: Remove Skill Dashboard Component
+```javascript
+// Remove from navigation/routing
+// REMOVE these routes:
+// - /skill-assessments/dashboard
+// - Any dashboard-related components in skill assessment
+
+// UPDATE navigation to show only:
+// - Skill Assessments (main page)
+```
+
+### Step 2: Fetch Target Role Skills
+```javascript
+// On page load, get user's target role and associated skills
+useEffect(() => {
+  async function loadTargetRoleSkills() {
+    try {
+      // Get user's saved target role
+      const userProfile = await getUserProfile();
+      const targetRole = userProfile.targetRole; // e.g., "Full Stack Developer"
+      
+      // Fetch skills required for this role
+      const roleSkills = await getRoleRequiredSkills(targetRole);
+      
+      // Get user's current skill assessments
+      const userSkillLevels = await getUserSkillAssessments();
+      
+      // Combine data for display
+      const skillsWithContext = roleSkills.map(skill => ({
+        ...skill,
+        currentLevel: userSkillLevels[skill.id] || null,
+        isAssessed: !!userSkillLevels[skill.id],
+        gapLevel: calculateSkillGap(skill.requiredLevel, userSkillLevels[skill.id])
+      }));
+      
+      setTargetRoleSkills(skillsWithContext);
+      setTargetRole(targetRole);
+    } catch (error) {
+      console.error('Failed to load role-specific skills:', error);
+    }
+  }
+  
+  loadTargetRoleSkills();
+}, []);
+```
+
+### Step 3: Update Skill Assessment Flow
+```javascript
+// When user clicks "Assess Skill", start role-contextualized assessment
+const startSkillAssessment = (skill) => {
+  // Navigate to assessment with role context
+  navigate(`/skill-assessment/${skill.id}`, {
+    state: {
+      skill: skill,
+      targetRole: targetRole,
+      requiredLevel: skill.requiredLevel,
+      roleContext: skill.roleRelevance
+    }
+  });
+};
+```
+
+### Step 4: Add Role Change Detection
+```javascript
+// If user changes target role, update skill assessment page
+useEffect(() => {
+  // Listen for target role changes
+  const handleRoleChange = (newRole) => {
+    if (newRole !== targetRole) {
+      // Reload skills for new target role
+      loadTargetRoleSkills();
+      // Show notification about role change
+      showNotification(`Skills updated for ${newRole} role`);
+    }
+  };
+  
+  // Subscribe to role changes (implement based on your state management)
+  subscribeToRoleChanges(handleRoleChange);
+  
+  return () => unsubscribeFromRoleChanges(handleRoleChange);
+}, [targetRole]);
+```
+
+## UI/UX Enhancements
+
+### 1. Visual Hierarchy
+- **Prominent target role display** at the top
+- **Clear skill categorization** (Critical, Important, Beneficial)
+- **Visual skill gap indicators** (color-coded progress bars)
+- **Assessment status badges** (Not Started, In Progress, Completed)
+
+### 2. Contextual Information
+- **Role relevance descriptions** for each skill
+- **Required vs. current level comparisons**
+- **Skill importance indicators**
+- **Assessment completion progress**
+
+### 3. User Guidance
+- **Clear call-to-action buttons** for each skill
+- **Progress indicators** showing assessment completion
+- **Next steps recommendations** based on skill gaps
+
+## Success Criteria
+
+### Navigation Structure
+✅ **Skill Dashboard sub-component completely removed**
+✅ **Skill Assessment is the only option under Skill Assessments menu**
+✅ **No broken navigation links or components**
+
+### Context and Relevance
+✅ **User's target role prominently displayed**
+✅ **Only skills relevant to target role are shown**
+✅ **Each skill includes context about role relevance**
+✅ **Skills organized by importance level**
+
+### User Experience
+✅ **Clear understanding of which skills to assess**
+✅ **Progress tracking for role-specific skill assessment**
+✅ **Easy navigation to individual skill assessments**
+✅ **Assessment status clearly visible for each skill**
+
+### Data Integration
+✅ **Automatically loads user's saved target role**
+✅ **Displays skills specific to chosen target role**
+✅ **Updates when user changes target role**
+✅ **Shows current skill levels vs. required levels**
+
+## Testing Requirements
+
+### Test Scenario 1: Menu Structure
+1. Navigate to Skill Assessments menu
+2. Verify only "Skill Assessment" option exists (no dashboard)
+3. Verify no broken links or missing components
+
+### Test Scenario 2: Target Role Context
+1. User with "Full Stack Developer" target role
+2. Navigate to Skill Assessments
+3. Verify "Full Stack Developer" is prominently displayed
+4. Verify only Full Stack Developer skills are shown
+5. Verify skills are categorized by importance
+
+### Test Scenario 3: Role Change Impact
+1. Change target role from "Full Stack Developer" to "DevOps Engineer"
+2. Navigate to Skill Assessments
+3. Verify skills update to DevOps Engineer requirements
+4. Verify previous assessments are preserved but contextualized
+
+Please implement these changes to create a focused, context-aware skill assessment experience that helps users understand exactly which skills they need to develop for their chosen career path.
