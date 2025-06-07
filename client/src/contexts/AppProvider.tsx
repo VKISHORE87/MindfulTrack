@@ -4,7 +4,6 @@ import { SkillsProvider } from './SkillsContext';
 import { ProgressProvider } from './ProgressContext';
 import { LearningPathProvider } from './LearningPathContext';
 import { TargetRoleProvider } from './TargetRoleContext';
-import { UserJourneyProvider } from './UserJourneyContext';
 
 // Combined provider component that wraps all the individual providers
 export default function AppProvider({
@@ -15,18 +14,16 @@ export default function AppProvider({
   userId: number;
 }) {
   return (
-    <UserJourneyProvider>
-      <CareerGoalProvider userId={userId}>
-        <TargetRoleProvider userId={userId}>
-          <SkillsProvider userId={userId}>
-            <ProgressProvider userId={userId}>
-              <LearningPathProvider userId={userId}>
-                {children}
-              </LearningPathProvider>
-            </ProgressProvider>
-          </SkillsProvider>
-        </TargetRoleProvider>
-      </CareerGoalProvider>
-    </UserJourneyProvider>
+    <CareerGoalProvider userId={userId}>
+      <TargetRoleProvider userId={userId}>
+        <SkillsProvider userId={userId}>
+          <ProgressProvider userId={userId}>
+            <LearningPathProvider userId={userId}>
+              {children}
+            </LearningPathProvider>
+          </ProgressProvider>
+        </SkillsProvider>
+      </TargetRoleProvider>
+    </CareerGoalProvider>
   );
 }

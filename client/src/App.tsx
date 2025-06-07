@@ -33,7 +33,6 @@ import { CareerGoalProvider } from "@/contexts/CareerGoalContext";
 import { SkillsProvider } from "@/contexts/SkillsContext";
 import { ProgressProvider } from "@/contexts/ProgressContext";
 import { LearningPathProvider } from "@/contexts/LearningPathContext";
-import { UserJourneyProvider } from "@/contexts/UserJourneyContext";
 
 // Create a simple Redirect component for redirecting routes
 function Redirect({ to }: { to: string }) {

@@ -8,12 +8,9 @@ import {
   LightbulbIcon,
   Briefcase,
   Brain,
-  Target,
-  Lock,
-  CheckCircle2
+  Target
 } from "lucide-react";
 import { useTargetRole } from "@/contexts/TargetRoleContext";
-import { useUserJourney } from "@/contexts/UserJourneyContext";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -24,21 +21,15 @@ interface SidebarProps {
 
 export default function Sidebar({ user, currentRoute }: SidebarProps) {
   const { targetRole } = useTargetRole();
-  const { steps, currentStep, setCurrentStep, isStepAccessible } = useUserJourney();
-
-  const getIconForStep = (stepId: string) => {
-    const iconMap: Record<string, React.ReactElement> = {
-      'dashboard': <Home className="h-5 w-5 mr-3" />,
-      'profile': <Target className="h-5 w-5 mr-3" />,
-      'assessment': <Brain className="h-5 w-5 mr-3" />,
-      'goals': <Briefcase className="h-5 w-5 mr-3" />,
-      'gap-analysis': <TrendingUp className="h-5 w-5 mr-3" />,
-      'learning': <BookOpen className="h-5 w-5 mr-3" />,
-      'progress': <TrendingUp className="h-5 w-5 mr-3" />,
-      'validation': <CheckCircle className="h-5 w-5 mr-3" />
-    };
-    return iconMap[stepId] || <Home className="h-5 w-5 mr-3" />;
-  };
+  
+  const navItems = [
+    { href: '/dashboard', label: 'Dashboard', icon: <Home className="h-5 w-5 mr-3" /> },
+    { href: '/career-transitions', label: 'Career Options', icon: <Briefcase className="h-5 w-5 mr-3" /> },
+    { href: '/resources', label: 'Resources', icon: <BookOpen className="h-5 w-5 mr-3" /> },
+    { href: '/skill-assessments', label: 'Skill Assessments', icon: <Brain className="h-5 w-5 mr-3" /> },
+    { href: '/progress', label: 'Progress', icon: <TrendingUp className="h-5 w-5 mr-3" /> },
+    { href: '/validation', label: 'Validation', icon: <CheckCircle className="h-5 w-5 mr-3" /> },
+  ];
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 min-h-screen">
@@ -90,66 +81,21 @@ export default function Sidebar({ user, currentRoute }: SidebarProps) {
       )}
       
       <nav className="flex-1 px-2 py-4 space-y-1">
-        {steps.map((step) => {
-          const isActive = currentRoute === step.path || 
-            (step.path === '/dashboard' && currentRoute === '/');
-          const isAccessible = step.isUnlocked;
-          
-          return (
-            <TooltipProvider key={step.id}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div>
-                    {isAccessible ? (
-                      <Link href={step.path}>
-                        <div 
-                          className={`flex items-center justify-between px-4 py-2 rounded-lg cursor-pointer transition-colors ${
-                            isActive
-                              ? 'text-gray-900 bg-gray-100' 
-                              : 'text-gray-700 hover:bg-gray-100'
-                          }`}
-                          onClick={() => setCurrentStep(step.id)}
-                        >
-                          <div className="flex items-center">
-                            {getIconForStep(step.id)}
-                            <span className="text-lg mr-2">{step.icon}</span>
-                            <span>{step.title}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            {step.isCompleted && (
-                              <CheckCircle2 className="h-4 w-4 text-green-600" />
-                            )}
-                            {step.id === currentStep && (
-                              <Badge variant="secondary" className="text-xs">Current</Badge>
-                            )}
-                          </div>
-                        </div>
-                      </Link>
-                    ) : (
-                      <div className={`flex items-center justify-between px-4 py-2 rounded-lg cursor-not-allowed opacity-50`}>
-                        <div className="flex items-center">
-                          <Lock className="h-5 w-5 mr-3 text-gray-400" />
-                          <span className="text-lg mr-2">{step.icon}</span>
-                          <span className="text-gray-400">{step.title}</span>
-                        </div>
-                        <Lock className="h-4 w-4 text-gray-400" />
-                      </div>
-                    )}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  <div className="space-y-1 max-w-xs">
-                    <p className="font-semibold">{step.title}</p>
-                    <p className="text-xs">{step.description}</p>
-                    {!step.isUnlocked && (
-                      <p className="text-xs text-red-500">Complete previous steps to unlock</p>
-                    )}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          );
-        })}
+        {navItems.map((item) => (
+          <Link key={item.href} href={item.href}>
+            <div 
+              className={`flex items-center px-4 py-2 rounded-lg cursor-pointer ${
+                currentRoute === item.href || 
+                (item.href === '/dashboard' && currentRoute === '/') 
+                  ? 'text-gray-900 bg-gray-100' 
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              {item.icon}
+              {item.label}
+            </div>
+          </Link>
+        ))}
       </nav>
       
       <div className="p-4 border-t border-gray-200">

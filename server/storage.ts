@@ -1593,42 +1593,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined> {
-    // Get current user data to check what actually needs updating
-    const currentUser = await this.getUser(id);
-    if (!currentUser) {
-      throw new Error('User not found');
-    }
-
-    // Filter out unchanged fields to prevent unnecessary constraint violations
-    const fieldsToUpdate: Partial<InsertUser> = {};
-    
-    if (userData.name !== undefined && userData.name !== currentUser.name) {
-      fieldsToUpdate.name = userData.name;
-    }
-    
-    if (userData.email !== undefined && userData.email !== currentUser.email) {
-      fieldsToUpdate.email = userData.email;
-    }
-    
-    if (userData.experience !== undefined && userData.experience !== currentUser.experience) {
-      fieldsToUpdate.experience = userData.experience;
-    }
-    
-    if (userData.location !== undefined && userData.location !== currentUser.location) {
-      fieldsToUpdate.location = userData.location;
-    }
-    
-    if (userData.industry !== undefined && userData.industry !== currentUser.industry) {
-      fieldsToUpdate.industry = userData.industry;
-    }
-
-    // If no fields need updating, return current user
-    if (Object.keys(fieldsToUpdate).length === 0) {
-      return currentUser;
-    }
-
     const [updatedUser] = await db.update(users)
-      .set(fieldsToUpdate)
+      .set(userData)
       .where(eq(users.id, id))
       .returning();
     return updatedUser || undefined;
@@ -2128,54 +2094,27 @@ export class DatabaseStorage implements IStorage {
     // Get all learning resources
     const allResources = await this.getAllLearningResources();
     
-    // Get user's current career goal and target role
-    const careerGoal = await this.getLatestCareerGoalByUserId(userId);
-    let targetRoleSkills: string[] = [];
-    
-    if (careerGoal && careerGoal.targetRoleId) {
-      const targetRole = await this.getInterviewRole(careerGoal.targetRoleId);
-      if (targetRole && targetRole.requiredSkills) {
-        targetRoleSkills = targetRole.requiredSkills;
-      }
-    }
-    
     // Get all skills for this user
     const userSkills = await this.getUserSkillsByUserId(userId);
     
     // Get skill details to map IDs to names
     const skillDetails = await this.getAllSkills();
     const skillMap = new Map(skillDetails.map(skill => [skill.id, skill]));
-    const skillNameMap = new Map(skillDetails.map(skill => [skill.name.toLowerCase(), skill]));
     
     // Create a map of skill IDs to resource counts and completions
     const skillStats = new Map<number, { completed: number, total: number, skillName: string }>();
     
-    // Prioritize target role skills if available
-    if (targetRoleSkills.length > 0) {
-      // Initialize skill stats for target role skills
-      targetRoleSkills.forEach(skillName => {
-        const skill = skillNameMap.get(skillName.toLowerCase());
-        if (skill) {
-          skillStats.set(skill.id, {
-            completed: 0,
-            total: 0,
-            skillName: skill.name
-          });
-        }
-      });
-    } else {
-      // Fallback to user skills if no target role
-      userSkills.forEach(userSkill => {
-        const skill = skillMap.get(userSkill.skillId);
-        if (skill) {
-          skillStats.set(userSkill.skillId, {
-            completed: 0,
-            total: 0,
-            skillName: skill.name
-          });
-        }
-      });
-    }
+    // Initialize skill stats for all user skills
+    userSkills.forEach(userSkill => {
+      const skill = skillMap.get(userSkill.skillId);
+      if (skill) {
+        skillStats.set(userSkill.skillId, {
+          completed: 0,
+          total: 0,
+          skillName: skill.name
+        });
+      }
+    });
     
     // Track which resources are completed
     const completedResourceIds = new Set(completedResources.map(res => res.resourceId));
@@ -2189,7 +2128,7 @@ export class DatabaseStorage implements IStorage {
       resource.skillIds.forEach(skillIdStr => {
         const skillId = parseInt(skillIdStr, 10);
         
-        // Only count resources for skills we're tracking (target role skills or user skills)
+        // Only count resources for skills the user has
         if (skillStats.has(skillId)) {
           const stats = skillStats.get(skillId)!;
           stats.total += 1;

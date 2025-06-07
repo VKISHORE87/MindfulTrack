@@ -41,31 +41,6 @@ export const getQueryFn: <T>(options: {
     return await res.json();
   };
 
-// New API request function for mutations with proper options interface
-export async function apiRequestMutation(
-  url: string,
-  options?: {
-    method?: string;
-    body?: unknown;
-    headers?: Record<string, string>;
-  }
-): Promise<any> {
-  const { method = "GET", body, headers = {} } = options || {};
-  
-  const res = await fetch(url, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-    },
-    body: body ? JSON.stringify(body) : undefined,
-    credentials: "include",
-  });
-
-  await throwIfResNotOk(res);
-  return res.json();
-}
-
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
