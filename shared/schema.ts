@@ -25,6 +25,7 @@ export const careerGoals = pgTable("career_goals", {
   description: text("description"),
   timelineMonths: integer("timeline_months").notNull(),
   targetDate: timestamp("target_date"),
+  currentRoleId: integer("current_role_id").references(() => interviewRoles.id),
   targetRoleId: integer("target_role_id").references(() => interviewRoles.id),
   createdAt: timestamp("created_at").defaultNow()
 });
@@ -134,6 +135,7 @@ export const insertCareerGoalSchema = createInsertSchema(careerGoals).pick({
   description: true,
   timelineMonths: true,
   targetDate: true,
+  currentRoleId: true,
   targetRoleId: true
 });
 

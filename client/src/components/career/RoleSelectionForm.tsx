@@ -56,6 +56,18 @@ export const RoleSelectionForm: React.FC<RoleSelectionFormProps> = ({
         setTargetRoleSkills(role.requiredSkills || []);
       }
     }
+
+    // CRITICAL FIX: Also load the current role from saved data
+    // Check if the current goal has a current role ID stored
+    if (currentGoal?.currentRoleId) {
+      setCurrentRoleId(currentGoal.currentRoleId);
+      
+      // Find the current role title
+      const currentRole = getRoleById(currentGoal.currentRoleId);
+      if (currentRole) {
+        setCurrentRoleTitle(currentRole.title);
+      }
+    }
   }, [currentGoal, targetRole]);
   
   // Mutation to save the target role
@@ -299,7 +311,7 @@ export const RoleSelectionForm: React.FC<RoleSelectionFormProps> = ({
         </CardFooter>
       </Card>
       
-      {/* Show the transition template if both roles are selected */}
+      {/* Show the transition template if both roles are available */}
       {(showTemplate || (currentRoleTitle && targetRoleTitle)) && (
         <RoleTransitionTemplateCard
           currentRole={currentRoleTitle}
