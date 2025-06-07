@@ -1,0 +1,83 @@
+# Replit Agent Task: Fix Career Dashboard Dynamic Data Population
+
+## Problem Statement
+The career dashboard components (Priority Skills Gaps, Career Progress, Skills Radar) are not dynamically updating when users select different target roles from the career main menu. The data remains static instead of reflecting the chosen role's requirements and user's progress toward that specific role.
+
+## Required Fixes
+
+### 1. Data Flow Architecture
+- **Identify and fix the state management system** that should connect the career main menu role selection to dashboard components
+- **Ensure proper data binding** between role selection and dashboard widgets
+- **Implement reactive data updates** so all dashboard components refresh when role changes
+
+### 2. Component-Specific Fixes
+
+#### Priority Skills Gaps Component
+- Must dynamically calculate and display skill gaps based on:
+  - Selected target role requirements
+  - User's current skill levels
+  - Gap analysis showing what skills need development
+- Should update immediately when role selection changes
+
+#### Career Progress Component  
+- Must show progress metrics specific to the selected role:
+  - Completion percentage toward role requirements
+  - Milestone achievements relevant to chosen career path
+  - Timeline and next steps for the selected role
+
+#### Skills Radar Component
+- Must generate role-specific radar chart showing:
+  - Required skills for selected role (target levels)
+  - User's current proficiency in those skills
+  - Visual representation of gaps and strengths
+- Chart should redraw with new data when role changes
+
+### 3. Technical Implementation Requirements
+
+#### Frontend
+- **Fix event handlers** for role selection in career main menu
+- **Implement proper state management** (Redux/Context/Vuex depending on framework)
+- **Add loading states** during data transitions
+- **Ensure error handling** for failed data updates
+
+#### Backend/API
+- **Create or fix API endpoints** that return role-specific data:
+  - `GET /api/roles/{roleId}/requirements`
+  - `GET /api/users/{userId}/progress/{roleId}`
+  - `GET /api/users/{userId}/skills-gap/{roleId}`
+- **Optimize database queries** for fast role-specific data retrieval
+- **Implement caching** for frequently accessed role data
+
+#### Data Consistency
+- **Establish single source of truth** for role data across all components
+- **Implement data synchronization** to prevent stale information
+- **Add data validation** to ensure role requirements and user progress align
+
+### 4. Testing Requirements
+- **Unit tests** for each dashboard component with different role data
+- **Integration tests** for role selection → dashboard update flow
+- **End-to-end tests** covering complete user journey from role selection to dashboard view
+- **Performance tests** to ensure fast data loading during role switches
+
+### 5. User Experience Improvements
+- **Add smooth transitions** between role data changes
+- **Implement loading indicators** during data fetching
+- **Show clear feedback** when role selection updates dashboard
+- **Handle edge cases** like missing role data or network errors gracefully
+
+## Expected Outcome
+After implementation, when a user selects any target role from the career main menu:
+1. All dashboard components should immediately reflect data specific to that role
+2. Priority Skills Gaps should show gaps relevant to the new role
+3. Career Progress should display progress metrics for the selected career path
+4. Skills Radar should visualize skill requirements and current levels for that role
+5. The entire application should maintain data consistency across all views
+
+## Verification Steps
+1. Test role switching with multiple different career paths
+2. Verify all three dashboard components update simultaneously
+3. Confirm data accuracy matches selected role requirements
+4. Test with various user profiles and skill levels
+5. Ensure performance remains smooth during role transitions
+
+Please implement these fixes comprehensively, ensuring robust error handling and optimal user experience throughout the application.

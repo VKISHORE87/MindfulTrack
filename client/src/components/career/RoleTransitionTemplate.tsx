@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -29,22 +29,26 @@ const RoleTransitionTemplateCard: React.FC<RoleTransitionTemplateCardProps> = ({
 }) => {
   const [transitionPath, setTransitionPath] = useState<TransitionPath | null>(null);
   
-  // Get skills needed for the transition
-  const currentRoleData = getRoleByTitle(currentRole);
-  const targetRoleData = getRoleByTitle(targetRole);
-  
-  // Generate required skills comparison
-  const currentSkills = currentRoleData?.requiredSkills || [];
-  const targetSkills = targetRoleData?.requiredSkills || [];
-  
-  // Find new skills needed
-  const newSkillsNeeded = targetSkills.filter(skill => !currentSkills.includes(skill));
-  
-  // Find shared skills
-  const sharedSkills = targetSkills.filter(skill => currentSkills.includes(skill));
-  
-  // Calculate skill gap percentage
-  const skillGapPercentage = Math.round((sharedSkills.length / targetSkills.length) * 100);
+  // Memoize role data to prevent infinite re-renders
+  const { currentSkills, targetSkills, newSkillsNeeded, sharedSkills, skillGapPercentage } = useMemo(() => {
+    const currentRoleData = getRoleByTitle(currentRole);
+    const targetRoleData = getRoleByTitle(targetRole);
+    
+    const currentSkills = currentRoleData?.requiredSkills || [];
+    const targetSkills = targetRoleData?.requiredSkills || [];
+    
+    const newSkillsNeeded = targetSkills.filter(skill => !currentSkills.includes(skill));
+    const sharedSkills = targetSkills.filter(skill => currentSkills.includes(skill));
+    const skillGapPercentage = Math.round((sharedSkills.length / targetSkills.length) * 100);
+    
+    return {
+      currentSkills,
+      targetSkills,
+      newSkillsNeeded,
+      sharedSkills,
+      skillGapPercentage
+    };
+  }, [currentRole, targetRole]);
   
   // Generate a difficulty rating based on the skill gap
   const getDifficulty = (): 'Easy' | 'Moderate' | 'Hard' | 'Very Hard' => {
@@ -131,7 +135,7 @@ const RoleTransitionTemplateCard: React.FC<RoleTransitionTemplateCardProps> = ({
       difficulty: difficultyRating
     });
     
-  }, [currentRole, targetRole, newSkillsNeeded, sharedSkills.length, targetSkills.length]);
+  }, [currentRole, targetRole, newSkillsNeeded.length, sharedSkills.length, targetSkills.length]);
   
   const getDifficultyColor = (difficulty: string): string => {
     switch (difficulty) {
